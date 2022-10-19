@@ -1,0 +1,23 @@
+name: subpred4
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - scikit-learn
+  - scipy
+  - black
+  - ipykernel
+  - conda-forge::yellowbrick
+  - conda-forge::imbalanced-learn
+  - joblib
+  - matplotlib
+  - flake8
+  - seaborn
+  - fastcluster
+  - bioconda::cd-hit
+  - bioconda::blast
+  - openpyxl
+  - nbconvert
+  - jupyter
