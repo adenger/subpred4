@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 
-from .custom_transformers import PSSMSelector
+from .custom_transformers import PSSMSelector, FeatureCombinator
 
 
 def __encode_labels(labels: pd.Series) -> np.ndarray:

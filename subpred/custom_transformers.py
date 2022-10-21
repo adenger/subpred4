@@ -1,6 +1,26 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 import re
+from sklearn.feature_selection import SelectorMixin
+
+
+# this should be used this in combination with a standardscaler, since the features might not in the same range.
+class FeatureCombinator(BaseEstimator, SelectorMixin):
+    # feature_names have the shape "feature_type__feature_name", separated by two underscores.
+    def __init__(self, feature_names: np.array, feature_types: np.array):
+        # grid search sets these fields with the values from the parameter grid, then fit is called.
+        self.feature_names = feature_names
+        self.feature_types = feature_types
+
+    def _get_support_mask(self):
+        feature_types_individual = np.array(
+            [feature_name.split("__")[0] for feature_name in self.feature_names]
+        , dtype=str)
+        return np.isin(element=feature_types_individual, test_elements=self.feature_types)
+
+    def fit(self, X, y=None):
+        return self
+
 
 class PSSMSelector(BaseEstimator, TransformerMixin):
     def __init__(self, feature_names, uniref_threshold="all", iterations="all"):
