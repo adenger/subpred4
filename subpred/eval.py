@@ -86,8 +86,9 @@ def __get_cv_method(cross_val_method: str):
 def optimize_hyperparams(
     X_train,
     y_train,
-    feature_transformer=None,
+    # feature_transformer=None,
     feature_names=None,
+    feature_types=[["AAC"],["PAAC"],["PSSM_50_1", "PSSM_50_3", "PSSM_90_1", "PSSM_90_3"]],
     kernel="rbf",
     C=[1, 0.1, 10],
     gamma=["scale", 0.01, 0.1, 1],
@@ -103,16 +104,22 @@ def optimize_hyperparams(
 ):
     pipe_list = list()
     param_grid = dict()
-    if feature_transformer == "pssm":
-        if feature_names is None:
-            raise ValueError("feature names need to be provided for PSSM filtering")
-        pipe_list.append(PSSMSelector(feature_names=feature_names))
-        param_grid.update(
-            {
-                "pssmselector__uniref_threshold": [50, 90, "all"],
-                "pssmselector__iterations": [1, 3, "all"],
-            }
-        )
+    # if feature_transformer == "pssm":
+    #     if feature_names is None:
+    #         raise ValueError("feature names need to be provided for PSSM filtering")
+    #     pipe_list.append(PSSMSelector(feature_names=feature_names))
+    #     param_grid.update(
+    #         {
+    #             "pssmselector__uniref_threshold": [50, 90, "all"],
+    #             "pssmselector__iterations": [1, 3, "all"],
+    #         }
+    #     )
+    # TODO test!
+    if feature_names is not None:
+        # TODO add string options like individual or all
+        feature_combinator = FeatureCombinator(feature_names=feature_names)
+        pipe_list.append(feature_combinator)
+        param_grid.update({"featurecombinator__feature_types" : feature_types})
     if remove_zero_var:
         pipe_list.append(VarianceThreshold(threshold=0))
     pipe_list.append(StandardScaler())
@@ -136,7 +143,11 @@ def optimize_hyperparams(
     if kernel == "rbf":
         pipe_list.append(SVC())
         param_grid.update(
-            {"svc__class_weight": class_weight, "svc__C": C, "svc__gamma": gamma,}
+            {
+                "svc__class_weight": class_weight,
+                "svc__C": C,
+                "svc__gamma": gamma,
+            }
         )
         if len(np.unique(y_train)) > 2:
             param_grid.update(
@@ -202,7 +213,11 @@ def get_classification_report(
 ):
     y_pred = clf.predict(X_test)
 
-    report_dict = classification_report(y_true=y_test, y_pred=y_pred, output_dict=True,)
+    report_dict = classification_report(
+        y_true=y_test,
+        y_pred=y_pred,
+        output_dict=True,
+    )
 
     df_report = pd.DataFrame.from_dict(report_dict).T
     df_report = df_report.astype({"support": "int"})
@@ -263,9 +278,9 @@ def get_cv_scores(X: np.array, y: np.array, clf, labels: np.array = None, cv: in
     for train_index, test_index in StratifiedKFold(cv).split(X, y):
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
-        clf.fit(X_train,y_train)
+        clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
-        c_matrix = confusion_matrix(y_test,y_pred)
+        c_matrix = confusion_matrix(y_test, y_pred)
         accuracies = c_matrix.diagonal() / c_matrix.sum(axis=1)
         for label_name, acc in zip(label_names, accuracies):
             accuracies_individual[f"test_acc_{label_name}"].append(acc)
@@ -461,11 +476,15 @@ def models_quick_compare(X_train, y_train):
     for estimator in [
         LinearSVC(random_state=0, max_iter=1e6),
         LinearSVC(random_state=0, max_iter=1e6, class_weight="balanced"),
-        SVC(random_state=0,),
+        SVC(
+            random_state=0,
+        ),
         SVC(random_state=0, class_weight="balanced"),
         GaussianNB(),
         KNeighborsClassifier(),
-        RandomForestClassifier(random_state=0,),
+        RandomForestClassifier(
+            random_state=0,
+        ),
         RandomForestClassifier(random_state=0, class_weight="balanced"),
         SGDClassifier(random_state=0),
     ]:
@@ -481,4 +500,3 @@ def models_quick_compare(X_train, y_train):
     df_cv = df_cv.assign(mean=mean)
     df_cv = df_cv.assign(std=std)
     return df_cv.round(3).sort_index()
-
