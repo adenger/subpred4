@@ -164,28 +164,32 @@ def calculate_pssm_feature(
 
 
 # special hardcoded function for the notebooks
-def calculate_pssms_notebook(sequences: pd.Series, n_threads: int = 4):
-    df_pssm_all = pd.DataFrame()
-    for uniref_cluster_threshold in [50, 90]:
-        for psiblast_iterations in [1, 3]:
-            df_pssm = calculate_pssm_feature(
-                sequences,
-                tmp_folder="../data/intermediate/blast/pssm_uniref{}_{}it".format(
-                    uniref_cluster_threshold, psiblast_iterations
-                ),
-                blast_db="../data/raw/uniref/uniref{}/uniref{}.fasta".format(
-                    uniref_cluster_threshold, uniref_cluster_threshold
-                ),
-                iterations=psiblast_iterations,
-                psiblast_executable="psiblast",
-                psiblast_threads=n_threads,
-                verbose=False,
-            )
-            df_pssm = df_pssm.rename(
-                columns=lambda c: c
-                + f"_{uniref_cluster_threshold}_{psiblast_iterations}"
-            )
+# def calculate_pssms_notebook(
+#     sequences: pd.Series,
+#     uniref_cluster_thresholds: list = [50, 90],
+#     psiblast_iterations_list: list = [1, 3],
+#     n_threads: int = 4,
+# ):
+#     df_pssm_all = pd.DataFrame()
+#     for uniref_cluster_threshold in uniref_cluster_thresholds:
+#         for psiblast_iterations in psiblast_iterations_list:
+#             df_pssm = calculate_pssm_feature(
+#                 sequences,
+#                 tmp_folder="../data/intermediate/blast/pssm_uniref{}_{}it".format(
+#                     uniref_cluster_threshold, psiblast_iterations
+#                 ),
+#                 blast_db="../data/raw/uniref/uniref{}/uniref{}.fasta".format(
+#                     uniref_cluster_threshold, uniref_cluster_threshold
+#                 ),
+#                 iterations=psiblast_iterations,
+#                 psiblast_executable="psiblast",
+#                 psiblast_threads=n_threads,
+#                 verbose=False,
+#             )
+#             df_pssm = df_pssm.rename(
+#                 columns=lambda c: f"PSSM_{uniref_cluster_threshold}_{psiblast_iterations}__{c}"
+#             )
 
-            df_pssm_all = pd.concat([df_pssm_all, df_pssm], axis=1)
+#             df_pssm_all = pd.concat([df_pssm_all, df_pssm], axis=1)
 
-    return df_pssm_all
+#     return df_pssm_all

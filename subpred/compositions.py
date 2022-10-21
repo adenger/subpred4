@@ -18,7 +18,7 @@ def calculate_aac(sequences: pd.Series):
     return pd.DataFrame(
         data=sequences.apply(__amino_acid_comp).tolist(),
         index=sequences.index,
-        columns=__get_amino_acids(),
+        columns=["AAC__" + aa for aa in __get_amino_acids()],
     )
 
 
@@ -40,7 +40,7 @@ def calculate_paac(sequences: pd.Series):
     return pd.DataFrame(
         data=sequences.apply(__dipeptide_comp).tolist(),
         index=sequences.index,
-        columns=__get_dipeptides(),
+        columns=["PAAC__" + dipeptide for dipeptide in __get_dipeptides()],
     )
 
 
