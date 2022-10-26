@@ -149,3 +149,6 @@ cython_debug/
 .vscode/settings.json
 
 
+data/raw/swissprot/uniprot_data_2022_04.tab.gz
+data/raw/swissprot/uniprot_data_2022_04.tab.gz.pkl
+data/raw/swissprot/uniprot-reviewed_yes.tab.gz.pkl
