@@ -30,8 +30,9 @@ from joblib import Parallel, delayed
 import numpy as np
 import pandas as pd
 from collections import defaultdict
+from itertools import combinations
 
-from .custom_transformers import PSSMSelector, FeatureCombinator
+from .custom_transformers import FeatureCombinator
 
 
 def __encode_labels(labels: pd.Series) -> np.ndarray:
@@ -83,43 +84,73 @@ def __get_cv_method(cross_val_method: str):
         raise ValueError(f"Unsupported CV method: {cross_val_method}")
 
 
+def _get_all_subsets(items: list):
+    all_subsets = list()
+    for num_features in range(1, len(items)):
+        subset = [list(x) for x in combinations(items, num_features)]
+        all_subsets.extend(subset)
+    return all_subsets
+
+
+def _get_feature_type_combinations(combination_method: str, feature_types: list):
+    if combination_method == "individual":
+        return [[feature_type] for feature_type in feature_types]
+    elif combination_method == "all_combinations":
+        return _get_all_subsets(feature_types)
+    elif combination_method == "pssm_combinations":
+        pssm_feature_types = [
+            feature_type
+            for feature_type in feature_types
+            if feature_type.startswith("PSSM")
+        ]
+        if len(pssm_feature_types) == 0:
+            raise ValueError(
+                "Used combination_method pssm_combinations without any pssm features"
+            )
+        other_feature_types = [
+            [feature_type]
+            for feature_type in feature_types
+            if not feature_type.startswith("PSSM")
+        ]
+        other_feature_types.extend(_get_all_subsets(pssm_feature_types))
+        return other_feature_types
+    else:
+        raise ValueError("Invalid combination method:", combination_method)
+
+
 def optimize_hyperparams(
-    X_train,
-    y_train,
-    # feature_transformer=None,
-    feature_names=None,
-    feature_types=[["AAC"],["PAAC"],["PSSM_50_1", "PSSM_50_3", "PSSM_90_1", "PSSM_90_3"]],
-    kernel="rbf",
-    C=[1, 0.1, 10],
-    gamma=["scale", 0.01, 0.1, 1],
-    class_weight=["balanced", None],
-    dim_reduction=None,
-    decision_function_shape=None,
-    verbose=True,
-    remove_zero_var=False,
-    select_k_steps=1,
+    X_train: np.array,
+    y_train: np.array,
+    feature_names: list = None,
+    feature_combination_method: str = "pssm_combinations",
+    kernel: str = "rbf",
+    C: list = [1, 0.1, 10],
+    gamma: list = ["scale", 0.01, 0.1, 1],
+    class_weight: list = ["balanced", None],
+    dim_reduction: str = None,
+    decision_function_shape: str = None,
+    verbose: bool = True,
+    remove_zero_var: bool = False,
+    select_k_steps: int = 1,
     max_k_to_select: int = None,
     cross_val_method: str = "5fold",
     n_jobs: int = -1,
 ):
     pipe_list = list()
     param_grid = dict()
-    # if feature_transformer == "pssm":
-    #     if feature_names is None:
-    #         raise ValueError("feature names need to be provided for PSSM filtering")
-    #     pipe_list.append(PSSMSelector(feature_names=feature_names))
-    #     param_grid.update(
-    #         {
-    #             "pssmselector__uniref_threshold": [50, 90, "all"],
-    #             "pssmselector__iterations": [1, 3, "all"],
-    #         }
-    #     )
-    # TODO test!
+
     if feature_names is not None:
-        # TODO add string options like individual or all
+        feature_types = sorted(
+            list(set([feature_name.split("__")[0] for feature_name in feature_names]))
+        )
         feature_combinator = FeatureCombinator(feature_names=feature_names)
         pipe_list.append(feature_combinator)
-        param_grid.update({"featurecombinator__feature_types" : feature_types})
+        feature_combinations_grid = _get_feature_type_combinations(
+            combination_method=feature_combination_method, feature_types=feature_types
+        )
+        param_grid.update(
+            {"featurecombinator__feature_types": feature_combinations_grid}
+        )
     if remove_zero_var:
         pipe_list.append(VarianceThreshold(threshold=0))
     pipe_list.append(StandardScaler())
