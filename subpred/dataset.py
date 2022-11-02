@@ -95,9 +95,15 @@ def parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
         case "remove_protein":
             df = df[df.sequence.str.match(re.compile("[ACDEFGHIKLMNPQRSTVWY]+"))]
         case "remove_amino_acids":
-            df = df[df.sequence.str.replace(re.compile("[^ACDEFGHIKLMNPQRSTVWY]+"), "")]
+            df.sequence = df.sequence.str.replace(
+                re.compile("[^ACDEFGHIKLMNPQRSTVWY]+"), ""
+            )
+        case "keep":
+            df = df
         case _:
-            raise ValueError("Invalid value of invalid_amino_acids")
+            raise ValueError(
+                "Invalid value of invalid_amino_acids:", invalid_amino_acids
+            )
     df = df[df.fragment.isnull()]
     df = df.drop(["fragment"], axis=1)
 
@@ -274,11 +280,6 @@ def filter_by_keywords(
     return df
 
 
-# TODO docstring
-# TODO remove test
-# TODO more generalized version of annoatation/filtering?
-
-
 def get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
     srs_keywords = (
         df.keywords.str.split(";").explode().str.strip()
@@ -301,6 +302,18 @@ def get_go_df(df: pd.DataFrame):
     return df_go
 
 
+# TODO remove test
+# TODO prints
+# TODO more generalized version of annoatation/filtering?
+# accessions_or = df_keywords[df_keywords.keyword.isin(set(keywords_substrate_filter))].Entry.tolist()
+# df_new.loc[accessions_or]
+
+# filter for keywords, then check how many matches exist for each protein
+# keyword_matches = df_keywords[df_keywords.keyword.isin(set(keywords_keep))].groupby("Entry").apply(len)
+# accessions_and = keyword_matches[keyword_matches == len(keywords_keep)].index
+
+# df_new.loc[accessions_and]
+
 def create_dataset(
     input_file: str,
     keywords_substrate_filter: List[str],
@@ -315,24 +328,49 @@ def create_dataset(
     evidence_code: int = 2,
     force_update: bool = False,
 ) -> pd.DataFrame:
-    """_summary_
+    """Creates machine learning dataset from Uniprot data
 
     Args:
-        input_file (str): _description_
-        keywords_substrate_filter (List[str]): _description_
-        keywords_component_filter (List[str]): _description_
-        keywords_transport_filter (List[str]): _description_
-        multi_substrate (str, optional): _description_. Defaults to "keep".
-        outliers (List[str], optional): _description_. Defaults to None.
-        verbose (bool, optional): _description_. Defaults to False.
-        tax_ids_filter (List[int], optional): _description_. Defaults to None.
-        sequence_clustering (int, optional): _description_. Defaults to None.
-        invalid_amino_acids (str, optional): _description_. Defaults to "remove_protein".
-        evidence_code (int, optional): _description_. Defaults to 2.
-        force_update (bool, optional): _description_. Defaults to False.
+        input_file (str): Uniprot custom download, see Makefile
+        keywords_substrate_filter (List[str]): The class labels.
+            For list of substrates, look at annoatate_keywords()
+        keywords_component_filter (List[str]): 
+            Membrane-related cellular component keywords to filter for.
+            For list of substrates, look at annoatate_keywords()
+        keywords_transport_filter (List[str]): Transport-related keywords to filter for.
+            For list of substrates, look at annoatate_keywords()
+        multi_substrate (str, optional): 
+            How to deal with proteins that are annotated with multiple substrates.
+            "keep": return all substrates, separated by ";"
+            "remove": remove all proteins annotated with more than one substrate
+            "integrate": only keep substrates that are class labels, remove proteins with more than one class label
+            Defaults to "keep".
+        outliers (List[str], optional): 
+            List of uniprot accessions to exclude from the dataset. Defaults to None.
+        verbose (bool, optional): Print messages about progress. Defaults to False.
+        tax_ids_filter (List[int], optional):
+            List of organism identifiers to filter dataset with. Only proteins from organisms are kept.
+            Defaults to None.
+        sequence_clustering (int, optional): Sequence clustering threshold to use with cd-hit.
+            Can be 40,50,60,70,80,90 or 100.
+            Defaults to None.
+        invalid_amino_acids (str, optional): What to do with protein sequences that contain amino acids like "X".
+            "remove_protein": Remove entire protein from dataset
+            "remove_amino_acids": Keep protein, but remove invalid amino acids from sequence
+            "keep": Do nothing
+            Defaults to "remove_protein".
+        evidence_code (int, optional): Lower value leads to more accurate data, but less samples.
+            1: Experimental evidence at protein level.
+            2: Above + experimental evidence at transcript level.
+            3: Above + inferred by homology
+            4: Above + existence predicted
+            5: Above + uncertain
+            Defaults to 2.
+        force_update (bool, optional):
+            Read raw data and write pickle, even if pickle already exists. Defaults to False.
 
     Returns:
-        pd.DataFrame: _description_
+        pd.DataFrame: The finished dataset.
     """
     pd.set_option("expand_frame_repr", False)
 
@@ -389,6 +427,7 @@ if __name__ == "__main__":
         tax_ids_filter=[3702, 9606, 83333, 559292],
         outliers=outliers,
         sequence_clustering=70,
-        evidence_code=2
+        evidence_code=2,
+        invalid_amino_acids="remove_protein",
         # force_update=True
     )
