@@ -314,6 +314,7 @@ def get_go_df(df: pd.DataFrame):
 
 # df_new.loc[accessions_and]
 
+
 def create_dataset(
     input_file: str,
     keywords_substrate_filter: List[str],
@@ -334,18 +335,18 @@ def create_dataset(
         input_file (str): Uniprot custom download, see Makefile
         keywords_substrate_filter (List[str]): The class labels.
             For list of substrates, look at annoatate_keywords()
-        keywords_component_filter (List[str]): 
+        keywords_component_filter (List[str]):
             Membrane-related cellular component keywords to filter for.
             For list of substrates, look at annoatate_keywords()
         keywords_transport_filter (List[str]): Transport-related keywords to filter for.
             For list of substrates, look at annoatate_keywords()
-        multi_substrate (str, optional): 
+        multi_substrate (str, optional):
             How to deal with proteins that are annotated with multiple substrates.
             "keep": return all substrates, separated by ";"
             "remove": remove all proteins annotated with more than one substrate
             "integrate": only keep substrates that are class labels, remove proteins with more than one class label
             Defaults to "keep".
-        outliers (List[str], optional): 
+        outliers (List[str], optional):
             List of uniprot accessions to exclude from the dataset. Defaults to None.
         verbose (bool, optional): Print messages about progress. Defaults to False.
         tax_ids_filter (List[int], optional):
