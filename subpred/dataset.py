@@ -55,7 +55,7 @@ def read_raw(input_file: str, force_update: bool = False):
     return df
 
 
-def cleanup_dataframe(df: pd.DataFrame, invalid_amino_acids: str, evidence_code: int):
+def parse_columns(df: pd.DataFrame):
     df = df.rename(
         columns={
             # Columns in old version of REST API
@@ -72,7 +72,7 @@ def cleanup_dataframe(df: pd.DataFrame, invalid_amino_acids: str, evidence_code:
     )
     df.columns = df.columns.map(lambda c: c.lower().replace(" ", "_"))
     # for compatibility with older scripts
-    df["tax_id"] = df["organism_id"]
+    # df["tax_id"] = df["organism_id"]
     if "entry_name" in df.columns:
         # In new version of Uniprot API, there is an additional column
         df = df.drop("entry_name", axis=1)
@@ -83,7 +83,13 @@ def cleanup_dataframe(df: pd.DataFrame, invalid_amino_acids: str, evidence_code:
         if type(x) != float
         else x
     )
+    # Only column that is not string
+    df.organism_id = df.organism_id.astype(int)
+    df.keywords = df.keywords.astype(str)
+    return df
 
+
+def parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
     match (invalid_amino_acids):
         case "remove_protein":
             df = df[df.sequence.str.match(re.compile("[ACDEFGHIKLMNPQRSTVWY]+"))]
@@ -91,13 +97,18 @@ def cleanup_dataframe(df: pd.DataFrame, invalid_amino_acids: str, evidence_code:
             df = df[df.sequence.str.replace(re.compile("[^ACDEFGHIKLMNPQRSTVWY]+"), "")]
         case _:
             raise ValueError("Invalid value of invalid_amino_acids")
+    df = df[df.fragment.isnull()]
+    df = df.drop(["fragment"], axis=1)
 
+    return df
+
+
+def parse_rows(
+    df: pd.DataFrame, evidence_code: int, tax_ids_filter: List[int], outliers: List[str]
+):
     df = df[~df.keywords.isnull()]
-
     # Mostly peptides, apparently. Like Pollen
     df = df[~df.gene_names.isnull()]
-    # Only column that is not string
-    df.organism_id = df.organism_id.astype(int)
 
     # df = df[
     #     df.protein_existence.isin(
@@ -114,8 +125,17 @@ def cleanup_dataframe(df: pd.DataFrame, invalid_amino_acids: str, evidence_code:
     ][:evidence_code]
     df = df[df.protein_existence.isin(set(evidence_levels_filter))]
 
-    df = df[df.fragment.isnull()]
-    df = df.drop(["protein_existence", "fragment"], axis=1)
+    if tax_ids_filter:
+        df = df[~df.organism_id.isnull()]
+        tax_ids_keep = set(tax_ids_filter)
+        df = df[df.organism_id.isin(tax_ids_keep)]
+        for tax_id in tax_ids_keep:
+            if tax_id not in df.organism_id.values:
+                raise RuntimeError(f"No proteins found for tax id {tax_id}")
+
+    if outliers:
+        df = df[~df.index.isin(outliers)]
+
     return df
 
 
@@ -128,10 +148,10 @@ def cleanup_dataframe(df: pd.DataFrame, invalid_amino_acids: str, evidence_code:
 
 
 def create_dataset(
+    input_file: str,
     keywords_substrate_filter: List[str],
     keywords_component_filter: List[str],
     keywords_transport_filter: List[str],
-    input_file: str,
     multi_substrate: str = "keep",
     outliers: List[str] = None,
     verbose: bool = False,
@@ -147,21 +167,40 @@ def create_dataset(
     df = read_raw(input_file=input_file, force_update=force_update)
     # df = df.fillna("")
 
-    df = cleanup_dataframe(
-        df, invalid_amino_acids=invalid_amino_acids, evidence_code=evidence_code
+    df = parse_columns(df)
+
+    df = parse_sequences(df, invalid_amino_acids=invalid_amino_acids)
+
+    df = parse_rows(
+        df,
+        evidence_code=evidence_code,
+        tax_ids_filter=tax_ids_filter,
+        outliers=outliers,
     )
 
-    ######################
-    # Taxonomy filtering #
-    ######################
+    # list of go terms and keywords to filter by
+    # list of go terms and keywords to remove
+    # list of possible classes
+    # list of actual classes
 
-    if tax_ids_filter:
-        df = df[~df.organism_id.isnull()]
-        tax_ids_keep = set(tax_ids_filter)
-        df = df[df.organism_id.isin(tax_ids_keep)]
-        for tax_id in tax_ids_keep:
-            if tax_id not in df.organism_id.value_counts().index:
-                raise RuntimeError(f"No proteins found for tax id {tax_id}")
+    # TODO field for class labels?
+    srs_keywords = df.keywords.str.split(";").explode().str.strip()
+    srs_keyword_ids = df.keyword_ids.str.split(";").explode().str.strip()
+
+    # keywords and keyword ids are both sorted alphanumerically, they do not match when axis=1.
+    df_keywords = pd.concat([srs_keywords, srs_keyword_ids], axis=0)
+    df_keywords.columns = ["keyword"]
+
+    print(df_keywords.loc["P50402"])
+
+    srs_go_long = df.go_terms.str.split(";").explode().str.strip()
+    go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
+    srs_go_long_ids = srs_go_long.str.extract(go_id_pattern)
+    srs_go_long_terms = srs_go_long.str.replace(go_id_pattern, "").str.strip()
+    df_go = pd.concat([srs_go_long_ids, srs_go_long_terms], axis=1)
+    df_go.columns = ["go_id", "go_term"]
+
+    print(df_go)
 
     ######################
     # Keyword annotation #
@@ -248,13 +287,6 @@ def create_dataset(
             [keyword for keyword in keywords if keyword in keywords_location]
         )
     )
-
-    ################################################
-    # Removing outliers                            #
-    ################################################
-
-    if outliers:
-        df = df[~df.index.isin(outliers)]
 
     ################################################
     # Removing proteins without necessary keywords #
@@ -369,7 +401,6 @@ def create_dataset(
             )
             .tolist()
         )
-        log.debug(f"writing output fasta file to {output_fasta}...")
         write_fasta(fasta_file_name=output_fasta, fasta_data=fasta_data)
 
     df_tsv = df[
