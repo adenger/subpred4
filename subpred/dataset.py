@@ -83,6 +83,7 @@ def parse_columns(df: pd.DataFrame):
         if type(x) != float
         else x
     )
+    df = df.assign(tcdb_class=df.tcdb_id.fillna("0.0").apply(lambda x: x[:3]))
     # Only column that is not string
     df.organism_id = df.organism_id.astype(int)
     df.keywords = df.keywords.astype(str)
@@ -139,73 +140,7 @@ def parse_rows(
     return df
 
 
-# TODO refactoring
-# TODO evidence code level
-# TODO create seperate df for keywords?
-# TODO "" instead of NaN from the start: check if there are still nan checks in script
-# TODO docstring
-# TODO revert imports? (subpred.)
-
-
-def create_dataset(
-    input_file: str,
-    keywords_substrate_filter: List[str],
-    keywords_component_filter: List[str],
-    keywords_transport_filter: List[str],
-    multi_substrate: str = "keep",
-    outliers: List[str] = None,
-    verbose: bool = False,
-    tax_ids_filter: List[int] = None,
-    output_tsv: str = None,
-    output_fasta: str = None,
-    sequence_clustering: int = None,
-    invalid_amino_acids: str = "remove_protein",
-    evidence_code: int = 2,
-    force_update: bool = False,
-):
-
-    df = read_raw(input_file=input_file, force_update=force_update)
-    # df = df.fillna("")
-
-    df = parse_columns(df)
-
-    df = parse_sequences(df, invalid_amino_acids=invalid_amino_acids)
-
-    df = parse_rows(
-        df,
-        evidence_code=evidence_code,
-        tax_ids_filter=tax_ids_filter,
-        outliers=outliers,
-    )
-
-    # list of go terms and keywords to filter by
-    # list of go terms and keywords to remove
-    # list of possible classes
-    # list of actual classes
-
-    # TODO field for class labels?
-    srs_keywords = df.keywords.str.split(";").explode().str.strip()
-    srs_keyword_ids = df.keyword_ids.str.split(";").explode().str.strip()
-
-    # keywords and keyword ids are both sorted alphanumerically, they do not match when axis=1.
-    df_keywords = pd.concat([srs_keywords, srs_keyword_ids], axis=0)
-    df_keywords.columns = ["keyword"]
-
-    print(df_keywords.loc["P50402"])
-
-    srs_go_long = df.go_terms.str.split(";").explode().str.strip()
-    go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
-    srs_go_long_ids = srs_go_long.str.extract(go_id_pattern)
-    srs_go_long_terms = srs_go_long.str.replace(go_id_pattern, "").str.strip()
-    df_go = pd.concat([srs_go_long_ids, srs_go_long_terms], axis=1)
-    df_go.columns = ["go_id", "go_term"]
-
-    print(df_go)
-
-    ######################
-    # Keyword annotation #
-    ######################
-
+def annotate_keywords(df: pd.DataFrame):
     keywords_transport = {
         "Ion transport",
         "Anion exchange",
@@ -287,16 +222,18 @@ def create_dataset(
             [keyword for keyword in keywords if keyword in keywords_location]
         )
     )
+    return df
 
-    ################################################
-    # Removing proteins without necessary keywords #
-    ################################################
 
-    df = df[df.keywords_transport != ""]
+def filter_by_keywords(
+    df: pd.DataFrame,
+    keywords_transport_filter,
+    keywords_component_filter,
+    keywords_substrate_filter,
+    multi_substrate,
+):
 
-    ###############################
-    # Transport keyword filtering #
-    ###############################
+    # Transport keyword filtering
     substrate_keywords = {kw.strip() for kw in keywords_transport_filter}
     df = df[
         df.keywords_transport_related.str.split(";").apply(
@@ -304,21 +241,15 @@ def create_dataset(
         )
     ]
 
-    #################################
-    # Compartment keyword filtering #
-    #################################
+    # Compartment keyword filtering
     df = df[
         df.keywords_location.str.split(";").apply(
             lambda l: len(set(l) & {kw.strip() for kw in keywords_component_filter}) > 0
         )
     ]
 
-    ###############################
-    # Substrate keyword filtering #
-    ###############################
-
+    # Substrate keyword filtering
     keywords_filter_set = {kw.strip() for kw in keywords_substrate_filter}
-
     if multi_substrate == "keep":
         # Keep protein if at least one of the substrates is in parameter
         df = df[
@@ -340,9 +271,96 @@ def create_dataset(
         # Should not happen, handled by argparse
         raise ValueError("Invalid parameter for multi_substrate")
 
-    ########################
-    # Sequence clustering  #
-    ########################
+    return df
+
+
+# TODO docstring
+# TODO more generalized version of annoatation/filtering?
+
+
+def get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
+    srs_keywords = (
+        df.keywords.str.split(";").explode().str.strip()
+        if use_keyword_names
+        else df.keyword_ids.str.split(";").explode().str.strip()
+    )
+
+    df_keywords = srs_keywords.to_frame(name="keyword").reset_index(drop=False)
+    df_keywords = df_keywords[~df_keywords.keyword.isnull()]
+
+    return df_keywords
+
+
+def get_go_df(df: pd.DataFrame):
+    df_go = df.go_terms.str.split(";").explode().str.strip().reset_index(drop=False)
+    go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
+    df_go["go_id"] = df_go.go_terms.str.extract(go_id_pattern)
+    df_go["go_term"] = df_go.go_terms.str.replace(go_id_pattern, "").str.strip()
+    df_go = df_go.drop("go_terms", axis=1)
+    return df_go
+
+
+def create_dataset(
+    input_file: str,
+    keywords_substrate_filter: List[str],
+    keywords_component_filter: List[str],
+    keywords_transport_filter: List[str],
+    multi_substrate: str = "keep",
+    outliers: List[str] = None,
+    verbose: bool = False,
+    tax_ids_filter: List[int] = None,
+    sequence_clustering: int = None,
+    invalid_amino_acids: str = "remove_protein",
+    evidence_code: int = 2,
+    force_update: bool = False,
+) -> pd.DataFrame:
+    """_summary_
+
+    Args:
+        input_file (str): _description_
+        keywords_substrate_filter (List[str]): _description_
+        keywords_component_filter (List[str]): _description_
+        keywords_transport_filter (List[str]): _description_
+        multi_substrate (str, optional): _description_. Defaults to "keep".
+        outliers (List[str], optional): _description_. Defaults to None.
+        verbose (bool, optional): _description_. Defaults to False.
+        tax_ids_filter (List[int], optional): _description_. Defaults to None.
+        sequence_clustering (int, optional): _description_. Defaults to None.
+        invalid_amino_acids (str, optional): _description_. Defaults to "remove_protein".
+        evidence_code (int, optional): _description_. Defaults to 2.
+        force_update (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        pd.DataFrame: _description_
+    """
+    pd.set_option("expand_frame_repr", False)
+
+    df = read_raw(input_file=input_file, force_update=force_update)
+
+    df = parse_columns(df)
+
+    df = parse_sequences(df, invalid_amino_acids=invalid_amino_acids)
+
+    df = parse_rows(
+        df,
+        evidence_code=evidence_code,
+        tax_ids_filter=tax_ids_filter,
+        outliers=outliers,
+    )
+
+    # df_keywords = get_keywords_df(df)
+    # df_go = get_go_df(df)
+
+    df = annotate_keywords(df)
+    df = df[df.keywords_transport != ""]
+
+    df = filter_by_keywords(
+        df,
+        keywords_transport_filter=keywords_transport_filter,
+        keywords_component_filter=keywords_component_filter,
+        keywords_substrate_filter=keywords_substrate_filter,
+        multi_substrate=multi_substrate,
+    )
 
     if sequence_clustering:
         cluster_repr = cd_hit(
@@ -350,130 +368,7 @@ def create_dataset(
         )
         df = df.loc[cluster_repr]
 
-    ########################
-    # TCDB class field     #
-    ########################
-
-    df = df.assign(tcdb_class=df.tcdb_id.fillna("0.0").apply(lambda x: x[:3]))
-
-    ########################
-    # Writing Output Files #
-    ########################
-
-    df_fasta = df[
-        [
-            "keywords_transport",
-            "gene_names",
-            "protein_names",
-            "tcdb_id",
-            "organism_id",
-            "sequence",
-        ]
-    ]
-
-    if output_fasta:
-        df_fasta = df[
-            [
-                "keywords_transport",
-                "gene_names",
-                "protein_names",
-                "tcdb_id",
-                "organism_id",
-                "sequence",
-            ]
-        ]
-        fasta_data = (
-            df_fasta.reset_index()
-            .apply(
-                lambda row: (
-                    (">sp" + "|{}" * 6).format(
-                        row.Uniprot,
-                        ";".join(row.gene_names.split()),
-                        row.organism_id,
-                        row.tcdb_id,
-                        row.keywords_transport,
-                        row.protein_names,
-                    ),
-                    row.sequence,
-                ),
-                axis=1,
-                result_type="reduce",
-            )
-            .tolist()
-        )
-        write_fasta(fasta_file_name=output_fasta, fasta_data=fasta_data)
-
-    df_tsv = df[
-        [
-            "keywords_transport",
-            "keywords_location",
-            "keywords_transport_related",
-            "gene_names",
-            "protein_names",
-            "tcdb_id",
-            "tcdb_class",
-            "organism_id",
-            "sequence",
-        ]
-    ]
-    if output_tsv:
-        df_tsv.to_csv(output_tsv, sep="\t")
-    return df_tsv
-
-
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument(
-#         "--keywords-substrate",
-#         type=str,
-#         required=True,
-#         help="List of Uniprot keywords, in Quotes and separated by semicolons",
-#     )
-#     parser.add_argument(
-#         "--keywords-component",
-#         type=str,
-#         required=True,
-#         help="List of Uniprot keywords, in Quotes and separated by semicolons",
-#     )
-#     parser.add_argument(
-#         "--keywords-transport",
-#         type=str,
-#         required=True,
-#         help="List of Uniprot keywords, in Quotes and separated by semicolons",
-#     )
-#     parser.add_argument("--input-file", type=str, required=True)
-#     parser.add_argument("--output-tsv", type=str)
-#     parser.add_argument("--output-fasta", type=str)
-#     parser.add_argument("--output-log", type=str)
-#     parser.add_argument(
-#         "--tax-ids",
-#         type=int,
-#         nargs="+",
-#         help="tax id(s) to filter for",
-#         default=None,
-#     )
-#     parser.add_argument("--verbose", action="store_true")
-#     parser.add_argument(
-#         "--multi-substrate",
-#         choices=["keep", "remove", "integrate"],
-#         default="keep",
-#         help="How to treat proteins with multiple substrates. \
-#             Remove them, keep them, or integrate them into \
-#             single-substrate classes if the other substrates are not in the dataset",
-#     )
-#     args = parser.parse_args()
-#     create_dataset(
-#         keywords_substrate_filter=args.keywords_substrate.split(";"),
-#         keywords_component_filter=args.keywords_component.split(";"),
-#         keywords_transport_filter=args.keywords_transport.split(";"),
-#         input_file=args.input_file,
-#         multi_substrate=args.multi_substrate,
-#         verbose=args.verbose,
-#         tax_ids_filter=args.tax_ids,
-#         output_tsv=args.output_tsv,
-#         output_fasta=args.output_fasta,
-#         output_log=args.output_log,
-# )
+    return df
 
 
 if __name__ == "__main__":
@@ -493,5 +388,6 @@ if __name__ == "__main__":
         tax_ids_filter=[3702, 9606, 83333, 559292],
         outliers=outliers,
         sequence_clustering=70,
+        evidence_code=2
         # force_update=True
     )
