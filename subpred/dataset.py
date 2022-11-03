@@ -2,8 +2,77 @@ import pandas as pd
 from typing import List
 import re
 from pathlib import Path
-from subpred.fasta import write_fasta
 from subpred.cdhit import cd_hit
+
+
+SUBSTRATE_KEYWORDS = {
+    "Ion transport",
+    "Anion exchange",
+    "Protein transport",
+    "Sodium/potassium transport",
+    "Polysaccharide transport",
+    "Bacteriocin transport",
+    "Peptide transport",
+    "Translocation",
+    "Bacterial flagellum protein export",
+    "Amino-acid transport",
+    "Electron transport",
+    "Lipid transport",
+    "mRNA transport",
+    "Neurotransmitter transport",
+    "Oxygen transport",
+    "Phosphate transport",
+    "Ammonia transport",
+    "Phosphonate transport",
+    "Viral movement protein",
+    "Sulfate transport",
+    "Sugar transport",
+    "Calcium transport",
+    "Cobalt transport",
+    "Copper transport",
+    "Hydrogen ion transport",
+    "Iron transport",
+    "Zinc transport",
+    "Nickel transport",
+    "Potassium transport",
+    "Sodium transport",
+    "Chloride",
+}
+
+KEYWORDS_TRANSPORT_RELATED = {
+    "Antibiotic resistance",
+    "Transport",
+    "Symport",
+    "Antiport",
+    "ER-Golgi transport",
+    "Ion channel",
+    "Calcium channel",
+    "Potassium channel",
+    "Chloride channel",
+    "Sodium channel",
+    "Viral ion channel",
+    "Voltage-gated channel",
+    "Ligand-gated ion channel",
+    "Porin",
+    "Nuclear pore complex",
+    "Respiratory chain",
+}
+
+KEYWORDS_LOCATION = {
+    "Membrane",
+    "Cell membrane",
+    "Cell inner membrane",
+    "Cell outer membrane",
+    "Transmembrane",
+    "Nucleus",
+    "Mitochondrion",
+    "Endoplasmic reticulum",
+    "Plastid outer membrane",
+    "Plastid inner membrane",
+    "Mitochondrion outer membrane",
+    "Mitochondrion inner membrane",
+    "Postsynaptic cell membrane",
+}
 
 
 def get_clustering_stats(
@@ -147,85 +216,21 @@ def parse_rows(
 
 
 def annotate_keywords(df: pd.DataFrame):
-    keywords_transport = {
-        "Ion transport",
-        "Anion exchange",
-        "Protein transport",
-        "Sodium/potassium transport",
-        "Polysaccharide transport",
-        "Bacteriocin transport",
-        "Peptide transport",
-        "Translocation",
-        "Bacterial flagellum protein export",
-        "Amino-acid transport",
-        "Electron transport",
-        "Lipid transport",
-        "mRNA transport",
-        "Neurotransmitter transport",
-        "Oxygen transport",
-        "Phosphate transport",
-        "Ammonia transport",
-        "Phosphonate transport",
-        "Viral movement protein",
-        "Sulfate transport",
-        "Sugar transport",
-        "Calcium transport",
-        "Cobalt transport",
-        "Copper transport",
-        "Hydrogen ion transport",
-        "Iron transport",
-        "Zinc transport",
-        "Nickel transport",
-        "Potassium transport",
-        "Sodium transport",
-        "Chloride",
-    }
     df["keywords_transport"] = df.keywords.str.split(";").apply(
         lambda keywords: ";".join(
-            [keyword for keyword in keywords if keyword in keywords_transport]
+            [keyword for keyword in keywords if keyword in SUBSTRATE_KEYWORDS]
         )
     )
-    keywords_transport_related = {
-        "Antibiotic resistance",
-        "Transport",
-        "Symport",
-        "Antiport",
-        "ER-Golgi transport",
-        "Ion channel",
-        "Calcium channel",
-        "Potassium channel",
-        "Chloride channel",
-        "Sodium channel",
-        "Viral ion channel",
-        "Voltage-gated channel",
-        "Ligand-gated ion channel",
-        "Porin",
-        "Nuclear pore complex",
-        "Respiratory chain",
-    }
+
     df["keywords_transport_related"] = df.keywords.str.split(";").apply(
         lambda keywords: ";".join(
-            [keyword for keyword in keywords if keyword in keywords_transport_related]
+            [keyword for keyword in keywords if keyword in KEYWORDS_TRANSPORT_RELATED]
         )
     )
-    keywords_location = {
-        "Membrane",
-        "Cell membrane",
-        "Cell inner membrane",
-        "Cell outer membrane",
-        "Transmembrane",
-        "Nucleus",
-        "Mitochondrion",
-        "Endoplasmic reticulum",
-        "Plastid outer membrane",
-        "Plastid inner membrane",
-        "Mitochondrion outer membrane",
-        "Mitochondrion inner membrane",
-        "Postsynaptic cell membrane",
-    }
+
     df["keywords_location"] = df.keywords.str.split(";").apply(
         lambda keywords: ";".join(
-            [keyword for keyword in keywords if keyword in keywords_location]
+            [keyword for keyword in keywords if keyword in KEYWORDS_LOCATION]
         )
     )
     return df
@@ -274,7 +279,6 @@ def filter_by_keywords(
         # Only keep protein if it is annotated with one substrate, and that substrate is in parameter
         df = df[df.keywords_transport.apply(lambda s: s.strip() in keywords_filter_set)]
     else:
-        # Should not happen, handled by argparse
         raise ValueError("Invalid parameter for multi_substrate")
 
     return df
@@ -373,7 +377,6 @@ def create_dataset(
     Returns:
         pd.DataFrame: The finished dataset.
     """
-    pd.set_option("expand_frame_repr", False)
 
     df = read_raw(input_file=input_file, force_update=force_update)
 
@@ -412,6 +415,8 @@ def create_dataset(
 
 
 if __name__ == "__main__":
+    # print entire df (for debugging)
+    pd.set_option("expand_frame_repr", False)
     # test
     outliers = (
         ["Q9HBR0", "Q07837"]
@@ -422,7 +427,7 @@ if __name__ == "__main__":
         keywords_substrate_filter=["Amino-acid transport", "Sugar transport"],
         keywords_component_filter=["Transmembrane"],
         keywords_transport_filter=["Transport"],
-        input_file="data/raw/swissprot/uniprot-reviewed_yes.tab.gz",
+        input_file="data/raw/swissprot/uniprot_data_2022_04.tab.gz",
         multi_substrate="integrate",
         verbose=True,
         tax_ids_filter=[3702, 9606, 83333, 559292],
