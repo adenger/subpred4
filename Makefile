@@ -46,7 +46,7 @@ raw_data:
 # Link for old API
 #	curl "https://www.uniprot.org/uniprot/?query=reviewed:yes&format=tab&columns=id,genes,protein%20names,organism,organism-id,keyword-id,keywords,go-id,go,database(TCDB),existence,sequence,fragment&sort=score" > data/raw/swissprot/sp_data.tsv
 
-## Extract raw data
+## Extract raw data from manuscript 1
 raw_data_manuscript: data_full.tar
 	tar xvf data_full.tar
 	mkdir data/intermediate/blast
