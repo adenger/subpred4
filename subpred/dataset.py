@@ -384,7 +384,6 @@ def create_dataset(
         pd.DataFrame: The finished dataset.
     """
 
-    
     df = read_raw(input_file=input_file, force_update=force_update)
 
     df = parse_columns(df)
@@ -420,7 +419,6 @@ def create_dataset(
     keywords_classes_all = list(SUBSTRATE_KEYWORDS)
     keywords_filter = keywords_component_filter + keywords_transport_filter
 
-
     # get set of proteins that are annotated with keywords_filter
     keyword_matches = (
         df_keywords[df_keywords.keyword.isin(keywords_filter)]
@@ -428,9 +426,7 @@ def create_dataset(
         .apply(len)
     )
     proteins_all_keywords = (
-        keyword_matches[keyword_matches == len(keywords_filter)]
-        .index.unique()
-        .values
+        keyword_matches[keyword_matches == len(keywords_filter)].index.unique().values
     )
 
     # only keep those proteins
@@ -454,12 +450,9 @@ def create_dataset(
         df_classes = df_classes[df_classes.keyword.isin(keywords_classes)]
         df_classes = df_classes.set_index("Uniprot")
 
-
-
-    df_classes.rename(columns = {'keyword':'label'}, inplace=True)
+    df_classes.rename(columns={"keyword": "label"}, inplace=True)
 
     df = df.join(df_classes, how="inner")
-
 
     if sequence_clustering:
         cluster_repr = cd_hit(
