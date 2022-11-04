@@ -309,6 +309,10 @@ def get_go_df(df: pd.DataFrame):
 # TODO remove test
 # TODO prints
 # TODO more generalized version of annoatation/filtering?
+
+# TODO idea: make interesting keyword cols independent of filtering
+# 
+#  
 # accessions_or = df_keywords[df_keywords.keyword.isin(set(keywords_substrate_filter))].Entry.tolist()
 # df_new.loc[accessions_or]
 
