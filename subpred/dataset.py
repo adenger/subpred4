@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from typing import List
 import re
 from pathlib import Path
@@ -160,6 +161,7 @@ def parse_columns(df: pd.DataFrame):
 
 
 def parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
+    # "BJOUXZ"
     match (invalid_amino_acids):
         case "remove_protein":
             df = df[df.sequence.str.match(re.compile("[ACDEFGHIKLMNPQRSTVWY]+"))]
@@ -311,8 +313,8 @@ def get_go_df(df: pd.DataFrame):
 # TODO more generalized version of annoatation/filtering?
 
 # TODO idea: make interesting keyword cols independent of filtering
-# 
-#  
+#
+#
 # accessions_or = df_keywords[df_keywords.keyword.isin(set(keywords_substrate_filter))].Entry.tolist()
 # df_new.loc[accessions_or]
 
@@ -382,6 +384,7 @@ def create_dataset(
         pd.DataFrame: The finished dataset.
     """
 
+    
     df = read_raw(input_file=input_file, force_update=force_update)
 
     df = parse_columns(df)
@@ -395,19 +398,68 @@ def create_dataset(
         outliers=outliers,
     )
 
-    # df_keywords = get_keywords_df(df)
     # df_go = get_go_df(df)
 
     df = annotate_keywords(df)
-    df = df[df.keywords_transport != ""]
 
-    df = filter_by_keywords(
-        df,
-        keywords_transport_filter=keywords_transport_filter,
-        keywords_component_filter=keywords_component_filter,
-        keywords_substrate_filter=keywords_substrate_filter,
-        multi_substrate=multi_substrate,
+    # ----------------------------------------
+    ## Old version:
+    # df = df[df.keywords_transport != ""]
+
+    # df = filter_by_keywords(
+    #     df,
+    #     keywords_transport_filter=keywords_transport_filter,
+    #     keywords_component_filter=keywords_component_filter,
+    #     keywords_substrate_filter=keywords_substrate_filter,
+    #     multi_substrate=multi_substrate,
+    # )
+    # ---------------------------------------
+
+    df_keywords = get_keywords_df(df)
+    keywords_classes = list(keywords_substrate_filter)
+    keywords_classes_all = list(SUBSTRATE_KEYWORDS)
+    keywords_filter = keywords_component_filter + keywords_transport_filter
+
+
+    # get set of proteins that are annotated with keywords_filter
+    keyword_matches = (
+        df_keywords[df_keywords.keyword.isin(keywords_filter)]
+        .groupby("Uniprot")
+        .apply(len)
     )
+    proteins_all_keywords = (
+        keyword_matches[keyword_matches == len(keywords_filter)]
+        .index.unique()
+        .values
+    )
+
+    # only keep those proteins
+    df_keywords = df_keywords[
+        df_keywords.Uniprot.isin(proteins_all_keywords)
+    ].reset_index(drop=True)
+
+    # get proteins where at least one substrate is in keywords classes
+    df_classes = df_keywords[df_keywords.keyword.isin(keywords_classes_all)]
+
+    if multi_substrate == "keep":
+        df_classes = (
+            df_classes.groupby("Uniprot").keyword.apply(list).str.join(";").to_frame()
+        )
+    elif multi_substrate == "integrate":
+        df_classes = df_classes[df_classes.keyword.isin(keywords_classes)]
+        df_classes = df_classes[~df_classes.Uniprot.duplicated(keep=False)]
+        df_classes = df_classes.set_index("Uniprot")
+    elif multi_substrate == "remove":
+        df_classes = df_classes[~df_classes.Uniprot.duplicated(keep=False)]
+        df_classes = df_classes[df_classes.keyword.isin(keywords_classes)]
+        df_classes = df_classes.set_index("Uniprot")
+
+
+
+    df_classes.rename(columns = {'keyword':'label'}, inplace=True)
+
+    df = df.join(df_classes, how="inner")
+
 
     if sequence_clustering:
         cluster_repr = cd_hit(
@@ -428,11 +480,17 @@ if __name__ == "__main__":
         + ["O81775", "Q9SW07", "Q9FHH5", "Q8S8A0", "Q3E965", "Q3EAV6", "Q3E8L0"]
     )
     df = create_dataset(
-        keywords_substrate_filter=["Amino-acid transport", "Sugar transport"],
+        keywords_substrate_filter=[
+            "Amino-acid transport",
+            "Sugar transport",
+            "Ion transport",
+            "Potassium transport",
+        ],
+        # keywords_substrate_filter=SUBSTRATE_KEYWORDS,
         keywords_component_filter=["Transmembrane"],
         keywords_transport_filter=["Transport"],
         input_file="data/raw/swissprot/uniprot_data_2022_04.tab.gz",
-        multi_substrate="integrate",
+        multi_substrate="remove",
         verbose=True,
         tax_ids_filter=[3702, 9606, 83333, 559292],
         outliers=outliers,
