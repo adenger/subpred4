@@ -327,9 +327,9 @@ def get_go_df(df: pd.DataFrame):
 
 def create_dataset(
     input_file: str,
-    keywords_substrate_filter: List[str],
-    keywords_component_filter: List[str],
-    keywords_transport_filter: List[str],
+    keywords_classes: List[str] = None,
+    keywords_classes_all: List[str] = list(SUBSTRATE_KEYWORDS),
+    keywords_filter: List[str] = None,
     multi_substrate: str = "keep",
     outliers: List[str] = None,
     verbose: bool = False,
@@ -343,17 +343,17 @@ def create_dataset(
 
     Args:
         input_file (str): Uniprot custom download, see Makefile
-        keywords_substrate_filter (List[str]): The class labels.
-            For list of substrates, look at annoatate_keywords()
-        keywords_component_filter (List[str]):
-            Membrane-related cellular component keywords to filter for.
-            For list of substrates, look at annoatate_keywords()
-        keywords_transport_filter (List[str]): Transport-related keywords to filter for.
-            For list of substrates, look at annoatate_keywords()
+        keywords_filter (List[str]):
+            Uniprot keywords to filter for. Only proteins annotated with all keywords are kept
+        keywords_classes (List[str]): The class labels to use for the classification task.
+            For list of substrates, look at dataset.SUBSTRATE_KEYWORDS
+        keywords_classes_all (List[str]): All possible class labels.
+            Only used when for the multi_substrate="remove" or multi_substrate="keep".
+            Defaults to dataset.SUBSTRATE_KEYWORDS
         multi_substrate (str, optional):
             How to deal with proteins that are annotated with multiple substrates.
-            "keep": return all substrates, separated by ";"
-            "remove": remove all proteins annotated with more than one substrate
+            "keep": return all class labels in keywords_classes_all, separated by ";"
+            "remove": remove all proteins annotated with more than one class in keywords_classes_all
             "integrate": only keep substrates that are class labels, remove proteins with more than one class label
             Defaults to "keep".
         outliers (List[str], optional):
@@ -415,27 +415,29 @@ def create_dataset(
     # ---------------------------------------
 
     df_keywords = get_keywords_df(df)
-    keywords_classes = list(keywords_substrate_filter)
-    keywords_classes_all = list(SUBSTRATE_KEYWORDS)
-    keywords_filter = keywords_component_filter + keywords_transport_filter
 
-    # get set of proteins that are annotated with keywords_filter
-    keyword_matches = (
-        df_keywords[df_keywords.keyword.isin(keywords_filter)]
-        .groupby("Uniprot")
-        .apply(len)
-    )
-    proteins_all_keywords = (
-        keyword_matches[keyword_matches == len(keywords_filter)].index.unique().values
-    )
+    if keywords_filter:
+        # get set of proteins that are annotated with keywords_filter
+        keyword_matches = (
+            df_keywords[df_keywords.keyword.isin(keywords_filter)]
+            .groupby("Uniprot")
+            .apply(len)
+        )
+        proteins_all_keywords = (
+            keyword_matches[keyword_matches == len(keywords_filter)].index.unique().values
+        )
 
-    # only keep those proteins
-    df_keywords = df_keywords[
-        df_keywords.Uniprot.isin(proteins_all_keywords)
-    ].reset_index(drop=True)
+        # only keep those proteins
+        df_keywords = df_keywords[
+            df_keywords.Uniprot.isin(proteins_all_keywords)
+        ].reset_index(drop=True)
 
-    # get proteins where at least one substrate is in keywords classes
-    df_classes = df_keywords[df_keywords.keyword.isin(keywords_classes_all)]
+    # if keywords_classes:
+        # get proteins where at least one substrate is in keywords classes
+    if multi_substrate != "integrate":
+        df_classes = df_keywords[df_keywords.keyword.isin(keywords_classes_all)]
+    else:
+        df_classes = df_keywords
 
     if multi_substrate == "keep":
         df_classes = (
@@ -472,23 +474,26 @@ if __name__ == "__main__":
         + ["P76773", "Q47706", "P02943", "P75733", "P69856", "P64550"]
         + ["O81775", "Q9SW07", "Q9FHH5", "Q8S8A0", "Q3E965", "Q3EAV6", "Q3E8L0"]
     )
+    from time import time
+
+    t = time()
     df = create_dataset(
-        keywords_substrate_filter=[
+        keywords_classes=[
             "Amino-acid transport",
             "Sugar transport",
             "Ion transport",
             "Potassium transport",
         ],
-        # keywords_substrate_filter=SUBSTRATE_KEYWORDS,
-        keywords_component_filter=["Transmembrane"],
-        keywords_transport_filter=["Transport"],
+        keywords_filter=["Transmembrane", "Transport"],
         input_file="data/raw/swissprot/uniprot_data_2022_04.tab.gz",
-        multi_substrate="remove",
+        multi_substrate="integrate",
         verbose=True,
         tax_ids_filter=[3702, 9606, 83333, 559292],
         outliers=outliers,
         sequence_clustering=70,
         evidence_code=2,
         invalid_amino_acids="remove_protein",
-        # force_update=True
+        force_update=False
     )
+    print(df.shape)
+    print(time() - t)
