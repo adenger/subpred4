@@ -1,10 +1,8 @@
 import pandas as pd
-import numpy as np
-from typing import List
 import re
 from pathlib import Path
 from subpred.cdhit import cd_hit
-
+from urllib.parse import urlencode, quote
 
 SUBSTRATE_KEYWORDS = {
     "Ion transport",
@@ -75,6 +73,45 @@ KEYWORDS_LOCATION = {
     "Postsynaptic cell membrane",
 }
 
+# columns to be added to dataframe
+KEYWORD_SETS = {
+    "keywords_substrates": SUBSTRATE_KEYWORDS,
+    "keywords_transport_related": KEYWORDS_TRANSPORT_RELATED,
+    "keywords_location": KEYWORDS_TRANSPORT_RELATED,
+}
+
+
+def __create_uniprot_url(
+    base_url="https://rest.uniprot.org/uniprotkb/stream",
+    compressed="true",
+    fields=[
+        "accession",
+        "id",
+        "gene_names",
+        "protein_name",
+        "organism_name",
+        "organism_id",
+        "keywordid",
+        "keyword",
+        "go_id",
+        "go",
+        "xref_tcdb",
+        "protein_existence",
+        "sequence",
+        "fragment",
+    ],
+    format="tsv",
+    query="* AND (reviewed:true)",
+):
+
+    params = {
+        "compressed": compressed,
+        "fields": ",".join(fields),
+        "format": format,
+        "query": query,
+    }
+
+    return f"{base_url}?{urlencode(params, quote_via=quote)}"
 
 def __read_raw(input_file: str, force_update: bool = False):
     # does not work if file paths contain "~"
@@ -150,13 +187,17 @@ def __parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
     return df
 
 
-def __parse_rows(
-    df: pd.DataFrame, evidence_code: int, tax_ids_filter: List[int], outliers: List[str]
-):
-    df = df[~df.keywords.isnull()]
-    # Mostly peptides, apparently. Like Pollen
-    df = df[~df.gene_names.isnull()]
+def __add_keyword_column(df: pd.DataFrame, keyword_set: set, colname: str):
+    df[colname] = df.keywords.str.split(";").apply(
+        lambda keywords: ";".join(
+            [keyword for keyword in keywords if keyword in keyword_set]
+        )
+    )
 
+    return df
+
+
+def __filter_protein_evidence(df: pd.DataFrame, evidence_code: int):
     assert evidence_code > 0 and evidence_code <= 5
     evidence_levels_filter = [
         "Evidence at protein level",
@@ -166,43 +207,10 @@ def __parse_rows(
         "Uncertain",
     ][:evidence_code]
     df = df[df.protein_existence.isin(set(evidence_levels_filter))]
-
-    if tax_ids_filter:
-        df = df[~df.organism_id.isnull()]
-        tax_ids_keep = set(tax_ids_filter)
-        df = df[df.organism_id.isin(tax_ids_keep)]
-        for tax_id in tax_ids_keep:
-            if tax_id not in df.organism_id.values:
-                raise RuntimeError(f"No proteins found for tax id {tax_id}")
-
-    if outliers:
-        df = df[~df.index.isin(outliers)]
-
     return df
 
 
-def annotate_keywords(df: pd.DataFrame):
-    df["keywords_transport"] = df.keywords.str.split(";").apply(
-        lambda keywords: ";".join(
-            [keyword for keyword in keywords if keyword in SUBSTRATE_KEYWORDS]
-        )
-    )
-
-    df["keywords_transport_related"] = df.keywords.str.split(";").apply(
-        lambda keywords: ";".join(
-            [keyword for keyword in keywords if keyword in KEYWORDS_TRANSPORT_RELATED]
-        )
-    )
-
-    df["keywords_location"] = df.keywords.str.split(";").apply(
-        lambda keywords: ";".join(
-            [keyword for keyword in keywords if keyword in KEYWORDS_LOCATION]
-        )
-    )
-    return df
-
-
-def get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
+def __get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
     srs_keywords = (
         df.keywords.str.split(";").explode().str.strip()
         if use_keyword_names
@@ -215,7 +223,7 @@ def get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
     return df_keywords
 
 
-def get_go_df(df: pd.DataFrame):
+def __get_go_df(df: pd.DataFrame):
     df_go = df.go_terms.str.split(";").explode().str.strip().reset_index(drop=False)
     go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
     df_go["go_id"] = df_go.go_terms.str.extract(go_id_pattern)
@@ -224,14 +232,14 @@ def get_go_df(df: pd.DataFrame):
     return df_go
 
 
-def __filter_by_keywords(df: pd.DataFrame, keywords_filter: list):
-    df_keywords = get_keywords_df(df)
+def __filter_by_keywords(df: pd.DataFrame, keywords_filter: set):
+    df_keywords = __get_keywords_df(df)
     keyword_matches = (
         df_keywords[df_keywords.keyword.isin(keywords_filter)]
         .groupby("Uniprot")
         .apply(len)
     )
-    proteins_all_keywords = (
+    proteins_all_keywords = set(
         keyword_matches[keyword_matches == len(keywords_filter)].index.unique().values
     )
 
@@ -239,13 +247,13 @@ def __filter_by_keywords(df: pd.DataFrame, keywords_filter: list):
     return df
 
 
-def ____annotate_keywords(
+def __add_class_labels(
     df: pd.DataFrame,
-    keywords_classes: list,
-    keywords_classes_all: list,
+    keywords_classes: set,
+    keywords_classes_all: set,
     multi_substrate: str,
 ):
-    df_classes = get_keywords_df(df)
+    df_classes = __get_keywords_df(df)
 
     if multi_substrate == "keep":
         df_classes = df_classes[df_classes.keyword.isin(keywords_classes_all)]
@@ -270,13 +278,13 @@ def ____annotate_keywords(
 
 def create_dataset(
     input_file: str,
-    keywords_classes: List[str] = None,
-    keywords_classes_all: List[str] = list(SUBSTRATE_KEYWORDS),
-    keywords_filter: List[str] = None,
+    keywords_classes: set = None,
+    keywords_classes_all: set = SUBSTRATE_KEYWORDS,
+    keywords_filter: set = None,
     multi_substrate: str = "keep",
-    outliers: List[str] = None,
+    outliers: set = None,
     verbose: bool = False,
-    tax_ids_filter: List[int] = None,
+    tax_ids_filter: set = None,
     sequence_clustering: int = None,
     invalid_amino_acids: str = "remove_protein",
     evidence_code: int = 2,
@@ -284,7 +292,7 @@ def create_dataset(
 ) -> pd.DataFrame:
     """Creates machine learning dataset from Uniprot data
 
-    Args:
+    ## Args:
         input_file (str): Uniprot custom download, see Makefile
         keywords_classes (List[str]): The class labels to use for the classification task.
             For list of substrates, look at dataset.SUBSTRATE_KEYWORDS
@@ -325,22 +333,85 @@ def create_dataset(
         force_update (bool, optional):
             Read raw data and write pickle, even if pickle already exists. Defaults to False.
 
-    Returns:
+    ## Returns:
         pd.DataFrame: The finished dataset.
+
+    ## Examples:
+
+    ### Download raw data::
+
+        from subprocess import run
+        url = __create_uniprot_url()
+        filename = "uniprot_data_2022_04.tab.gz"
+        run(f'curl "{url}" > "{filename}"', shell=True)
+
+    ### Create transporter dataset::
+    
+        from subpred.dataset import create_dataset
+        create_dataset(
+            input_file="uniprot_data_2022_04.tab.gz",
+            keywords_classes={
+                "Amino-acid transport",
+                "Sugar transport",
+                "Ion transport",
+                "Potassium transport",
+            },
+            keywords_filter={"Transmembrane", "Transport"},
+            multi_substrate="integrate",
+            verbose=True,
+            tax_ids_filter={3702, 9606, 83333, 559292},
+            outliers={
+                "Q9HBR0",
+                "Q07837",
+                "P76773",
+                "Q47706",
+                "P02943",
+                "P75733",
+                "P69856",
+                "P64550",
+                "O81775",
+                "Q9SW07",
+                "Q9FHH5",
+                "Q8S8A0",
+                "Q3E965",
+                "Q3EAV6",
+                "Q3E8L0",
+            },
+            sequence_clustering=70,
+            evidence_code=2,
+            invalid_amino_acids="remove_protein",
+            force_update=False,
+        )
+
+    ### Add keyword column to dataset::
+
+        from subpred import dataset
+        col_name = "new_col"
+        keyword_set = {"Transmembrane", "Cell membrane"}
+        dataset.KEYWORD_SETS.update({col_name: keyword_set})
+
+
+
     """
 
     df = __read_raw(input_file=input_file, force_update=force_update)
 
     df = __parse_columns(df)
 
+    df = df[~df.keywords.isnull()]
+    # Mostly peptides, apparently. Like Pollen
+    df = df[~df.gene_names.isnull()]
+
     df = __parse_sequences(df, invalid_amino_acids=invalid_amino_acids)
 
-    df = __parse_rows(
-        df,
-        evidence_code=evidence_code,
-        tax_ids_filter=tax_ids_filter,
-        outliers=outliers,
-    )
+    df = __filter_protein_evidence(df, evidence_code=evidence_code)
+
+    if tax_ids_filter:
+        df = df[~df.organism_id.isnull()]
+        df = df[df.organism_id.isin(tax_ids_filter)]
+
+    if outliers:
+        df = df[~df.index.isin(outliers)]
 
     # df_go = get_go_df(df)
 
@@ -348,14 +419,15 @@ def create_dataset(
         df = __filter_by_keywords(df, keywords_filter=keywords_filter)
 
     if keywords_classes:
-        df = ____annotate_keywords(
+        df = __add_class_labels(
             df=df,
             keywords_classes=keywords_classes,
             keywords_classes_all=keywords_classes_all,
             multi_substrate=multi_substrate,
         )
 
-    df = annotate_keywords(df)
+    for keyword_name, keyword_set in KEYWORD_SETS.items():
+        df = __add_keyword_column(df, keyword_set=keyword_set, colname=keyword_name)
 
     if sequence_clustering:
         cluster_repr = cd_hit(
@@ -370,27 +442,38 @@ if __name__ == "__main__":
     # print entire df (for debugging)
     pd.set_option("expand_frame_repr", False)
     # test input
-    outliers = (
-        ["Q9HBR0", "Q07837"]
-        + ["P76773", "Q47706", "P02943", "P75733", "P69856", "P64550"]
-        + ["O81775", "Q9SW07", "Q9FHH5", "Q8S8A0", "Q3E965", "Q3EAV6", "Q3E8L0"]
-    )
     from time import time
 
     t = time()
     df = create_dataset(
-        keywords_classes=[
+        keywords_classes={
             "Amino-acid transport",
             "Sugar transport",
             "Ion transport",
             "Potassium transport",
-        ],
-        keywords_filter=["Transmembrane", "Transport"],
+        },
+        keywords_filter={"Transmembrane", "Transport"},
         input_file="data/raw/swissprot/uniprot_data_2022_04.tab.gz",
         multi_substrate="integrate",
         verbose=True,
-        tax_ids_filter=[3702, 9606, 83333, 559292],
-        outliers=outliers,
+        tax_ids_filter={3702, 9606, 83333, 559292},
+        outliers={
+            "Q9HBR0",
+            "Q07837",
+            "P76773",
+            "Q47706",
+            "P02943",
+            "P75733",
+            "P69856",
+            "P64550",
+            "O81775",
+            "Q9SW07",
+            "Q9FHH5",
+            "Q8S8A0",
+            "Q3E965",
+            "Q3EAV6",
+            "Q3E8L0",
+        },
         sequence_clustering=70,
         evidence_code=2,
         invalid_amino_acids="remove_protein",
