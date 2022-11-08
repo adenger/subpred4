@@ -103,7 +103,7 @@ def __create_uniprot_url(
     format="tsv",
     query="* AND (reviewed:true)",
 ):
-
+    """Create URL for use with curl"""
     params = {
         "compressed": compressed,
         "fields": ",".join(fields),
@@ -112,6 +112,7 @@ def __create_uniprot_url(
     }
 
     return f"{base_url}?{urlencode(params, quote_via=quote)}"
+
 
 def __read_raw(input_file: str, force_update: bool = False):
     # does not work if file paths contain "~"
@@ -132,6 +133,7 @@ def __read_raw(input_file: str, force_update: bool = False):
 
 
 def __parse_columns(df: pd.DataFrame):
+    """Basic cleanup of raw data"""
     df = df.rename(
         columns={
             # Columns in old version of REST API
@@ -147,8 +149,6 @@ def __parse_columns(df: pd.DataFrame):
         },
     )
     df.columns = df.columns.map(lambda c: c.lower().replace(" ", "_"))
-    # for compatibility with older scripts
-    # df["tax_id"] = df["organism_id"]
     if "entry_name" in df.columns:
         # In new version of Uniprot API, there is an additional column
         df = df.drop("entry_name", axis=1)
@@ -166,8 +166,10 @@ def __parse_columns(df: pd.DataFrame):
     return df
 
 
-def __parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
-    # "BJOUXZ"
+def __parse_sequences(
+    df: pd.DataFrame, invalid_amino_acids: str, remove_sequence_fragments: bool
+):
+    """Handle non-standard amino acids, and sequence fragments"""
     match (invalid_amino_acids):
         case "remove_protein":
             df = df[df.sequence.str.match(re.compile("[ACDEFGHIKLMNPQRSTVWY]+"))]
@@ -181,8 +183,10 @@ def __parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
             raise ValueError(
                 "Invalid value of invalid_amino_acids:", invalid_amino_acids
             )
-    df = df[df.fragment.isnull()]
-    df = df.drop(["fragment"], axis=1)
+
+    if remove_sequence_fragments:
+        df = df[df.fragment.isnull()]
+        df = df.drop(["fragment"], axis=1)
 
     return df
 
@@ -288,6 +292,8 @@ def create_dataset(
     sequence_clustering: int = None,
     invalid_amino_acids: str = "remove_protein",
     evidence_code: int = 2,
+    gene_names: bool = True,
+    remove_sequence_fragments: bool = True,
     force_update: bool = False,
 ) -> pd.DataFrame:
     """Creates machine learning dataset from Uniprot data
@@ -330,6 +336,13 @@ def create_dataset(
             4: Above + existence predicted
             5: Above + uncertain
             Defaults to 2.
+        gene_names (bool, optional):
+            If True, remove all proteins with no associated gene name.
+            Useful when using gene annotation data.
+            Defaults to True
+        remove_sequence_fragments (bool, optional):
+            Remove fragmented sequences from dataset.
+            Defaults to True
         force_update (bool, optional):
             Read raw data and write pickle, even if pickle already exists. Defaults to False.
 
@@ -346,7 +359,7 @@ def create_dataset(
         run(f'curl "{url}" > "{filename}"', shell=True)
 
     ### Create transporter dataset::
-    
+
         from subpred.dataset import create_dataset
         create_dataset(
             input_file="uniprot_data_2022_04.tab.gz",
@@ -390,24 +403,25 @@ def create_dataset(
         keyword_set = {"Transmembrane", "Cell membrane"}
         dataset.KEYWORD_SETS.update({col_name: keyword_set})
 
-
-
     """
 
     df = __read_raw(input_file=input_file, force_update=force_update)
 
     df = __parse_columns(df)
 
-    df = df[~df.keywords.isnull()]
-    # Mostly peptides, apparently. Like Pollen
-    df = df[~df.gene_names.isnull()]
+    if gene_names:
+        # Mostly peptides, apparently. Like Pollen
+        df = df[~df.gene_names.isnull()]
 
-    df = __parse_sequences(df, invalid_amino_acids=invalid_amino_acids)
+    df = __parse_sequences(
+        df,
+        invalid_amino_acids=invalid_amino_acids,
+        remove_sequence_fragments=remove_sequence_fragments,
+    )
 
     df = __filter_protein_evidence(df, evidence_code=evidence_code)
 
     if tax_ids_filter:
-        df = df[~df.organism_id.isnull()]
         df = df[df.organism_id.isin(tax_ids_filter)]
 
     if outliers:
