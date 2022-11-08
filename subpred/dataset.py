@@ -76,41 +76,10 @@ KEYWORDS_LOCATION = {
 }
 
 
-def get_clustering_stats(
-    df_dataset: pd.DataFrame,
-    keyword_types: list = [
-        "keywords_transport",
-        "keywords_location",
-        "keywords_transport_related",
-        "tcdb_class",
-    ],
-    identity_thresholds: list = [40, 50, 60, 70, 80, 90, 100],
-    explode: bool = True,
-):
-    columns = ["identity_threshold", "kw_type", "keyword", "count"]
-    records = []
-    for identity_threshold in identity_thresholds:
-        cluster_representatives = cd_hit(
-            df_dataset.sequence, identity_threshold=identity_threshold, verbose=False
-        )
-        df_clustered = df_dataset.loc[cluster_representatives]
-        for keyword_type in keyword_types:
-            for kw, count in df_clustered[keyword_type].value_counts().iteritems():
-                records.append([identity_threshold, keyword_type, kw, count])
-    df_stats_long = pd.DataFrame.from_records(records, columns=columns)
-    if explode:
-        df_stats_long.keyword = df_stats_long.keyword.str.split(";")
-        df_stats_long = df_stats_long.explode("keyword", ignore_index=True)
-        df_stats_long = df_stats_long.groupby(
-            ["identity_threshold", "kw_type", "keyword"], as_index=False
-        ).sum()
-    return df_stats_long
-
-
-def read_raw(input_file: str, force_update: bool = False):
+def __read_raw(input_file: str, force_update: bool = False):
+    # does not work if file paths contain "~"
     input_path = Path(input_file)
     pickle_path = Path(input_path.parent, input_path.name + ".pkl")
-    print(pickle_path)
     if pickle_path.exists() and not force_update:
         print("Found pickle, reading...")
         df = pd.read_pickle(pickle_path)
@@ -125,7 +94,7 @@ def read_raw(input_file: str, force_update: bool = False):
     return df
 
 
-def parse_columns(df: pd.DataFrame):
+def __parse_columns(df: pd.DataFrame):
     df = df.rename(
         columns={
             # Columns in old version of REST API
@@ -160,7 +129,7 @@ def parse_columns(df: pd.DataFrame):
     return df
 
 
-def parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
+def __parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
     # "BJOUXZ"
     match (invalid_amino_acids):
         case "remove_protein":
@@ -181,18 +150,13 @@ def parse_sequences(df: pd.DataFrame, invalid_amino_acids: str):
     return df
 
 
-def parse_rows(
+def __parse_rows(
     df: pd.DataFrame, evidence_code: int, tax_ids_filter: List[int], outliers: List[str]
 ):
     df = df[~df.keywords.isnull()]
     # Mostly peptides, apparently. Like Pollen
     df = df[~df.gene_names.isnull()]
 
-    # df = df[
-    #     df.protein_existence.isin(
-    #         {"Evidence at protein level", "Evidence at transcript level"}
-    #     )
-    # ]
     assert evidence_code > 0 and evidence_code <= 5
     evidence_levels_filter = [
         "Evidence at protein level",
@@ -238,54 +202,6 @@ def annotate_keywords(df: pd.DataFrame):
     return df
 
 
-def filter_by_keywords(
-    df: pd.DataFrame,
-    keywords_transport_filter,
-    keywords_component_filter,
-    keywords_substrate_filter,
-    multi_substrate,
-):
-
-    # Transport keyword filtering
-    substrate_keywords = {kw.strip() for kw in keywords_transport_filter}
-    df = df[
-        df.keywords_transport_related.str.split(";").apply(
-            lambda l: len(set(l) & substrate_keywords) > 0
-        )
-    ]
-
-    # Compartment keyword filtering
-    df = df[
-        df.keywords_location.str.split(";").apply(
-            lambda l: len(set(l) & {kw.strip() for kw in keywords_component_filter}) > 0
-        )
-    ]
-
-    # Substrate keyword filtering
-    keywords_filter_set = {kw.strip() for kw in keywords_substrate_filter}
-    if multi_substrate == "keep":
-        # Keep protein if at least one of the substrates is in parameter
-        df = df[
-            df.keywords_transport.str.split(";").apply(
-                lambda l: len(set(l) & keywords_filter_set) > 0
-            )
-        ]
-    elif multi_substrate in {"remove", "integrate"}:
-        if multi_substrate == "integrate":
-            # Remove all other keywords. Only those proteins where exactly one desired keywords is left are kept
-            df.keywords_transport = df.keywords_transport.str.split(";").apply(
-                lambda kw_list: ";".join(
-                    [kw for kw in kw_list if kw in keywords_filter_set]
-                )
-            )
-        # Only keep protein if it is annotated with one substrate, and that substrate is in parameter
-        df = df[df.keywords_transport.apply(lambda s: s.strip() in keywords_filter_set)]
-    else:
-        raise ValueError("Invalid parameter for multi_substrate")
-
-    return df
-
-
 def get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
     srs_keywords = (
         df.keywords.str.split(";").explode().str.strip()
@@ -308,21 +224,48 @@ def get_go_df(df: pd.DataFrame):
     return df_go
 
 
-# TODO remove test
-# TODO prints
-# TODO more generalized version of annoatation/filtering?
+def __filter_by_keywords(df: pd.DataFrame, keywords_filter: list):
+    df_keywords = get_keywords_df(df)
+    keyword_matches = (
+        df_keywords[df_keywords.keyword.isin(keywords_filter)]
+        .groupby("Uniprot")
+        .apply(len)
+    )
+    proteins_all_keywords = (
+        keyword_matches[keyword_matches == len(keywords_filter)].index.unique().values
+    )
 
-# TODO idea: make interesting keyword cols independent of filtering
-#
-#
-# accessions_or = df_keywords[df_keywords.keyword.isin(set(keywords_substrate_filter))].Entry.tolist()
-# df_new.loc[accessions_or]
+    df = df[df.index.isin(proteins_all_keywords)]
+    return df
 
-# filter for keywords, then check how many matches exist for each protein
-# keyword_matches = df_keywords[df_keywords.keyword.isin(set(keywords_keep))].groupby("Entry").apply(len)
-# accessions_and = keyword_matches[keyword_matches == len(keywords_keep)].index
 
-# df_new.loc[accessions_and]
+def ____annotate_keywords(
+    df: pd.DataFrame,
+    keywords_classes: list,
+    keywords_classes_all: list,
+    multi_substrate: str,
+):
+    df_classes = get_keywords_df(df)
+
+    if multi_substrate == "keep":
+        df_classes = df_classes[df_classes.keyword.isin(keywords_classes_all)]
+        df_classes = (
+            df_classes.groupby("Uniprot").keyword.apply(list).str.join(";").to_frame()
+        )
+    elif multi_substrate == "integrate":
+        df_classes = df_classes[df_classes.keyword.isin(keywords_classes)]
+        df_classes = df_classes[~df_classes.Uniprot.duplicated(keep=False)]
+        df_classes = df_classes.set_index("Uniprot")
+    elif multi_substrate == "remove":
+        df_classes = df_classes[df_classes.keyword.isin(keywords_classes_all)]
+        df_classes = df_classes[~df_classes.Uniprot.duplicated(keep=False)]
+        df_classes = df_classes[df_classes.keyword.isin(keywords_classes)]
+        df_classes = df_classes.set_index("Uniprot")
+
+    df_classes.rename(columns={"keyword": "label"}, inplace=True)
+
+    df = df.join(df_classes, how="inner")
+    return df
 
 
 def create_dataset(
@@ -343,13 +286,15 @@ def create_dataset(
 
     Args:
         input_file (str): Uniprot custom download, see Makefile
-        keywords_filter (List[str]):
-            Uniprot keywords to filter for. Only proteins annotated with all keywords are kept
         keywords_classes (List[str]): The class labels to use for the classification task.
             For list of substrates, look at dataset.SUBSTRATE_KEYWORDS
+            Defaults to None
         keywords_classes_all (List[str]): All possible class labels.
             Only used when for the multi_substrate="remove" or multi_substrate="keep".
             Defaults to dataset.SUBSTRATE_KEYWORDS
+        keywords_filter (List[str]):
+            Uniprot keywords to filter for. Only proteins annotated with all keywords are kept
+            Defaults to None
         multi_substrate (str, optional):
             How to deal with proteins that are annotated with multiple substrates.
             "keep": return all class labels in keywords_classes_all, separated by ";"
@@ -384,13 +329,13 @@ def create_dataset(
         pd.DataFrame: The finished dataset.
     """
 
-    df = read_raw(input_file=input_file, force_update=force_update)
+    df = __read_raw(input_file=input_file, force_update=force_update)
 
-    df = parse_columns(df)
+    df = __parse_columns(df)
 
-    df = parse_sequences(df, invalid_amino_acids=invalid_amino_acids)
+    df = __parse_sequences(df, invalid_amino_acids=invalid_amino_acids)
 
-    df = parse_rows(
+    df = __parse_rows(
         df,
         evidence_code=evidence_code,
         tax_ids_filter=tax_ids_filter,
@@ -399,62 +344,18 @@ def create_dataset(
 
     # df_go = get_go_df(df)
 
-    df = annotate_keywords(df)
-
-    # ----------------------------------------
-    ## Old version:
-    # df = df[df.keywords_transport != ""]
-
-    # df = filter_by_keywords(
-    #     df,
-    #     keywords_transport_filter=keywords_transport_filter,
-    #     keywords_component_filter=keywords_component_filter,
-    #     keywords_substrate_filter=keywords_substrate_filter,
-    #     multi_substrate=multi_substrate,
-    # )
-    # ---------------------------------------
-
-    df_keywords = get_keywords_df(df)
-
     if keywords_filter:
-        # get set of proteins that are annotated with keywords_filter
-        keyword_matches = (
-            df_keywords[df_keywords.keyword.isin(keywords_filter)]
-            .groupby("Uniprot")
-            .apply(len)
+        df = __filter_by_keywords(df, keywords_filter=keywords_filter)
+
+    if keywords_classes:
+        df = ____annotate_keywords(
+            df=df,
+            keywords_classes=keywords_classes,
+            keywords_classes_all=keywords_classes_all,
+            multi_substrate=multi_substrate,
         )
-        proteins_all_keywords = (
-            keyword_matches[keyword_matches == len(keywords_filter)].index.unique().values
-        )
 
-        # only keep those proteins
-        df_keywords = df_keywords[
-            df_keywords.Uniprot.isin(proteins_all_keywords)
-        ].reset_index(drop=True)
-
-    # if keywords_classes:
-        # get proteins where at least one substrate is in keywords classes
-    if multi_substrate != "integrate":
-        df_classes = df_keywords[df_keywords.keyword.isin(keywords_classes_all)]
-    else:
-        df_classes = df_keywords
-
-    if multi_substrate == "keep":
-        df_classes = (
-            df_classes.groupby("Uniprot").keyword.apply(list).str.join(";").to_frame()
-        )
-    elif multi_substrate == "integrate":
-        df_classes = df_classes[df_classes.keyword.isin(keywords_classes)]
-        df_classes = df_classes[~df_classes.Uniprot.duplicated(keep=False)]
-        df_classes = df_classes.set_index("Uniprot")
-    elif multi_substrate == "remove":
-        df_classes = df_classes[~df_classes.Uniprot.duplicated(keep=False)]
-        df_classes = df_classes[df_classes.keyword.isin(keywords_classes)]
-        df_classes = df_classes.set_index("Uniprot")
-
-    df_classes.rename(columns={"keyword": "label"}, inplace=True)
-
-    df = df.join(df_classes, how="inner")
+    df = annotate_keywords(df)
 
     if sequence_clustering:
         cluster_repr = cd_hit(
@@ -468,7 +369,7 @@ def create_dataset(
 if __name__ == "__main__":
     # print entire df (for debugging)
     pd.set_option("expand_frame_repr", False)
-    # test
+    # test input
     outliers = (
         ["Q9HBR0", "Q07837"]
         + ["P76773", "Q47706", "P02943", "P75733", "P69856", "P64550"]
@@ -493,7 +394,7 @@ if __name__ == "__main__":
         sequence_clustering=70,
         evidence_code=2,
         invalid_amino_acids="remove_protein",
-        force_update=False
+        force_update=False,
     )
     print(df.shape)
     print(time() - t)
