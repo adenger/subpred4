@@ -22,10 +22,10 @@ setup_ubuntu:
 	rm ~/miniconda.sh
 	@echo Reload shell to put conda in path: source ~/.bashrc
 
-## Install packages.
+## Install packages with mambaforge (conda takes hours, mamba <1 min)
 requirements:
-	conda update -n base -c defaults conda
-	conda env create --file environment.yml
+	# conda update -n base -c defaults conda
+	mamba env create --file environment.yml
 
 ## Install code as python package to use it in notebooks
 package:

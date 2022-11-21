@@ -1,23 +1,26 @@
 The Makefiles included here download the most recent versions of the raw datasets.
-For the analyses in the manuscript and in the notebooks, we used a dataset that was downloaded on November 15, 2021. More recent datasets can contain a slightly different set of proteins and annotations, which can influence the evaluation results and the dataset analysis.
-If you want to reproduce or validate the results from the manuscript, follow the section *Reproduce results from manuscript* below.
+
+TODO readme text for manuscript 2
 
 ## Setup:
 
-1. Install miniconda
+1. Install Mambaforge
+```
+https://github.com/conda-forge/miniforge#mambaforge
+```
 2. Recreate conda environment:
 ```
-conda env create --file environment.yml
+mamba env create --file environment.yml
 ```
 3. Activate conda environment: 
 ```
-conda activate subpred
+conda activate subpred4
 ```
 4. Install code as python package into environment: 
 ```
 pip install -e .
 ```
-5. Download raw transporter data: 
+5. Download raw data: 
 ```
 make raw_data
 ```
@@ -26,9 +29,9 @@ make raw_data
 make blast_databases
 ```
 
-## Reproduce results from manuscript:
+<!-- ## Reproduce results from manuscript:
 
-1. Install miniconda
+ 1. Install miniconda
 2. Recreate conda environment:
 ```
 conda env create --file environment.yml
@@ -55,4 +58,4 @@ make raw_data_manuscript
   
 ```
 make blast_databases
-```
+``` -->
