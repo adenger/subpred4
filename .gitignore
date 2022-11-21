@@ -152,3 +152,10 @@ cython_debug/
 data/raw/swissprot/uniprot_data_2022_04.tab.gz
 data/raw/swissprot/uniprot_data_2022_04.tab.gz.pkl
 data/raw/swissprot/uniprot-reviewed_yes.tab.gz.pkl
+data/raw/ontologies/go.owl
+data/raw/ontologies/go.obo
+data/raw/ontologies/chebi_core.owl
+data/raw/ontologies/chebi_lite.owl
+data/raw/ontologies/chebi.owl
+data/raw/ontologies/go-plus.owl
+data/raw/tcdb/tcdb_substrates.tsv

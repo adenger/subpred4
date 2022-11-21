@@ -41,6 +41,13 @@ env_export:
 
 ## Download raw data
 raw_data:
+	# curl "http://current.geneontology.org/ontology/go.owl" > "data/raw/ontologies/go.owl"
+	curl "http://current.geneontology.org/ontology/extensions/go-plus.owl" > "data/raw/ontologies/go-plus.owl"
+	# ChEBI files: Lite (Id, name, definition, and relationships), Core (Lite plus Synonyms) and Full (Core plus database accessions)
+	curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.owl.gz" | gunzip > data/raw/ontologies/chebi.owl
+	# curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_core.owl.gz" | gunzip > data/raw/ontologies/chebi_core.owl
+	# curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.owl.gz" | gunzip > data/raw/ontologies/chebi_lite.owl
+	curl "https://tcdb.org/cgi-bin/substrates/getSubstrates.py" > data/raw/tcdb/tcdb_substrates.tsv
 	curl "https://rest.uniprot.org/uniprotkb/stream?compressed=true&fields=accession%2Cid%2Cgene_names%2Cprotein_name%2Corganism_name%2Corganism_id%2Ckeywordid%2Ckeyword%2Cgo_id%2Cgo%2Cxref_tcdb%2Cprotein_existence%2Csequence%2Cfragment&format=tsv&query=%2A%20AND%20%28reviewed%3Atrue%29" > "../data/raw/swissprot/uniprot_data_2022_04.tab.gz"
 
 # Link for old API
