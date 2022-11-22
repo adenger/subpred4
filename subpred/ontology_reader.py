@@ -1,4 +1,4 @@
-from owlready2 import get_ontology, Restriction
+from owlready2 import get_namespace, get_ontology, Restriction
 
 # from collections import frozenset
 # TODO convert : to _?
@@ -15,8 +15,12 @@ class Ontology:
         self.ontology = get_ontology(owl_file_path).load()
         self.namespace = self.ontology.get_namespace(namespace_url)
 
-    def get_identifier(self, label: str) -> str:
-        return self.ontology.search_one(label=label).name
+    def get_identifier(self, label: str, return_first=True) -> str | list:
+        return (
+            self.ontology.search_one(label=label).name
+            if return_first
+            else [identifier.name for identifier in self.ontology.search(label=label)]
+        )
 
     def get_label(self, identifier: str) -> str:
         labels = self.namespace[identifier].label
