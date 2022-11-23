@@ -159,3 +159,5 @@ data/raw/ontologies/chebi_lite.owl
 data/raw/ontologies/chebi.owl
 data/raw/ontologies/go-plus.owl
 data/raw/tcdb/tcdb_substrates.tsv
+data/raw/swissprot/uniprot_data_all_evidence1_2022_04.tsv
+data/raw/swissprot/uniprot_data_all_evidence1_2022_04.tsv.pkl
