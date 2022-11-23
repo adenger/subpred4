@@ -12,6 +12,42 @@ session = requests.Session()
 session.mount("https://", HTTPAdapter(max_retries=retries))
 
 
+# TODO create urls dynamically
+# TODO support for stream download
+# TODO support for gzipped download
+
+# def __create_uniprot_url(
+#     base_url="https://rest.uniprot.org/uniprotkb/stream",
+#     compressed="true",
+#     fields=[
+#         "accession",
+#         "id",
+#         "gene_names",
+#         "protein_name",
+#         "organism_name",
+#         "organism_id",
+#         "keywordid",
+#         "keyword",
+#         "go_id",
+#         "go",
+#         "xref_tcdb",
+#         "protein_existence",
+#         "sequence",
+#         "fragment",
+#     ],
+#     format="tsv",
+#     query="* AND (reviewed:true)",
+# ):
+#     """Create URL for use with curl"""
+#     params = {
+#         "compressed": compressed,
+#         "fields": ",".join(fields),
+#         "format": format,
+#         "query": query,
+#     }
+
+#     return f"{base_url}?{urlencode(params, quote_via=quote)}"
+
 def get_next_link(headers):
     if "Link" in headers:
         match = re_next_link.match(headers["Link"])

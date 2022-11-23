@@ -80,40 +80,6 @@ KEYWORD_SETS = {
     "keywords_location": KEYWORDS_TRANSPORT_RELATED,
 }
 
-
-def __create_uniprot_url(
-    base_url="https://rest.uniprot.org/uniprotkb/stream",
-    compressed="true",
-    fields=[
-        "accession",
-        "id",
-        "gene_names",
-        "protein_name",
-        "organism_name",
-        "organism_id",
-        "keywordid",
-        "keyword",
-        "go_id",
-        "go",
-        "xref_tcdb",
-        "protein_existence",
-        "sequence",
-        "fragment",
-    ],
-    format="tsv",
-    query="* AND (reviewed:true)",
-):
-    """Create URL for use with curl"""
-    params = {
-        "compressed": compressed,
-        "fields": ",".join(fields),
-        "format": format,
-        "query": query,
-    }
-
-    return f"{base_url}?{urlencode(params, quote_via=quote)}"
-
-
 def __read_raw(input_file: str, force_update: bool = False):
     # does not work if file paths contain "~"
     input_path = Path(input_file)
