@@ -214,7 +214,7 @@ def __filter_protein_evidence(df: pd.DataFrame, evidence_code: int):
     return df
 
 
-def __get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
+def get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
     srs_keywords = (
         df.keywords.str.split(";").explode().str.strip()
         if use_keyword_names
@@ -227,7 +227,25 @@ def __get_keywords_df(df: pd.DataFrame, use_keyword_names: bool = True):
     return df_keywords
 
 
-def __get_go_df(df: pd.DataFrame):
+def get_tcdb_substrates(df: pd.DataFrame):
+    df_tcdb = df.reset_index(drop=False)[["Uniprot", "tcdb_id", "tcdb_substrates"]]
+    df_tcdb = df_tcdb[(~df_tcdb.tcdb_id.isnull()) & (~df_tcdb.tcdb_substrates.isnull())]
+    df_substrates = (
+        df_tcdb.tcdb_substrates.str.split("|")
+        .explode()
+        .str.split(";", expand=True)
+        .rename(columns={0: "chebi_id", 1: "chebi_term"})
+    )
+    df_substrates = (
+        df_tcdb.drop("tcdb_substrates", axis=1)
+        .join(df_substrates)
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+    return df_substrates
+
+
+def get_go_df(df: pd.DataFrame):
     df_go = df.go_terms.str.split(";").explode().str.strip().reset_index(drop=False)
     go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
     df_go["go_id"] = df_go.go_terms.str.extract(go_id_pattern)
@@ -237,7 +255,7 @@ def __get_go_df(df: pd.DataFrame):
 
 
 def __filter_by_keywords(df: pd.DataFrame, keywords_filter: set):
-    df_keywords = __get_keywords_df(df)
+    df_keywords = get_keywords_df(df)
     keyword_matches = (
         df_keywords[df_keywords.keyword.isin(keywords_filter)]
         .groupby("Uniprot")
@@ -257,7 +275,7 @@ def __add_class_labels(
     keywords_classes_all: set,
     multi_substrate: str,
 ):
-    df_classes = __get_keywords_df(df)
+    df_classes = get_keywords_df(df)
 
     if multi_substrate == "keep":
         df_classes = df_classes[df_classes.keyword.isin(keywords_classes_all)]
@@ -295,6 +313,7 @@ def create_dataset(
     gene_names: bool = True,
     remove_sequence_fragments: bool = True,
     force_update: bool = False,
+    tcdb_substrates_file: str = None,
 ) -> pd.DataFrame:
     """Creates machine learning dataset from Uniprot data
 
@@ -439,6 +458,18 @@ def create_dataset(
             keywords_classes_all=keywords_classes_all,
             multi_substrate=multi_substrate,
         )
+
+    if tcdb_substrates_file:
+        df_substrates = pd.read_table(tcdb_substrates_file, header=None)
+        df_substrates.columns = ["tcdb_id", "tcdb_substrates"]
+        # add uniprot accessions
+        df_substrates = df_substrates.merge(
+            df.tcdb_id.to_frame().reset_index(drop=False), how="left", on="tcdb_id"
+        )
+        df_substrates = df_substrates.drop("tcdb_id", axis=1)
+        df_substrates = df_substrates[~df_substrates.Uniprot.isnull()]
+        df_substrates = df_substrates.set_index("Uniprot", drop=True)
+        df = df.join(df_substrates, how="left")
 
     for keyword_name, keyword_set in KEYWORD_SETS.items():
         df = __add_keyword_column(df, keyword_set=keyword_set, colname=keyword_name)
