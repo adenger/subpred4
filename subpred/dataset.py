@@ -364,6 +364,8 @@ def create_dataset(
             Defaults to True
         force_update (bool, optional):
             Read raw data and write pickle, even if pickle already exists. Defaults to False.
+        tcdb_substrates_file (str, optional):
+            Tab-seperated file with TCDB IDs and substrates, from TCDB website. See makefile for download link.
 
     ## Returns:
         pd.DataFrame: The finished dataset.
