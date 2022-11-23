@@ -1,6 +1,6 @@
 data/intermediate/blast.tar.xz
 data/intermediate/blast/
-data/raw/swissprot/uniprot-reviewed_yes.tab.gz
+data/raw/uniprot/uniprot-reviewed_yes.tab.gz
 data/raw/uniref/uniref50/uniref50*
 data/raw/uniref/uniref90/uniref90*
 data_full.tar
@@ -149,9 +149,9 @@ cython_debug/
 .vscode/settings.json
 
 
-data/raw/swissprot/uniprot_data_2022_04.tab.gz
-data/raw/swissprot/uniprot_data_2022_04.tab.gz.pkl
-data/raw/swissprot/uniprot-reviewed_yes.tab.gz.pkl
+data/raw/uniprot/uniprot_data_2022_04.tab.gz
+data/raw/uniprot/uniprot_data_2022_04.tab.gz.pkl
+data/raw/uniprot/uniprot-reviewed_yes.tab.gz.pkl
 data/raw/ontologies/go.owl
 data/raw/ontologies/go.obo
 data/raw/ontologies/chebi_core.owl
@@ -159,7 +159,11 @@ data/raw/ontologies/chebi_lite.owl
 data/raw/ontologies/chebi.owl
 data/raw/ontologies/go-plus.owl
 data/raw/tcdb/tcdb_substrates.tsv
-data/raw/swissprot/uniprot_data_all_evidence1_2022_04.tsv
-data/raw/swissprot/uniprot_data_all_evidence1_2022_04.tsv.pkl
-data/raw/swissprot/uniprot_data_all_evidence1-2_2022_04.tsv
-data/raw/swissprot/uniprot_data_all_evidence1-2_2022_04.tsv.pkl
+data/raw/uniprot/uniprot_data_all_evidence1_2022_04.tsv
+data/raw/uniprot/uniprot_data_all_evidence1_2022_04.tsv.pkl
+data/raw/uniprot/uniprot_data_all_evidence1-2_2022_04.tsv
+data/raw/uniprot/uniprot_data_all_evidence1-2_2022_04.tsv.pkl
+data/raw/uniprot/swissprot_data_2022_04.tsv.gz
+data/raw/uniprot/swissprot_data_2021_04_manuscript1.tsv.gz
+data/raw/uniprot/uniprot_data_2022_04_evidence1_nofragments.tsv
+data/raw/uniprot/uniprot_data_2022_04_evidence1-2_nofragments.tsv
