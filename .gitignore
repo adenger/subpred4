@@ -167,3 +167,6 @@ data/raw/uniprot/swissprot_data_2022_04.tsv.gz
 data/raw/uniprot/swissprot_data_2021_04_manuscript1.tsv.gz
 data/raw/uniprot/uniprot_data_2022_04_evidence1_nofragments.tsv
 data/raw/uniprot/uniprot_data_2022_04_evidence1-2_nofragments.tsv
+data/raw/uniprot/swissprot_data_2021_04_manuscript1.tsv.gz.pkl
+data/raw/uniprot/swissprot_data_2022_04_protein_families.tsv.gz
+data/raw/uniprot/swissprot_data_2022_04.tsv.gz.pkl

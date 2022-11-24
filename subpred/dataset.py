@@ -220,7 +220,7 @@ def get_go_df(df: pd.DataFrame):
     return df_go
 
 
-def __filter_by_keywords(df: pd.DataFrame, keywords_filter: set):
+def filter_by_keywords(df: pd.DataFrame, keywords_filter: set):
     df_keywords = get_keywords_df(df)
     keyword_matches = (
         df_keywords[df_keywords.keyword.isin(keywords_filter)]
@@ -417,7 +417,7 @@ def create_dataset(
     # df_go = get_go_df(df)
 
     if keywords_filter:
-        df = __filter_by_keywords(df, keywords_filter=keywords_filter)
+        df = filter_by_keywords(df, keywords_filter=keywords_filter)
 
     if keywords_classes:
         df = __add_class_labels(
