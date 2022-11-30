@@ -32,10 +32,10 @@ class Ontology(ABC):
 
     def get_identifier(self, label: str, return_first=True) -> str | list:
         return (
-            self.rename_identifier(self.ontology.search_one(label=label).name)
+            self.decode_identifier(self.ontology.search_one(label=label).name)
             if return_first
             else [
-                self.rename_identifier(identifier.name)
+                self.decode_identifier(identifier.name)
                 for identifier in self.ontology.search(label=label)
             ]
         )
