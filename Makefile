@@ -41,8 +41,8 @@ env_export:
 
 ## Download raw data
 raw_data:
-	# curl "http://current.geneontology.org/ontology/go.owl" > "data/raw/ontologies/go.owl"
-	curl "http://current.geneontology.org/ontology/extensions/go-plus.owl" > "data/raw/ontologies/go-plus.owl"
+	curl "http://current.geneontology.org/ontology/go.owl" > "data/raw/ontologies/go.owl"
+	# curl "http://current.geneontology.org/ontology/extensions/go-plus.owl" > "data/raw/ontologies/go-plus.owl"
 	# ChEBI files: Lite (Id, name, definition, and relationships), Core (Lite plus Synonyms) and Full (Core plus database accessions)
 	curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.owl.gz" | gunzip > data/raw/ontologies/chebi.owl
 	# curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_core.owl.gz" | gunzip > data/raw/ontologies/chebi_core.owl
