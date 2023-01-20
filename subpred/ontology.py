@@ -3,8 +3,6 @@ from abc import ABC, abstractmethod
 
 # CHEBI_FILE = "../data/raw/ontologies/chebi.owl"
 
-
-
 class Ontology(ABC):
     def __init__(
         self, owl_file_path: str, namespace_url: str = "http://purl.obolibrary.org/obo/"
