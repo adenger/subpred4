@@ -171,3 +171,5 @@ data/raw/uniprot/swissprot_data_2021_04_manuscript1.tsv.gz.pkl
 data/raw/uniprot/swissprot_data_2022_04_protein_families.tsv.gz
 data/raw/uniprot/swissprot_data_2022_04.tsv.gz.pkl
 data/raw/uniprot/uniprot_2022_05_evidence1-2_nofragments.tsv
+data/raw/gene_ontology/goa_sp_iea_mf_enables.tsv.xz
+data/raw/gene_ontology/goa_uniprot_all_noiea.gaf.gz
