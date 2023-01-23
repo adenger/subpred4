@@ -98,7 +98,7 @@ def __read_raw(input_file: str, force_update: bool = False):
     return df
 
 
-def __parse_columns(df: pd.DataFrame):
+def parse_columns(df: pd.DataFrame):
     """Basic cleanup of raw data"""
     df = df.rename(
         columns={
@@ -394,7 +394,7 @@ def create_dataset(
 
     df = __read_raw(input_file=input_file, force_update=force_update)
 
-    df = __parse_columns(df)
+    df = parse_columns(df)
 
     if gene_names:
         # Mostly peptides, apparently. Like Pollen
