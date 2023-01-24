@@ -80,6 +80,7 @@ KEYWORD_SETS = {
     "keywords_location": KEYWORDS_TRANSPORT_RELATED,
 }
 
+
 def __read_raw(input_file: str, force_update: bool = False):
     # does not work if file paths contain "~"
     input_path = Path(input_file)
@@ -93,7 +94,7 @@ def __read_raw(input_file: str, force_update: bool = False):
             print("Did not find pickle, creating new version...")
         else:
             print("Overwriting existing pickle...")
-        df = pd.read_table(input_file, index_col=0, dtype=str)
+        df = pd.read_table(input_file, index_col=0, low_memory=False)
         df.to_pickle(pickle_path)
     return df
 
@@ -150,7 +151,7 @@ def __parse_sequences(
                 "Invalid value of invalid_amino_acids:", invalid_amino_acids
             )
 
-    if remove_sequence_fragments:
+    if remove_sequence_fragments and "fragment" in df.columns:
         df = df[df.fragment.isnull()]
         df = df.drop(["fragment"], axis=1)
 
@@ -211,6 +212,8 @@ def get_tcdb_substrates(df: pd.DataFrame):
     return df_substrates
 
 
+# Does no longer work for new dataset since it does not contain the column,
+# use the ontology class in go_utils instead!
 def get_go_df(df: pd.DataFrame):
     df_go = df.go_terms.str.split(";").explode().str.strip().reset_index(drop=False)
     go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
@@ -280,6 +283,7 @@ def create_dataset(
     remove_sequence_fragments: bool = True,
     force_update: bool = False,
     tcdb_substrates_file: str = None,
+    swissprot_only: str = True,
 ) -> pd.DataFrame:
     """Creates machine learning dataset from Uniprot data
 
@@ -332,6 +336,8 @@ def create_dataset(
             Read raw data and write pickle, even if pickle already exists. Defaults to False.
         tcdb_substrates_file (str, optional):
             Tab-seperated file with TCDB IDs and substrates, from TCDB website. See makefile for download link.
+        swissprot_only (bool, optional):
+            Removes proteins from the dataset that have not been manually reviewed
 
     ## Returns:
         pd.DataFrame: The finished dataset.
@@ -399,6 +405,9 @@ def create_dataset(
     if gene_names:
         # Mostly peptides, apparently. Like Pollen
         df = df[~df.gene_names.isnull()]
+
+    if swissprot_only and "reviewed" in df.columns:
+        df = df[df.reviewed == "reviewed"]
 
     df = __parse_sequences(
         df,
