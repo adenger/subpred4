@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 from subpred.cdhit import cd_hit
 from urllib.parse import urlencode, quote
+from subpred.go_utils import GeneOntology
 
 SUBSTRATE_KEYWORDS = {
     "Ion transport",
@@ -211,15 +212,19 @@ def get_tcdb_substrates(df: pd.DataFrame):
     )
     return df_substrates
 
-
+# TODO does not find all labels
 # Does no longer work for new dataset since it does not contain the column,
 # use the ontology class in go_utils instead!
-def get_go_df(df: pd.DataFrame):
-    df_go = df.go_terms.str.split(";").explode().str.strip().reset_index(drop=False)
-    go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
-    df_go["go_id"] = df_go.go_terms.str.extract(go_id_pattern)
-    df_go["go_term"] = df_go.go_terms.str.replace(go_id_pattern, "").str.strip()
-    df_go = df_go.drop("go_terms", axis=1)
+def get_go_df(df: pd.DataFrame, go: GeneOntology):
+    # df_go = df.go_terms.str.split(";").explode().str.strip().reset_index(drop=False)
+    # go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
+    # df_go["go_id"] = df_go.go_terms.str.extract(go_id_pattern)
+    # df_go["go_term"] = df_go.go_terms.str.replace(go_id_pattern, "").str.strip()
+    # df_go = df_go.drop("go_terms", axis=1)
+    df_go = df.go_ids.str.split(";").explode().str.strip().reset_index(drop=False)
+    df_go = df_go.rename(columns={"go_ids": "go_id"})
+    df_go = df_go.assign(go_term = df_go.go_id.apply(lambda x: go.get_label(x) if x==x else x))
+    df_go.head()
     return df_go
 
 
