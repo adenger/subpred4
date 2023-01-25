@@ -279,7 +279,7 @@ def create_dataset(
     sequence_clustering: int = None,
     invalid_amino_acids: str = "remove_protein",
     evidence_code: int = 2,
-    gene_names: bool = True,
+    gene_names_only: bool = True,
     remove_sequence_fragments: bool = True,
     force_update: bool = False,
     tcdb_substrates_file: str = None,
@@ -325,7 +325,7 @@ def create_dataset(
             4: Above + existence predicted
             5: Above + uncertain
             Defaults to 2.
-        gene_names (bool, optional):
+        gene_names_only (bool, optional):
             If True, remove all proteins with no associated gene name.
             Useful when using gene annotation data.
             Defaults to True
@@ -402,7 +402,7 @@ def create_dataset(
 
     df = parse_columns(df)
 
-    if gene_names:
+    if gene_names_only:
         # Mostly peptides, apparently. Like Pollen
         df = df[~df.gene_names.isnull()]
 
