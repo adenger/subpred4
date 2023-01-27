@@ -40,25 +40,8 @@ class GeneOntology(Ontology):
     def decode_identifier(self, identifier: str):
         return identifier.replace("_", ":", 1)
 
-    def update_identifer(self, identifier: str):
-        if self.get_label(identifier) != "":
-            return identifier
-        else:
-            properties_dict = self.get_properties(identifier)
-            new_identifier = properties_dict["term replaced by"].name
-            return self.decode_identifier(new_identifier)
+   
 
-    # def update_deprecated_identifiers(self, identifier: str):
-    #     identifier_properties_dict = self.get_properties(identifier)
-    #     # assert "deprecated" in identifier_properties_dict.keys() and identifier_properties_dict["deprecated"], "updated term was not deprecated"
-    #     if (
-    #         "deprecated" not in identifier_properties_dict.keys()
-    #         or "term replaced by" not in identifier_properties_dict.keys()
-    #         or not identifier_properties_dict["deprecated"]
-    #     ):
-    #         return identifier
-    #     new_identifier = identifier_properties_dict["term replaced by"].name
-    #     return self.decode_identifier(new_identifier)
 
 
 def read_go_uniprot(
