@@ -221,8 +221,22 @@ def get_go_df(df: pd.DataFrame, go: GeneOntology):
     # df_go["go_id"] = df_go.go_terms.str.extract(go_id_pattern)
     # df_go["go_term"] = df_go.go_terms.str.replace(go_id_pattern, "").str.strip()
     # df_go = df_go.drop("go_terms", axis=1)
+
+    # transform to long df of uniprot/go_id
     df_go = df.go_ids.str.split(";").explode().str.strip().reset_index(drop=False)
     df_go = df_go.rename(columns={"go_ids": "go_id"})
+    df_go = df_go[~df_go.go_id.isnull()]
+
+    # TODO fix this
+    # TODO why are there an values in the first place?
+    go_ids_unique = df_go.go_id.unique()
+    go_ids_update_dict = {go_id : go.update_identifer(go_id) for go_id in go_ids_unique}
+    # faster than replace, same result:
+
+    df_go = df_go.assign(go_id = df_go.go_id.map(go_ids_update_dict))
+    assert df_go.go_id[df_go.go_id.isnull()].shape[0] == 0
+    # df_go = df_go.replace({"go_id": deprecated_go_map})
+    
     df_go = df_go.assign(go_term = df_go.go_id.apply(lambda x: go.get_label(x) if x==x else x))
     df_go.head()
     return df_go
