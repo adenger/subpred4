@@ -212,9 +212,7 @@ def get_tcdb_substrates(df: pd.DataFrame):
     )
     return df_substrates
 
-# TODO does not find all labels
-# Does no longer work for new dataset since it does not contain the column,
-# use the ontology class in go_utils instead!
+
 def get_go_df(df: pd.DataFrame, go: GeneOntology):
     # df_go = df.go_terms.str.split(";").explode().str.strip().reset_index(drop=False)
     # go_id_pattern = re.compile("\[(GO\:[0-9]{7})\]")
@@ -227,17 +225,20 @@ def get_go_df(df: pd.DataFrame, go: GeneOntology):
     df_go = df_go.rename(columns={"go_ids": "go_id"})
     df_go = df_go[~df_go.go_id.isnull()]
 
-    # TODO fix this
-    # TODO why are there an values in the first place?
     go_ids_unique = df_go.go_id.unique()
-    go_ids_update_dict = {go_id : go.update_identifer(go_id) for go_id in go_ids_unique}
-    # faster than replace, same result:
+    go_ids_update_dict = {go_id: go.update_identifer(go_id) for go_id in go_ids_unique}
 
-    df_go = df_go.assign(go_id = df_go.go_id.map(go_ids_update_dict))
+    # faster than replace, same result:
+    df_go = df_go.assign(go_id=df_go.go_id.map(go_ids_update_dict))
     assert df_go.go_id[df_go.go_id.isnull()].shape[0] == 0
     # df_go = df_go.replace({"go_id": deprecated_go_map})
-    
-    df_go = df_go.assign(go_term = df_go.go_id.apply(lambda x: go.get_label(x) if x==x else x))
+
+    id_to_term = {
+        identifier: go.get_label(identifier) for identifier in df_go.go_id.unique()
+    }
+
+    # df_go = df_go.assign(go_term = df_go.go_id.apply(go.get_label))
+    df_go = df_go.assign(go_term=df_go.go_id.map(id_to_term))
     df_go.head()
     return df_go
 
