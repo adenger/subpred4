@@ -38,6 +38,25 @@ class Ontology(ABC):
             ]
         )
 
+    def update_identifer(self, identifier: str):
+        # the problem was that deprecated identifiers did not have labels.
+        # If a deprecated identifier does have a label then we keep it.
+        # Use self.get_class(identifier).deprecated[0] to check for that
+        if self.get_label(identifier) != "":
+            return identifier
+        else:
+            cl = self.get_class(identifier)
+            assert len(cl.IAO_0100001) == 1
+            term_replaced_by = cl.IAO_0100001[0]
+            if isinstance(term_replaced_by, str):
+                print(term_replaced_by)
+                return term_replaced_by
+            else:
+                return term_replaced_by.name
+            # properties_dict = self.get_properties(identifier)
+            # new_identifier = properties_dict["term replaced by"].name
+            # return self.decode_identifier(new_identifier)
+
     def get_label(self, identifier: str) -> str:
         labels = self.namespace[self.encode_identifier(identifier)].label
         return "" if len(labels) == 0 else list(labels)[0]
