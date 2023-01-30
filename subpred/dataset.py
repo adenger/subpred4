@@ -140,7 +140,7 @@ def __parse_sequences(
     """Handle non-standard amino acids, and sequence fragments"""
     match (invalid_amino_acids):
         case "remove_protein":
-            df = df[df.sequence.str.match(re.compile("[ACDEFGHIKLMNPQRSTVWY]+"))]
+            df = df[df.sequence.str.fullmatch(re.compile("[ACDEFGHIKLMNPQRSTVWY]+"))]
         case "remove_amino_acids":
             df.sequence = df.sequence.str.replace(
                 re.compile("[^ACDEFGHIKLMNPQRSTVWY]+"), ""
