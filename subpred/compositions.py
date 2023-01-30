@@ -3,12 +3,32 @@ import numpy as np
 import pandas as pd
 
 
-def __get_amino_acids():
-    return list("ACDEFGHIKLMNPQRSTVWY")
+AMINO_ACIDS = [
+    "A",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "K",
+    "L",
+    "M",
+    "N",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "V",
+    "W",
+    "Y",
+]
 
 
 def __amino_acid_comp(sequence: str):
-    counter = OrderedDict({aa: 0 for aa in __get_amino_acids()})
+    counter = OrderedDict({aa: 0 for aa in AMINO_ACIDS})
     for c in sequence:
         counter[c] += 1
     return np.divide(np.array(list(counter.values())), len(sequence))
@@ -18,13 +38,13 @@ def calculate_aac(sequences: pd.Series):
     return pd.DataFrame(
         data=sequences.apply(__amino_acid_comp).tolist(),
         index=sequences.index,
-        columns=["AAC__" + aa for aa in __get_amino_acids()],
+        columns=["AAC__" + aa for aa in AMINO_ACIDS],
     )
 
 
 def __get_dipeptides():
     return sorted(
-        [aa1 + aa2 for aa1 in __get_amino_acids() for aa2 in __get_amino_acids()]
+        [aa1 + aa2 for aa1 in AMINO_ACIDS for aa2 in AMINO_ACIDS]
     )
 
 
