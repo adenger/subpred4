@@ -175,3 +175,4 @@ data/raw/gene_ontology/goa_sp_iea_mf_enables.tsv.xz
 data/raw/gene_ontology/goa_uniprot_all_noiea.gaf.gz
 data/raw/uniprot/uniprot_2022_05_evidence1-2_nofragments.tsv.pkl
 data/raw/gene_ontology/goa_uniprot_enables_iea.tsv.xz
+data/raw/gene_ontology/goa_uniprot_enables_iea_old.tsv.xz
