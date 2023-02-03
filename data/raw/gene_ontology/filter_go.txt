@@ -1,3 +1,4 @@
 wget http://current.geneontology.org/annotations/goa_uniprot_all.gaf.gz > goa_uniprot_all.gaf.gz.download
 mv goa_uniprot_all.gaf.gz.download goa_uniprot_all.gaf.gz
-((gunzip | awk 'BEGIN {OFS="\t";FS="\t"} ($1 == "UniProtKB" && $4 == "enables" && $9=="F") {print $2,$5,$7}' | sort -u | xz) < goa_uniprot_all.gaf.gz > goa_uniprot_enables_iea.tmp.tsv.xz) && mv goa_uniprot_enables_iea.tmp.tsv.xz goa_uniprot_enables_iea.tsv.xz 
+(gunzip | awk 'BEGIN {OFS="\t";FS="\t"} ($1 == "UniProtKB" && $4 == "enables" && $9=="F") {print $2,$5,$7}' | sort -u | xz) < goa_uniprot_all.gaf.gz > goa_uniprot_enables_iea.tsv.xz
+(gunzip | awk 'BEGIN {OFS="\t";FS="\t"} ($1 == "UniProtKB") {print $2,$4,$5,$7,$9,$14}' | sort -u | xz -T16) < goa_uniprot_all.gaf.gz > goa_uniprot_all_iea.tsv.xz
