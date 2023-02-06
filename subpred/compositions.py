@@ -1,7 +1,8 @@
-from collections import OrderedDict
+from collections import OrderedDict, Counter
+from itertools import product
 import numpy as np
 import pandas as pd
-
+from joblib.parallel import delayed, Parallel, cpu_count
 
 AMINO_ACIDS = [
     "A",
@@ -27,91 +28,42 @@ AMINO_ACIDS = [
 ]
 
 
-def __amino_acid_comp(sequence: str):
-    counter = OrderedDict({aa: 0 for aa in AMINO_ACIDS})
-    for c in sequence:
-        counter[c] += 1
-    return np.divide(np.array(list(counter.values())), len(sequence))
+def __kmer_composition(sequence: str, k: int, kmers_dict: dict) -> pd.Series:
+    counter = Counter(kmers_dict)
+    counter.update([sequence[i : i + k] for i in range(len(sequence) - k + 1)])
+    return pd.Series([x / (len(sequence) - k + 1) for x in counter.values()])
 
 
-def calculate_aac(sequences: pd.Series):
-    return pd.DataFrame(
-        data=sequences.apply(__amino_acid_comp).tolist(),
-        index=sequences.index,
-        columns=["AAC__" + aa for aa in AMINO_ACIDS],
+def __kmer_composition_batch(
+    sequences: pd.Series, k: int, kmers_dict: dict
+) -> pd.DataFrame:
+    return sequences.apply(__kmer_composition, k=k, kmers_dict=kmers_dict)
+
+
+def calculate_comp(
+    sequences: pd.Series, k: int = 2, alphabet: list = AMINO_ACIDS, n_threads: int = 1
+) -> pd.DataFrame:
+    assert k > 0
+    assert n_threads != 0 and n_threads
+    n_chunks = n_threads if n_threads > 0 else cpu_count() + n_threads + 1
+    sequences_chunks = np.array_split(sequences, indices_or_sections=n_chunks)
+
+    kmers = ["".join(x) for x in product(alphabet, repeat=k)]
+    kmers_dict = {kmer: 0 for kmer in kmers}
+
+    chunk_results = Parallel(n_jobs=n_threads)(
+        delayed(__kmer_composition_batch)(sequences_chunk, k, kmers_dict)
+        for sequences_chunk in sequences_chunks
     )
+    df_kmer_frequencies = pd.concat(chunk_results)
+    feature_name = "AAC" if k == 1 else "PAAC" if k == 2 else f"KMER{k}"
+    df_kmer_frequencies.columns = [f"{feature_name}__" + kmer for kmer in kmers]
+    return df_kmer_frequencies
 
 
-def __get_dipeptides():
-    return sorted(
-        [aa1 + aa2 for aa1 in AMINO_ACIDS for aa2 in AMINO_ACIDS]
-    )
+def calculate_aac(sequences: pd.Series, n_threads: int = -1) -> pd.DataFrame:
+    return calculate_comp(sequences=sequences, k=1, n_threads=n_threads)
 
 
-def __dipeptide_comp(sequence: str):
-    counter = OrderedDict({dipeptide: 0 for dipeptide in __get_dipeptides()})
-    for i in range(len(sequence) - 1):
-        peptide = sequence[i : i + 2]
-        counter[peptide] += 1
-    return np.divide(np.array(list(counter.values())), len(sequence) - 1)
-
-
-def calculate_paac(sequences: pd.Series):
-    return pd.DataFrame(
-        data=sequences.apply(__dipeptide_comp).tolist(),
-        index=sequences.index,
-        columns=["PAAC__" + dipeptide for dipeptide in __get_dipeptides()],
-    )
-
-
-# def calculate_composition_feature(input_fasta: str, output_tsv: str, feature_type: str):
-#     fasta_data = read_fasta(input_fasta)
-#     fasta_data_records = []
-#     for header, sequence in fasta_data:
-#         fasta_data_records.append(
-#             {"Uniprot": header.split("|")[1], "sequence": sequence,}
-#         )
-
-#     sequence_df = pd.DataFrame.from_records(fasta_data_records).set_index("Uniprot")
-
-#     if feature_type == "aac":
-#         sequence_df = sequence_df.sequence.apply(__amino_acid_comp)
-#         sequence_df = pd.DataFrame(
-#             sequence_df.to_list(), index=sequence_df.index, columns=__get_amino_acids()
-#         )
-#     elif feature_type == "paac":
-#         sequence_df = sequence_df.sequence.apply(__dipeptide_comp)
-#         sequence_df = pd.DataFrame(
-#             sequence_df.to_list(),
-#             index=sequence_df.index,
-#             columns=[
-#                 aa1 + aa2 for aa1 in __get_amino_acids() for aa2 in __get_amino_acids()
-#             ],
-#         )
-#     else:
-#         raise ValueError(f"Invalid feature type: {feature_type}")
-
-#     sequence_df.to_csv(output_tsv, sep="\t")
-
-
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser(
-#         description="Create amino acid composition feature dataframe from protein sequences in fasta file"
-#     )
-
-#     parser.add_argument(
-#         "-i",
-#         "--input-file",
-#         help="FASTA file with Uniprot accession and Sequence",
-#         required=True,
-#     )
-
-#     parser.add_argument(
-#         "-o", "--output-file", required=True,
-#     )
-
-#     parser.add_argument("-t", "--type", choices=["aac", "paac"], default="aac")
-
-#     args = parser.parse_args()
-
-#     calculate_composition_feature(args.input_file, args.output_file, args.type)
+def calculate_paac(sequences: pd.Series, n_threads: int = -1) -> pd.DataFrame:
+    return calculate_comp(sequences=sequences, k=2, n_threads=n_threads)
