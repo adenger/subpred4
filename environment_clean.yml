@@ -19,6 +19,7 @@ dependencies:
   - fastcluster
   - bioconda::cd-hit
   - bioconda::blast
+  - bioconda::mmseqs2
   - openpyxl
   - nbconvert
   - jupyter
