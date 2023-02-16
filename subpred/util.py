@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+
 # import numpy as np
 # from sklearn.pipeline import make_pipeline
 # from sklearn.preprocessing import StandardScaler
@@ -8,18 +9,20 @@ import os
 # from sklearn.cluster import AgglomerativeClustering
 # Functions used my multiple notebooks and other functions
 
-def pickle_read(file_path,**pd_args):
+
+def pickle_read(file_path: str, force_update: bool = False, **pd_args):
     # automatically creates new cache file if original file was modified
     last_modified = os.path.getmtime(file_path)
-    pkl_path = file_path+f".{last_modified}.pkl"
-    if os.path.isfile(pkl_path):
-        print(f"reading {pkl_path}")
-        return pd.read_pickle(pkl_path)
+    pkl_path = file_path + f".{last_modified}.pkl"
+    if os.path.isfile(pkl_path) and not force_update:
+        print(f"reading pickle {pkl_path}...")
+        return pd.read_pickle(pkl_path, compression="infer")
     else:
-        print(f"cache file {pkl_path} did not exist, creating new cache:")
+        print(f"Creating cache file {pkl_path}...")
         df = pd.read_table(file_path, **pd_args)
-        df.to_pickle(pkl_path, compression=None)
+        df.to_pickle(pkl_path, compression="infer")
         return df
+
 
 # def get_protein_aac_stats(df_aac, accession):
 #     # compare the feature values of accession to the other features in the dataset
@@ -39,7 +42,6 @@ def pickle_read(file_path,**pd_args):
 #         ],
 #         columns=["AA", accession, "Mean", "Std", "Diff"],
 #     ).sort_values("Diff", ascending=False).set_index("AA")
-
 
 
 # def perform_pca(df_feature, labels: pd.Series, n_components: int = 2):
