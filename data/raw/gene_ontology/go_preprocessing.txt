@@ -5,3 +5,5 @@ mv goa_uniprot_all_ebi.gaf.gz.download goa_uniprot_all_ebi.gaf.gz
 # explanation about GAF format: http://geneontology.org/docs/go-annotation-file-gaf-format-2.0/
 gunzip -c goa_uniprot_all_ebi.gaf.gz | awk 'BEGIN {OFS="\t";FS="\t"} ($1 == "UniProtKB") {print $2,$4,$5,$7,$9,$14}' | sort -u | xz -T16 > goa_uniprot_all_ebi_filtered.tsv.xz.tmp
 mv goa_uniprot_all_ebi_filtered.tsv.xz.tmp goa_uniprot_all_ebi_filtered.tsv.xz
+
+Created 17.02.2023
