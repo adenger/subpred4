@@ -33,7 +33,7 @@ df_uniprot = create_dataset(
     # remove_sequence_fragments = True,
     # force_update = False,
     tcdb_substrates_file="../data/raw/tcdb/tcdb_substrates.tsv",
-    swissprot_only=False,
+    swissprot_only=True,
 )
 print(df_uniprot.shape)
 df_uniprot.head()
