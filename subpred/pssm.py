@@ -104,11 +104,11 @@ def __get_pssm_feature(
     if os.path.isfile(pssm_file_name):
         pssm = __process_pssm_file(pssm_file_name, pssm_folder_path)
         if verbose:
-            print(f"PSSM for accession {accession} was found in tmp folder")
+            print(f"PSSM for accession {accession} was found in tmp folder {pssm_folder_path}")
     else:
         if verbose:
             print(
-                f"PSSM for accession {accession} was not found in tmp folder, calling psiblast"
+                f"PSSM for accession {accession} was not found in tmp folder {pssm_folder_path}, calling psiblast"
             )
         write_fasta(
             fasta_file_name=fasta_file_name, fasta_data=[(">" + accession, sequence)]
@@ -138,19 +138,30 @@ def calculate_pssm_feature(
     psiblast_threads: int = 4,
     verbose: bool = False,
 ):
-    features = [
-        __get_pssm_feature(
-            accession=sequences.index[i],
-            sequence=sequences.values[i],
-            blastdb_fasta_file=blast_db,
-            pssm_folder_path=tmp_folder,
-            iterations=iterations,
-            psiblast_location=psiblast_executable,
-            threads=psiblast_threads,
-            verbose=verbose,
-        )
-        for i in range(len(sequences))
-    ]
+    features = list()
+    errors = list()
+
+    for i in range(len(sequences)):
+        try:
+            pssm = __get_pssm_feature(
+                accession=sequences.index[i],
+                sequence=sequences.values[i],
+                blastdb_fasta_file=blast_db,
+                pssm_folder_path=tmp_folder,
+                iterations=iterations,
+                psiblast_location=psiblast_executable,
+                threads=psiblast_threads,
+                verbose=verbose,
+            )
+            features.append(pssm)
+        except StopIteration:
+            errors.append(f"Error: Stopiteration occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. File might be empty")
+            continue
+        except ValueError as e:
+            errors.append(f"Error: Stopiteration occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. Message:{e}")
+            continue
+    
+    print(errors)
 
     pssm_aa_order = "ARNDCQEGHILKMFPSTWYV"
     pssm_aa_substitutions = [
