@@ -178,3 +178,4 @@ data/raw/gene_ontology/goa_uniprot_enables_iea.tsv.xz
 data/raw/gene_ontology/goa_uniprot_enables_iea_old.tsv.xz
 data/raw/gene_ontology/goa_uniprot_all_iea.tsv.xz
 data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz
+data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz.*.pkl
