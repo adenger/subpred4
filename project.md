@@ -55,23 +55,41 @@ We also updated the Uniref datasets used for local BLAST searches to version 202
 
 *PSSMs were generated again from scratch.*
 
-### Comparison to old dataset
-
-In manuscript 1, we used a dataset created from Uniprot Keywords, and Swissprot proteins. 
 
 ## New methods
 
-### Features
-
 ### Clustering/unsupervised learning
 
-#### Sequence clustering
+
+First, we tried special tools for sequence clustering, such as MMSeq2 and CD-Hit. They both encode and cluster the proteins. This approach did not work, since they create too many clusters. Even with the least strict clustering parameters, more than half the proteins were in their own cluster. We want methods that create around 5-20 clusters, not hundreds.
 
 Clustering a protein sequence dataset follows two steps: Encoding the sequence into a vector of fixed length *n*, and the clustering of those vectors. Finally, the clusters are compared to training labels, which are given by annotations such as GO terms.
 
-**There are special tools for sequence clustering, such as MMSeq2 and CD-Hit. Can we use them to both encode and cluster our transmembrane transproters into substrate classes?**
+**Encodings:**
 
-No, they create too many clusters. Even with the least strict clustering parameters, more than half the proteins were in their own cluster. We want methods that create around 5-20 clusters, not hundreds.
+- AAC, PAAC
+- PSSM
+    - Improve algorithms? *TODO*
+- Biovec
+- Word2Vec custom algorithm
+- ProtNLM
 
-**Encoding+Clustering**
- 
+**Clustering**
+
+Algorithms:
+
+- Kmeans
+
+Finding the optimal number of clusters k: Cluster quality metrics.
+
+- Silhouette Coefficient
+- Calinski-Harabasz Index
+- Davis-Bouldin Index
+- Elbow plot
+
+**Assessment of clusters**
+
+Gene annotation enrichment analysis: 
+
+- Hypergeometric test
+- Rand metric?
