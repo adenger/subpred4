@@ -6,17 +6,25 @@ import subprocess
 import platform
 from .fasta import read_fasta, write_fasta
 
+PSSM_AA_ORDER = "ARNDCQEGHILKMFPSTWYV"
+PSSM_AA_LIST = list(PSSM_AA_ORDER)
+PSSM_AA_SET = set(PSSM_AA_ORDER)
 
-def __process_pssm_file(pssm_file_name, tmp_folder_name):
+def __process_pssm_file(pssm_file_name, sequence:str):
     # print(pssm_file_name, tmp_folder_name)
     with open(pssm_file_name) as pssm_file:
         next(pssm_file)
         next(pssm_file)
 
         amino_acids = pssm_file.readline().strip().split()[:20]
+        assert amino_acids == PSSM_AA_LIST, f"Unexpexted amino acid order: {amino_acids}"
+
+        # dict keeps insertion order in python 3.7+, therefore is same order as PSSM_AA_ORDER
         amino_acid_to_sum_vector = {
             amino_acid: [0.0] * 20 for amino_acid in amino_acids
         }
+
+        sequence_pssm_file = ""
 
         for line in pssm_file:
             if line == "\n":  # end of file, before overall scores
@@ -24,26 +32,29 @@ def __process_pssm_file(pssm_file_name, tmp_folder_name):
 
             values = line.strip().split()
             amino_acid = values[1]
-            if amino_acid not in amino_acids:
-                raise ValueError(
-                    f"unexpected amino acid in pssm file {pssm_file_name}: {amino_acid}"
-                )
+            assert amino_acid in PSSM_AA_SET, f"unexpected amino acid in pssm file {pssm_file_name}: {amino_acid}"
+            sequence_pssm_file += amino_acid
 
             scores = [float(score) for score in values[2:22]]
             sum_vector = amino_acid_to_sum_vector.get(amino_acid)
 
-            if len(scores) != 20:
-                raise ValueError(
-                    f"incomplete PSSM file: {pssm_file_name}. Delete from folder {tmp_folder_name} and recompute"
-                )
+            assert len(scores) == 20, f"incomplete PSSM file: {pssm_file_name}. delete and rerun program."
 
             for pos in range(20):
                 sum_vector[pos] += scores[pos]
             amino_acid_to_sum_vector[amino_acid] = sum_vector
 
+
+        # Can happen for sequence conflicts, like in Q91Y77 position 5
+        assert sequence_pssm_file == sequence, f"Sequence from PSSM file {pssm_file_name} did not match input sequence:\n{sequence_pssm_file}\n{sequence}"
+
+        sum_amino_acids = ""
         pssm = []
-        for _, sum_vector in sorted(amino_acid_to_sum_vector.items()):
+        for sum_aa, sum_vector in amino_acid_to_sum_vector.items():
+            sum_amino_acids += sum_aa
             pssm.extend(sum_vector)
+
+        assert sum_amino_acids == PSSM_AA_ORDER, f"unexpected amino acid in pssm file {pssm_file_name}: {amino_acid}"
 
         pssm = minmax_scale(pssm).tolist()  # scale to [0,1]
 
@@ -59,6 +70,8 @@ def __create_pssm_file(
     evalue: float,
     threads: int,
 ) -> None:
+    
+    # TODO create tmp files, then rename after program finished
     log_file_name = f"{pssm_file_name}.log"
     subprocess.run(
         "{} -query {} -db {} -num_iterations {} -inclusion_ethresh {} -num_threads {} -save_pssm_after_last_round\
@@ -102,9 +115,9 @@ def __get_pssm_feature(
 
     pssm = []
     if os.path.isfile(pssm_file_name):
-        pssm = __process_pssm_file(pssm_file_name, pssm_folder_path)
-        if verbose:
-            print(f"PSSM for accession {accession} was found in tmp folder {pssm_folder_path}")
+        pssm = __process_pssm_file(pssm_file_name, sequence)
+        # if verbose:
+            # print(f"PSSM for accession {accession} was found in tmp folder {pssm_folder_path}")
     else:
         if verbose:
             print(
@@ -122,7 +135,7 @@ def __get_pssm_feature(
             evalue=evalue,
             threads=threads,
         )
-        pssm = __process_pssm_file(pssm_file_name, pssm_folder_path)
+        pssm = __process_pssm_file(pssm_file_name, sequence)
         if verbose:
             print(f"PSSM for accession {accession} was generated")
 
@@ -138,6 +151,7 @@ def calculate_pssm_feature(
     psiblast_threads: int = 4,
     verbose: bool = False,
 ):
+    accessions = list()
     features = list()
     errors = list()
 
@@ -153,23 +167,25 @@ def calculate_pssm_feature(
                 threads=psiblast_threads,
                 verbose=verbose,
             )
+            accessions.append(sequences.index[i])
             features.append(pssm)
         except StopIteration:
             errors.append(f"Error: Stopiteration occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. File might be empty")
             continue
-        except ValueError as e:
-            errors.append(f"Error: Stopiteration occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. Message:{e}")
+        except AssertionError as e:
+            errors.append(f"Error: AssertionError occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. Message:{e}")
             continue
     
-    print(errors)
+    for error in errors: 
+        print(error)
 
-    pssm_aa_order = "ARNDCQEGHILKMFPSTWYV"
+    # pssm_aa_order = "ARNDCQEGHILKMFPSTWYV"
     pssm_aa_substitutions = [
-        aa1 + aa2 for aa1 in pssm_aa_order for aa2 in pssm_aa_order
+        aa1 + aa2 for aa1 in PSSM_AA_ORDER for aa2 in PSSM_AA_ORDER
     ]
 
     pssm_df = pd.DataFrame(
-        data=features, index=sequences.index, columns=pssm_aa_substitutions
+        data=features, index=accessions, columns=pssm_aa_substitutions
     )
     return pssm_df
 
