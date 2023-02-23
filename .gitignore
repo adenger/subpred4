@@ -1,5 +1,5 @@
 data/intermediate/blast.tar.xz
-data/intermediate/blast/
+data/intermediate/blast*/
 data/raw/uniprot/uniprot-reviewed_yes.tab.gz
 data/raw/uniref/uniref50/uniref50*
 data/raw/uniref/uniref90/uniref90*
