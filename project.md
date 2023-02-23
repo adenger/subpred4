@@ -13,7 +13,7 @@ Problems with methods from manuscript 1:
         - More sophisticated feature generation algorithms: Other PSSM encodings, protein embeddings, etc.
 - Complicated setup
     - Provide pre-trained model that is easily applicable
-    - Or snakemake pipeline, python package, webserver
+    - Or snakemake pipeline, python package, webserver, or container
 
 ## Dataset improvements
 
