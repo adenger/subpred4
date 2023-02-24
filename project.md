@@ -45,7 +45,9 @@ Strangely, the gene-ontology file had little overlap with the Uniprot custom dow
 
 The problem with the custom download annotations is that the qualifiers and the evidence codes are missing. To get accurate result, we should stick to the "enables" qualifier and the non-IEA evidence codes.  
 
-Overall, the EBI file was by far the most complete. Linking the custom download file with the qualifiers and evidence codes from the EBI file yielded fewer proteins and annotations than simply filtering the EBI file for Uniprot identifiers in the Uniprot dataset. Although there might be a reason why Uniprot removed some of the annotations?
+Overall, the EBI file was by far the most complete. 
+
+Linking the custom download file with the qualifiers and evidence codes from the EBI file yielded fewer proteins and annotations than simply filtering the EBI file for Uniprot identifiers in the Uniprot dataset. This is because InterPro also provides Uniprot annotations, and some of those are not included in Uniprot. There are about 5 mio annotations in Uniprot, and another 2 mio when including InterPro annotations.
 
 Link: https://ftp.ebi.ac.uk/pub/databases/GO/goa/UNIPROT/goa_uniprot_all.gaf.gz
 
