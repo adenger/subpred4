@@ -473,7 +473,7 @@ def create_dataset(
 
     if sequence_clustering:
         cluster_repr = cd_hit(
-            df.sequence, identity_threshold=sequence_clustering, verbose=verbose
+            df.sequence, identity_threshold=sequence_clustering, verbose=verbose, n_threads=0
         )
         df = df.loc[cluster_repr]
 
