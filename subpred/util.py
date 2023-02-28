@@ -9,19 +9,34 @@ import os
 # from sklearn.cluster import AgglomerativeClustering
 # Functions used my multiple notebooks and other functions
 
+from pathlib import Path
+import pandas as pd
 
-def pickle_read(file_path: str, force_update: bool = False, **pd_args):
-    # automatically creates new cache file if original file was modified
-    last_modified = os.path.getmtime(file_path)
-    pkl_path = file_path + f".{last_modified}.pkl"
-    if os.path.isfile(pkl_path) and not force_update:
-        print(f"reading pickle {pkl_path}...")
-        return pd.read_pickle(pkl_path, compression="infer")
-    else:
-        print(f"Creating cache file {pkl_path}...")
-        df = pd.read_table(file_path, **pd_args)
-        df.to_pickle(pkl_path, compression="infer")
-        return df
+def save_df(
+    df: pd.DataFrame,
+    dataset_name: str,
+    folder_path: str,
+    method: str = "pickle",
+):
+    match (method):
+        case "pickle":
+            df.to_pickle(f"{folder_path}/{dataset_name}.pickle")
+        case "pickle_gz":
+            df.to_pickle(
+                f"{folder_path}/{dataset_name}.pickle_gz",
+                compression={"method": "gzip", "compresslevel": 1, "mtime": 1},
+            )
+
+
+def load_df(dataset_name:str, folder_path:str):
+    for file_path in Path(folder_path).iterdir():
+        file_name = file_path.stem
+        if file_name != dataset_name:
+            continue
+        # file name is dataset name
+        file_extension = file_path.suffix[1:]
+        match(file_extension):
+            case "pickle" | "pickle_gz": return pd.read_pickle(file_path)
 
 
 # def get_protein_aac_stats(df_aac, accession):
