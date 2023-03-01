@@ -17,18 +17,19 @@ def save_df(
     dataset_name: str,
     folder_path: str,
     method: str = "pickle",
+    **kwargs
 ):
     match (method):
         case "pickle":
-            df.to_pickle(f"{folder_path}/{dataset_name}.pickle")
-        case "pickle_gz":
-            df.to_pickle(
-                f"{folder_path}/{dataset_name}.pickle_gz",
-                compression={"method": "gzip", "compresslevel": 1, "mtime": 1},
-            )
+            df.to_pickle(f"{folder_path}/{dataset_name}.pickle", **kwargs)
+        # case "pickle_gz":
+        #     df.to_pickle(
+        #         f"{folder_path}/{dataset_name}.pickle_gz",
+        #         compression={"method": "gzip", "compresslevel": 1, "mtime": 1},
+        #     )
 
 
-def load_df(dataset_name:str, folder_path:str):
+def load_df(dataset_name:str, folder_path:str, **kwargs):
     for file_path in Path(folder_path).iterdir():
         file_name = file_path.stem
         if file_name != dataset_name:
@@ -36,7 +37,7 @@ def load_df(dataset_name:str, folder_path:str):
         # file name is dataset name
         file_extension = file_path.suffix[1:]
         match(file_extension):
-            case "pickle" | "pickle_gz": return pd.read_pickle(file_path)
+            case "pickle" | "pickle_gz": return pd.read_pickle(file_path, **kwargs)
 
 
 # def get_protein_aac_stats(df_aac, accession):
