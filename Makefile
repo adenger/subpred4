@@ -43,10 +43,10 @@ env_export:
 ## Download raw data
 raw_data:
 	curl "http://current.geneontology.org/ontology/go.owl" > "data/raw/ontologies/go.owl"
-	# ChEBI files: Lite (Id, name, definition, and relationships), Core (Lite plus Synonyms) and Full (Core plus database accessions)
-	curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.owl.gz" | gunzip > data/raw/ontologies/chebi.owl
+	curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.owl.gz" | gunzip -c > data/raw/ontologies/chebi.owl
 	curl "https://tcdb.org/cgi-bin/substrates/getSubstrates.py" > data/raw/tcdb/tcdb_substrates.tsv
 	python3 subpred/uniprot_downloader.py "https://rest.uniprot.org/uniprotkb/search?compressed=false&fields=accession%2Cgene_names%2Cprotein_name%2Creviewed%2Cprotein_existence%2Csequence%2Corganism_id%2Cgo_id%2Ckeywordid%2Ckeyword%2Cxref_tcdb%2Cxref_interpro&format=tsv&query=%28%28fragment%3Afalse%29%20AND%20%28existence%3A1%29%20OR%20%28existence%3A2%29%29&size=500" "data/raw/uniprot/uniprot_2022_05_evidence1-2_nofragments.tsv"
+	wget https://ftp.ebi.ac.uk/pub/databases/GO/goa/UNIPROT/goa_uniprot_all.gaf.gz -O - | gunzip -c | awk 'BEGIN {OFS="\t";FS="\t"} ($1 == "UniProtKB") {print $2,$4,$5,$7,$9,$14}' | sort -u | xz -T0 > data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz
 # Link for old API
 #	curl "https://www.uniprot.org/uniprot/?query=reviewed:yes&format=tab&columns=id,genes,protein%20names,organism,organism-id,keyword-id,keywords,go-id,go,database(TCDB),existence,sequence,fragment&sort=score" > data/raw/swissprot/sp_data.tsv
 
