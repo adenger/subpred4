@@ -4,7 +4,7 @@
 
 Problems with methods from manuscript 1:
 
-- Not that many substrate classes
+- Few substrate classes
     - Increase sample count for training/testing data
         - Explore new data sources
     - Find more optimal substrate classes through clustering/unsupervised learning
