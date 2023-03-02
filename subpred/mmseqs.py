@@ -13,7 +13,7 @@ def __flatten_kwargs(**kwargs):
     return kwargs_list
 
 
-def mmseq(
+def mmseqs(
     sequences: pd.Series,
     fast_algo: bool = False,
     cluster_mode: int = 0,
