@@ -39,7 +39,7 @@ dependencies:
   - click=8.1.3=unix_pyhd8ed1ab_2
   - colorama=0.4.6=pyhd8ed1ab_0
   - cryptography=38.0.4=py310h600f1e7_0
-  - curl=7.87.0=hdc1c0ab_0
+  - curl=7.88.1=hdc1c0ab_0
   - cycler=0.11.0=pyhd8ed1ab_0
   - cython=0.29.32=py310h6a678d5_0
   - dbus=1.13.6=h5008d03_3
@@ -113,7 +113,7 @@ dependencies:
   - libclang=15.0.6=default_h2e3cab8_0
   - libclang13=15.0.6=default_h3a83d3e_0
   - libcups=2.3.3=h36d4200_3
-  - libcurl=7.87.0=hdc1c0ab_0
+  - libcurl=7.88.1=hdc1c0ab_0
   - libdb=6.2.32=h9c3ff4c_0
   - libdeflate=1.14=h166bdaf_0
   - libedit=3.1.20191231=he28a2e2_2
@@ -135,7 +135,7 @@ dependencies:
   - liblapacke=3.9.0=16_linux64_openblas
   - libllvm11=11.1.0=he0ac6c6_5
   - libllvm15=15.0.6=h63197d8_0
-  - libnghttp2=1.47.0=hff17c54_1
+  - libnghttp2=1.51.0=hff17c54_0
   - libnsl=2.0.0=h7f98852_0
   - libogg=1.3.4=h7f98852_1
   - libopenblas=0.3.21=pthreads_h78a6416_3
