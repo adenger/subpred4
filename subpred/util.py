@@ -29,7 +29,7 @@ def save_df(
         #     )
 
 
-def load_df(dataset_name:str, folder_path:str, **kwargs):
+def load_df(dataset_name:str, folder_path:str="../data/datasets", **kwargs):
     for file_path in Path(folder_path).iterdir():
         file_name = file_path.stem
         if file_name != dataset_name:
