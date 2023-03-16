@@ -116,8 +116,8 @@ def __get_pssm_feature(
     pssm = []
     if os.path.isfile(pssm_file_name):
         pssm = __process_pssm_file(pssm_file_name, sequence)
-        # if verbose:
-            # print(f"PSSM for accession {accession} was found in tmp folder {pssm_folder_path}")
+        if verbose:
+            print(f"PSSM for accession {accession} was found in tmp folder {pssm_folder_path}")
     else:
         if verbose:
             print(
