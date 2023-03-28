@@ -32,6 +32,8 @@ dependencies:
   - bzip2=1.0.8=h7f98852_4
   - c-ares=1.18.1=h7f98852_0
   - ca-certificates=2022.12.7=ha878542_0
+  - cached-property=1.5.2=hd8ed1ab_1
+  - cached_property=1.5.2=pyha770c72_1
   - cd-hit=4.8.1=h5b5514e_7
   - certifi=2022.12.7=pyhd8ed1ab_0
   - cffi=1.15.1=py310h255011f_2
@@ -72,6 +74,8 @@ dependencies:
   - gst-plugins-base=1.21.2=h3e40eee_0
   - gstreamer=1.21.2=hd4edc92_0
   - gstreamer-orc=0.4.33=h166bdaf_0
+  - h5py=3.8.0=nompi_py310ha66b2ad_101
+  - hdf5=1.14.0=nompi_hb72d44e_103
   - icu=70.1=h27087fc_0
   - idna=3.4=pyhd8ed1ab_0
   - imbalanced-learn=0.9.1=pyhd8ed1ab_1
@@ -104,6 +108,7 @@ dependencies:
   - lcms2=2.14=h6ed2654_0
   - ld_impl_linux-64=2.39=hcc3a1bd_1
   - lerc=4.0.0=h27087fc_0
+  - libaec=1.0.6=hcb278e6_1
   - libblas=3.9.0=16_linux64_openblas
   - libbrotlicommon=1.0.9=h166bdaf_8
   - libbrotlidec=1.0.9=h166bdaf_8
@@ -194,7 +199,7 @@ dependencies:
   - openblas=0.3.21=pthreads_h320a7e8_3
   - openjpeg=2.5.0=h7d73246_1
   - openpyxl=3.0.10=py310h5eee18b_0
-  - openssl=3.0.8=h0b41bf4_0
+  - openssl=3.1.0=h0b41bf4_0
   - owlready2=0.39=py310h5764c6d_1
   - packaging=21.3=pyhd8ed1ab_0
   - pandas=1.5.1=py310h1128e8f_0
