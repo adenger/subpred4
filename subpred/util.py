@@ -15,7 +15,7 @@ import pandas as pd
 def save_df(
     df: pd.DataFrame,
     dataset_name: str,
-    folder_path: str,
+    folder_path: str="../data/datasets",
     method: str = "pickle",
     **kwargs
 ):

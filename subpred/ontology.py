@@ -66,6 +66,7 @@ class Ontology(ABC):
         return {self.decode_identifier(cl.name) for cl in classes if len(cl.label) > 0}
 
     def get_ancestors(self, identifier: str) -> set:
+        # does not include restrictions, includes identifier
         return self.__to_set(self.namespace[self.encode_identifier(identifier)].ancestors())
 
     def get_descendants(self, identifier: str) -> set:
