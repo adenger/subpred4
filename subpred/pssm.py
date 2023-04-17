@@ -10,14 +10,17 @@ PSSM_AA_ORDER = "ARNDCQEGHILKMFPSTWYV"
 PSSM_AA_LIST = list(PSSM_AA_ORDER)
 PSSM_AA_SET = set(PSSM_AA_ORDER)
 
-def __process_pssm_file(pssm_file_name, sequence:str):
+
+def __process_pssm_file(pssm_file_name, sequence: str):
     # print(pssm_file_name, tmp_folder_name)
     with open(pssm_file_name) as pssm_file:
         next(pssm_file)
         next(pssm_file)
 
         amino_acids = pssm_file.readline().strip().split()[:20]
-        assert amino_acids == PSSM_AA_LIST, f"Unexpexted amino acid order: {amino_acids}"
+        assert (
+            amino_acids == PSSM_AA_LIST
+        ), f"Unexpexted amino acid order: {amino_acids}"
 
         # dict keeps insertion order in python 3.7+, therefore is same order as PSSM_AA_ORDER
         amino_acid_to_sum_vector = {
@@ -32,21 +35,26 @@ def __process_pssm_file(pssm_file_name, sequence:str):
 
             values = line.strip().split()
             amino_acid = values[1]
-            assert amino_acid in PSSM_AA_SET, f"unexpected amino acid in pssm file {pssm_file_name}: {amino_acid}"
+            assert (
+                amino_acid in PSSM_AA_SET
+            ), f"unexpected amino acid in pssm file {pssm_file_name}: {amino_acid}"
             sequence_pssm_file += amino_acid
 
             scores = [float(score) for score in values[2:22]]
             sum_vector = amino_acid_to_sum_vector.get(amino_acid)
 
-            assert len(scores) == 20, f"incomplete PSSM file: {pssm_file_name}. delete and rerun program."
+            assert (
+                len(scores) == 20
+            ), f"incomplete PSSM file: {pssm_file_name}. delete and rerun program."
 
             for pos in range(20):
                 sum_vector[pos] += scores[pos]
             amino_acid_to_sum_vector[amino_acid] = sum_vector
 
-
         # Can happen for sequence conflicts, like in Q91Y77 position 5
-        assert sequence_pssm_file == sequence, f"Sequence from PSSM file {pssm_file_name} did not match input sequence:\n{sequence_pssm_file}\n{sequence}"
+        assert (
+            sequence_pssm_file == sequence
+        ), f"Sequence from PSSM file {pssm_file_name} did not match input sequence:\n{sequence_pssm_file}\n{sequence}"
 
         sum_amino_acids = ""
         pssm = []
@@ -54,7 +62,9 @@ def __process_pssm_file(pssm_file_name, sequence:str):
             sum_amino_acids += sum_aa
             pssm.extend(sum_vector)
 
-        assert sum_amino_acids == PSSM_AA_ORDER, f"unexpected amino acid in pssm file {pssm_file_name}: {amino_acid}"
+        assert (
+            sum_amino_acids == PSSM_AA_ORDER
+        ), f"unexpected amino acid in pssm file {pssm_file_name}: {amino_acid}"
 
         pssm = minmax_scale(pssm).tolist()  # scale to [0,1]
 
@@ -70,7 +80,7 @@ def __create_pssm_file(
     evalue: float,
     threads: int,
 ) -> None:
-    
+
     # TODO create tmp files, then rename after program finished
     log_file_name = f"{pssm_file_name}.log"
     subprocess.run(
@@ -117,7 +127,9 @@ def __get_pssm_feature(
     if os.path.isfile(pssm_file_name):
         pssm = __process_pssm_file(pssm_file_name, sequence)
         if verbose:
-            print(f"PSSM for accession {accession} was found in tmp folder {pssm_folder_path}")
+            print(
+                f"PSSM for accession {accession} was found in tmp folder {pssm_folder_path}"
+            )
     else:
         if verbose:
             print(
@@ -170,13 +182,17 @@ def calculate_pssm_feature(
             accessions.append(sequences.index[i])
             features.append(pssm)
         except StopIteration:
-            errors.append(f"Error: Stopiteration occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. File might be empty")
+            errors.append(
+                f"Error: Stopiteration occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. File might be empty"
+            )
             continue
         except AssertionError as e:
-            errors.append(f"Error: AssertionError occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. Message:{e}")
+            errors.append(
+                f"Error: AssertionError occurred for {f'{tmp_folder}/{sequences.index[i]}.pssm'}. Message:{e}"
+            )
             continue
-    
-    for error in errors: 
+
+    for error in errors:
         print(error)
 
     # pssm_aa_order = "ARNDCQEGHILKMFPSTWYV"

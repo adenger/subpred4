@@ -48,6 +48,7 @@ session.mount("https://", HTTPAdapter(max_retries=retries))
 
 #     return f"{base_url}?{urlencode(params, quote_via=quote)}"
 
+
 def get_next_link(headers):
     if "Link" in headers:
         match = re_next_link.match(headers["Link"])

@@ -12,12 +12,13 @@ import os
 from pathlib import Path
 import pandas as pd
 
+
 def save_df(
     df: pd.DataFrame,
     dataset_name: str,
-    folder_path: str="../data/datasets",
+    folder_path: str = "../data/datasets",
     method: str = "pickle",
-    **kwargs
+    **kwargs,
 ):
     match (method):
         case "pickle":
@@ -29,15 +30,16 @@ def save_df(
         #     )
 
 
-def load_df(dataset_name:str, folder_path:str="../data/datasets", **kwargs):
+def load_df(dataset_name: str, folder_path: str = "../data/datasets", **kwargs):
     for file_path in Path(folder_path).iterdir():
         file_name = file_path.stem
         if file_name != dataset_name:
             continue
         # file name is dataset name
         file_extension = file_path.suffix[1:]
-        match(file_extension):
-            case "pickle" | "pickle_gz": return pd.read_pickle(file_path, **kwargs)
+        match (file_extension):
+            case "pickle" | "pickle_gz":
+                return pd.read_pickle(file_path, **kwargs)
 
 
 # def get_protein_aac_stats(df_aac, accession):
