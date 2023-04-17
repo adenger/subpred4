@@ -27,7 +27,9 @@ def __parse_cluster_file(file_path: str) -> pd.DataFrame:
                 matches = re.search(cluster_file_row_pattern, row_str)
                 if not matches:
                     print(row_str)
-                n_amino_acids, accession, percentage = (matches.group(i) for i in [1, 2, 3])
+                n_amino_acids, accession, percentage = (
+                    matches.group(i) for i in [1, 2, 3]
+                )
                 if percentage == "*":
                     percentage = 100.00
                 percentage = float(percentage)

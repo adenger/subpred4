@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 
 # CHEBI_FILE = "../data/raw/ontologies/chebi.owl"
 
+
 class Ontology(ABC):
     def __init__(
         self, owl_file_path: str, namespace_url: str = "http://purl.obolibrary.org/obo/"
@@ -67,13 +68,19 @@ class Ontology(ABC):
 
     def get_ancestors(self, identifier: str) -> set:
         # does not include restrictions, includes identifier
-        return self.__to_set(self.namespace[self.encode_identifier(identifier)].ancestors())
+        return self.__to_set(
+            self.namespace[self.encode_identifier(identifier)].ancestors()
+        )
 
     def get_descendants(self, identifier: str) -> set:
-        return self.__to_set(self.namespace[self.encode_identifier(identifier)].descendants())
+        return self.__to_set(
+            self.namespace[self.encode_identifier(identifier)].descendants()
+        )
 
     def get_children(self, identifier: str) -> set:
-        return self.__to_set(self.namespace[self.encode_identifier(identifier)].subclasses())
+        return self.__to_set(
+            self.namespace[self.encode_identifier(identifier)].subclasses()
+        )
 
     def get_parents(
         self,
@@ -135,6 +142,7 @@ class Ontology(ABC):
             properties[label] = values
 
         return properties
+
 
 EVIDENCE_CODE_TO_DESCRIPTION = {
     "IMP": "experimental_evidence",
