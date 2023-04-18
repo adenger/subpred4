@@ -1,6 +1,6 @@
 from owlready2 import get_ontology, Restriction
 from abc import ABC, abstractmethod
-
+import pandas as pd
 # CHEBI_FILE = "../data/raw/ontologies/chebi.owl"
 
 
@@ -189,3 +189,22 @@ class ChebiOntology(Ontology):
 
     def decode_identifier(self, identifier: str):
         return identifier.replace("_", ":", 1)
+
+
+def add_go_ancestors(go_dataset:pd.DataFrame, go_owl:GeneOntology):
+    # add ancestor go terms. that only includes "is_a" relationships.
+    # go_dataset was generated with the respective notebook.
+    go_dataset = go_dataset.assign(
+        ancestors=go_dataset.go_id.transform(
+            lambda go_id: go_owl.get_ancestors(go_id)
+        )
+    )
+    assert go_dataset.apply(lambda row: row.go_id in row.ancestors, axis=1).all()
+    go_dataset = (
+        go_dataset.explode("ancestors")
+        .drop("go_id", axis=1)
+        .rename(columns={"ancestors": "go_id"})
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+    return go_dataset
