@@ -1,6 +1,7 @@
 from scipy.stats import hypergeom, rankdata
 import numpy as np
 import pandas as pd
+from IPython.display import display
 
 
 def enrichment_analysis(
@@ -102,4 +103,27 @@ def enrichment_analysis(
     if min_lfc:
         annotation_scores = annotation_scores[annotation_scores.lfc >= min_lfc]
 
+    annotation_scores = annotation_scores.reset_index(drop=True)
+
     return annotation_scores
+
+
+def cluster_enrichment_analysis(cluster_labels: pd.Series, reference_set: set, annotations_dict, p_cutoff=0.05):
+    # cluster_labels has identifiers as its index, and label numbers as values.
+    # reference_set is a set of identifiers, that contain all the identifiers in cluster_labels.index
+    # annotations_dict has dataset names as keys, and lists of tuples (identifier, annotation) as values.
+    for cluster_number in sorted(cluster_labels.unique()):
+        print("=" * 60)
+        print("CLUSTER", cluster_number)
+        print("=" * 60)
+
+        for annotation_name, annotations_list in annotations_dict.items():
+            print(annotation_name)
+
+            res = enrichment_analysis(
+                proteins_reference=reference_set,
+                proteins_subset=set(cluster_labels[cluster_labels == cluster_number].index.tolist()),
+                annotations=annotations_list,
+                p_cutoff=p_cutoff,
+            )
+            display(res)
