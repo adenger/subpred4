@@ -126,4 +126,5 @@ def cluster_enrichment_analysis(cluster_labels: pd.Series, reference_set: set, a
                 annotations=annotations_list,
                 p_cutoff=p_cutoff,
             )
+            res = res.sort_values("annotated_subset", ascending=False)
             display(res)
