@@ -38,6 +38,11 @@ class Ontology(ABC):
                 for identifier in self.ontology.search(label=label)
             ]
         )
+    
+    def is_deprecated(self, identifier: str):
+        # deprecated is either [True], [False] or [].
+        deprecated_field = self.get_class(identifier).deprecated
+        return deprecated_field[0] if len(deprecated_field) > 0 else False
 
     def update_identifer(self, identifier: str):
         # the problem was that deprecated identifiers did not have labels.
