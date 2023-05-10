@@ -49,6 +49,8 @@ raw_data:
 	wget https://ftp.ebi.ac.uk/pub/databases/GO/goa/UNIPROT/goa_uniprot_all.gaf.gz -O - | gunzip -c | awk 'BEGIN {OFS="\t";FS="\t"} ($1 == "UniProtKB") {print $2,$4,$5,$7,$9,$14}' | sort -u | xz -T0 > data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz
 	# curl "https://ftp.ebi.ac.uk/pub/databases/interpro/current_release/entry.list" > "data/raw/interpro/interpro_entries.tsv"
 	curl "https://ftp.ebi.ac.uk/pub/databases/interpro/releases/90.0/entry.list" > "data/raw/interpro/interpro_entries.tsv"
+	curl https://release.geneontology.org/2023-01-01/ontology/go.obo > data/raw/ontologies/go.obo
+	curl https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.obo.gz | gzip -d  > data/raw/ontologies/chebi.obo
 # Link for old API
 #	curl "https://www.uniprot.org/uniprot/?query=reviewed:yes&format=tab&columns=id,genes,protein%20names,organism,organism-id,keyword-id,keywords,go-id,go,database(TCDB),existence,sequence,fragment&sort=score" > data/raw/swissprot/sp_data.tsv
 
