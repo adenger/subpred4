@@ -181,3 +181,4 @@ data/raw/gene_ontology/goa_uniprot_all_iea.tsv.xz
 data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz
 data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz.*.pkl
 data/raw/interpro/interpro_entries.tsv
+data/raw/ontologies/chebi.obo
