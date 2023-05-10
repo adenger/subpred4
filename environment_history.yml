@@ -30,3 +30,6 @@ dependencies:
   - openssl
   - gensim
   - h5py
+  - tabulate
+  - obonet
+  - pygraphviz
