@@ -1,4 +1,3 @@
-# %%
 from copy import deepcopy
 from subpred.util import load_df
 import obonet
@@ -40,7 +39,10 @@ def get_go_annotations(
 def add_ancestors(df_uniprot_goa, graph_go):
     df_uniprot_goa = df_uniprot_goa.assign(
         ancestors=[
-            nx.descendants(graph_go, go_id) | {go_id} if go_id in graph_go.nodes() else go_id for go_id in df_uniprot_goa.go_id 
+            nx.descendants(graph_go, go_id) | {go_id}
+            if go_id in graph_go.nodes()
+            else go_id
+            for go_id in df_uniprot_goa.go_id
         ]
     )
 
@@ -282,7 +284,6 @@ def add_paths_as_edges(graph, nodes_subset, relations_paths: set = {"is_a"}):
     return graph_subset
 
 
-# %%
 def graph_plot(
     graph_to_plot,
     root_node: str,
@@ -414,36 +415,21 @@ def preprocess_data(
     return df_uniprot, df_uniprot_goa, graph_go, graph_chebi
 
 
-def create_plots(
-    organism_ids={83333},
-    datasets_folder_path="data/datasets",
-    go_obo_path="data/raw/ontologies/go.obo",
-    chebi_obo_path="data/raw/ontologies/chebi.obo",
-    heatmap_output_path="plots/heatmap_ecoli.png",
-    graph_output_path="plots/graph_ecoli.png",
+def get_substrate_matrix(
+    datasets_folder_path: str,
+    graph_chebi,
+    graph_go,
+    df_uniprot_goa,
+    min_overlap=20,
+    max_overlap="half",
+    include_ancestor_chebi_ids=False,
 ):
-    ################
-    # Read datasets
-    ################
-
-    # Uniprot, GOA, GO, Chebi
-    df_uniprot, df_uniprot_goa, graph_go, graph_chebi = preprocess_data(
-        organism_ids=organism_ids,
-        datasets_folder_path=datasets_folder_path,
-        go_obo_path=go_obo_path,
-        chebi_obo_path=chebi_obo_path,
-    )
-
-    ###############
-    # Heatmap
-    ##############
-
     # GO-Chebi mapping
     df_go_to_chebi = get_go_chebi_mapping(
         datasets_folder_path=datasets_folder_path,
         graph_chebi=graph_chebi,
         graph_go=graph_go,
-        include_ancestor_chebi_ids=False,
+        include_ancestor_chebi_ids=include_ancestor_chebi_ids,
     )
 
     # Mapping Uniprot to GO to Chebi
@@ -452,7 +438,6 @@ def create_plots(
     )
 
     df_uniprot_go_chebi = df_uniprot_go_chebi.drop_duplicates().reset_index(drop=True)
-    df_uniprot_go_chebi
 
     dict_chebi_to_uniprot = (
         df_uniprot_go_chebi[["chebi_id", "Uniprot"]]
@@ -462,32 +447,22 @@ def create_plots(
     )
 
     protein_count = df_uniprot_go_chebi.Uniprot.unique().shape[0]
-    protein_count
 
     # Calculating pairwise overlaps for substrates with more then n substrates
     df_substrate_overlaps = get_pairwise_substrate_overlaps(
         dict_chebi_to_uniprot=dict_chebi_to_uniprot,
-        min_overlap=20,
-        max_overlap=protein_count // 2,
+        min_overlap=min_overlap,
+        max_overlap=max_overlap if max_overlap != "half" else protein_count // 2,
     )
     chebi_id_to_name = {id: data["name"] for id, data in graph_chebi.nodes(data=True)}
     df_substrate_overlaps.columns = df_substrate_overlaps.columns.map(chebi_id_to_name)
     df_substrate_overlaps.index = df_substrate_overlaps.index.map(chebi_id_to_name)
-    df_substrate_overlaps
+    return df_substrate_overlaps, dict_chebi_to_uniprot
 
-    create_heatmap(
-        df_matrix=df_substrate_overlaps,
-        title="Substrate molecular species overlaps for substrates with 20 or more transport proteins",
-        width=15,
-        height=10,
-        lower_triangle_only=True,
-        output_path=heatmap_output_path,
-    )
 
-    ###########
-    # Graph
-    ###########
-
+def get_graph_plot(
+    df_substrate_overlaps, dict_chebi_to_uniprot, graph_chebi, graph_output_path=None
+):
     # sort nodes by number of samples
     chebi_name_to_id = {data["name"]: id for id, data in graph_chebi.nodes(data=True)}
     substrates = df_substrate_overlaps.index.map(chebi_name_to_id)
@@ -508,13 +483,67 @@ def create_plots(
         output_path=graph_output_path,
     )
 
-for organism_id_individual in [3702, 9606, 83333, 559292]:
-    organism_ids = {organism_id_individual}
-    organism_ids_str = "+".join([str(i) for i in organism_ids])
-    print(organism_ids_str)
-    create_plots(
+
+if __name__ == "__main__":
+    organism_ids = {83333}
+    datasets_folder_path = "data/datasets"
+    go_obo_path = "data/raw/ontologies/go.obo"
+    chebi_obo_path = "data/raw/ontologies/chebi.obo"
+    heatmap_output_path = "plots/heatmap_ecoli.png"
+    graph_output_path = "plots/graph_ecoli.png"
+
+    ################
+    # Read datasets
+    ################
+
+    # Uniprot, GOA, GO, Chebi
+    df_uniprot, df_uniprot_goa, graph_go, graph_chebi = preprocess_data(
         organism_ids=organism_ids,
-        heatmap_output_path=f"plots/heatmap_{organism_ids_str}.png",
-        graph_output_path=f"plots/graph_{organism_ids_str}.png",
+        datasets_folder_path=datasets_folder_path,
+        go_obo_path=go_obo_path,
+        chebi_obo_path=chebi_obo_path,
     )
 
+    ###################
+    # Substrate matrix
+    ###################
+
+    df_substrate_overlaps, dict_chebi_to_uniprot = get_substrate_matrix(
+        datasets_folder_path=datasets_folder_path,
+        graph_chebi=graph_chebi,
+        graph_go=graph_go,
+        df_uniprot_goa=df_uniprot_goa,
+    )
+
+    ###############
+    # Heatmap
+    ##############
+
+    create_heatmap(
+        df_matrix=df_substrate_overlaps,
+        title="Substrate molecular species overlaps for substrates with 20 or more transport proteins",
+        width=15,
+        height=10,
+        lower_triangle_only=True,
+        output_path=heatmap_output_path,
+    )
+
+    ###########
+    # Graph
+    ###########
+
+    get_graph_plot(
+        df_substrate_overlaps=df_substrate_overlaps,
+        dict_chebi_to_uniprot=dict_chebi_to_uniprot,
+        graph_chebi=graph_chebi,
+    )
+# if __name__ == "__main__":
+#     for organism_id_individual in [3702, 9606, 83333, 559292]:
+#         organism_ids = {organism_id_individual}
+#         organism_ids_str = "+".join([str(i) for i in organism_ids])
+#         print(organism_ids_str)
+#         create_plots(
+#             organism_ids=organism_ids,
+#             heatmap_output_path=f"plots/heatmap_{organism_ids_str}.png",
+#             graph_output_path=f"plots/graph_{organism_ids_str}.png",
+#         )
