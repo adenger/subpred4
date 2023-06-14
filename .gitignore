@@ -6,6 +6,7 @@ data/raw/uniref/uniref90/uniref90*
 data/datasets/*.pickle
 data_full.tar
 data_bak/*
+plots/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
