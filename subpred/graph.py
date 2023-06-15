@@ -205,9 +205,11 @@ def get_go_chebi_mapping(
         chebi_id_to_name = {
             id: data["name"] for id, data in graph_chebi.nodes(data=True)
         }
+        # filter for original set of molecules (could remove potential substrate classes)
+        # TODO remove this once an automatic mehtod has been implemented
         df_go_to_chebi = df_go_to_chebi[
             df_go_to_chebi.chebi_id.isin(go_chebi_original_chebi_ids)
-        ]  # TODO remove or keep?
+        ]  
 
         df_go_to_chebi = df_go_to_chebi.assign(
             chebi_term=df_go_to_chebi.chebi_id.map(chebi_id_to_name)
