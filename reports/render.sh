@@ -1,0 +1,1 @@
+pandoc --self-contained --metadata pagetitle="Substrate classes" labels_organisms.md -o labels_organisms.html
