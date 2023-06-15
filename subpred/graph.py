@@ -232,9 +232,9 @@ def create_heatmap(
 
     if output_path:
         fig = g.get_figure()
-        fig.savefig(output_path, dpi=500)
+        fig.savefig(output_path, bbox_inches="tight", dpi=100)
 
-    plt.show()
+    return g
 
 
 def sort_by_sample_count(annotations: list, annotation_to_samples: dict):
@@ -365,9 +365,9 @@ def graph_plot(
     plt.title(title)
 
     if output_path:
-        plt.savefig(output_path, dpi=500)
+        plt.savefig(output_path, bbox_inches="tight", dpi=100)
 
-    plt.show()
+    return plt.gcf()
 
 
 def preprocess_data(
@@ -446,13 +446,17 @@ def get_substrate_matrix(
         .to_dict()
     )
 
-    protein_count = df_uniprot_go_chebi.Uniprot.unique().shape[0]
+    match max_overlap:
+        case None:
+            max_overlap = 1e6
+        case "half":  # number of proteins /2
+            max_overlap = df_uniprot_go_chebi.Uniprot.unique().shape[0] // 2
 
     # Calculating pairwise overlaps for substrates with more then n substrates
     df_substrate_overlaps = get_pairwise_substrate_overlaps(
         dict_chebi_to_uniprot=dict_chebi_to_uniprot,
         min_overlap=min_overlap,
-        max_overlap=max_overlap if max_overlap != "half" else protein_count // 2,
+        max_overlap=max_overlap,
     )
     chebi_id_to_name = {id: data["name"] for id, data in graph_chebi.nodes(data=True)}
     df_substrate_overlaps.columns = df_substrate_overlaps.columns.map(chebi_id_to_name)
@@ -461,7 +465,7 @@ def get_substrate_matrix(
 
 
 def get_graph_plot(
-    df_substrate_overlaps, dict_chebi_to_uniprot, graph_chebi, graph_output_path=None
+    df_substrate_overlaps, dict_chebi_to_uniprot, graph_chebi, title:str, graph_output_path=None, node_size:int=10000
 ):
     # sort nodes by number of samples
     chebi_name_to_id = {data["name"]: id for id, data in graph_chebi.nodes(data=True)}
@@ -475,11 +479,11 @@ def get_graph_plot(
         relations_paths={"is_a", "is_tautomer_of"},
     )
 
-    graph_plot(
+    return graph_plot(
         graph_chebi_heatmap,
         chebi_name_to_id["chemical entity"],
-        title="Relations between molecular species in for substrates with 20 or more transport proteins, only including abstractions and tautomers",
-        node_size=10000,
+        title=title,
+        node_size=node_size,
         output_path=graph_output_path,
     )
 
