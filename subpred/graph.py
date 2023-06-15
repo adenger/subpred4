@@ -192,10 +192,13 @@ def get_go_chebi_mapping(
 
     ## Add ancestors
     if include_ancestor_chebi_ids:
+        graph_chebi_isa = graph_chebi.edge_subgraph(
+            [edge for edge in list(graph_chebi.edges(keys=True)) if edge[2] == "is_a"]
+        )
         go_chebi_original_chebi_ids = set(df_go_to_chebi.chebi_id)
         df_go_to_chebi = df_go_to_chebi.drop("chebi_term", axis=1)
         df_go_to_chebi.chebi_id = [
-            nx.ancestors(graph_chebi, chebi_id) | {chebi_id}
+            nx.descendants(graph_chebi_isa, chebi_id) | {chebi_id} if chebi_id in graph_chebi_isa.nodes() else {chebi_id}
             for chebi_id in df_go_to_chebi.chebi_id
         ]
         df_go_to_chebi = df_go_to_chebi.explode("chebi_id").reset_index(drop=True)
@@ -465,7 +468,14 @@ def get_substrate_matrix(
 
 
 def get_graph_plot(
-    df_substrate_overlaps, dict_chebi_to_uniprot, graph_chebi, title:str, graph_output_path=None, node_size:int=10000
+    df_substrate_overlaps,
+    dict_chebi_to_uniprot,
+    graph_chebi,
+    title: str,
+    graph_output_path=None,
+    node_size: int = 10000,
+    width:int = 20,
+    height:int=15
 ):
     # sort nodes by number of samples
     chebi_name_to_id = {data["name"]: id for id, data in graph_chebi.nodes(data=True)}
@@ -485,6 +495,8 @@ def get_graph_plot(
         title=title,
         node_size=node_size,
         output_path=graph_output_path,
+        width=width,
+        height=height
     )
 
 
