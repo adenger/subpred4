@@ -30,7 +30,7 @@ Variablen:
 
 Wenn ein Chebi-Term einen Overlap von 100% mit einem abstrakteren Chebi-Term hat, dann machen wir einen Eintrag in die Matrix. 
 
-Nun ein abstrakter Term mit $n$ annotierten Proteinenen drei Arten von Kindern: 
+Nun hat ein abstrakter Term mit $n$ annotierten Proteinenen drei Arten von Kindern:
 
 1. $i$ Chebi-Terms mit 100% Overlap
     - Erklären $k_1 + \dots + k_i = k$ annotierte Proteine, mit $k < n$
@@ -43,6 +43,8 @@ Nun ein abstrakter Term mit $n$ annotierten Proteinenen drei Arten von Kindern:
     - Dieser Knoten muss neu erstellt werden
     - Könnten zu $k$ oder $l$ gehören aber genaues Substrat ist noch nicht bekannt
 
+Nun könnte man die verwandten Chebi-Terms miteinender kombinieren. Als nächstes würde ich mir dazu einen Algorithmus überlegen, der alle Fälle behandelt, um die Chebi-Terms auf 10-20 Substratklassen und dazu gehörigen Proteinen zu reduzieren (TODO).
+
 <!-- Es gibt mehrere mögliche Gründe, warum ein  -->
 
 ### Auswertung der Plots
@@ -50,16 +52,16 @@ Nun ein abstrakter Term mit $n$ annotierten Proteinenen drei Arten von Kindern:
 In allen Datensätzen scheint sich ein ähnliches Cluster im **Netzwerk** abzuzeichnen.
 
 - Ionen (alle Organismen)
-    - Meist sehr komplex
+  - Meist sehr komplex
 - Aminosäuren und organische Säuren (alle Organismen)
 - Amide und Peptide (alle Organismen)
 - Kohlenhydrate (alle Organismen)
-- Bio-Makromoleküle (nicht in A. thaliana)
+- Bio-Makromoleküle (nicht in E. coli)
 - Nucleotide und Phosphate (nur Mensch und Hefe)
 - Lipide (Nur Mensch)
-- Wasser (Nur E. coli)
+- Wasser (Nur A. thaliana)
 
-Die Matrizen/**Heatmaps** sehen nun besser aus, die "chemical entity" ist nun der häufigste Term, was logisch ist. Überraschend ist die Anzahl der Ionen. Im Menschen gibt einen Overlap von 1000/1078 zwischen "chemical entity" und "ion". Außerdem gibt es in allen Datensätzen einen overlap von 100% zwischen Aminosäure und Ion. Das könnte daran liegen, dass es einen Pfad zwischen Aminosäure, bzw. der ionisierten Form eines Moleküls und Ion gibt, oder an einem Fehler in der Pipeline. Als nächstes sollte ich versuchen, das nachzuvollziehen.
+Die Matrizen/**Heatmaps** sehen nun besser aus, die "chemical entity" ist nun der häufigste Term, was logisch ist. Überraschend ist die Anzahl der Ionen. Im Menschen gibt einen Overlap von 1000/1078 zwischen "chemical entity" und "ion". Außerdem gibt es in allen Datensätzen einen overlap von 100% zwischen Aminosäure und Ion. Das könnte daran liegen, dass es einen Pfad zwischen Aminosäure, bzw. der ionisierten Form eines Moleküls und Ion gibt, oder an einem Fehler in der Pipeline. Als nächstes sollte ich versuchen, das nachzuvollziehen (TODO).
 
 ## Arabidopsis thaliana
 
