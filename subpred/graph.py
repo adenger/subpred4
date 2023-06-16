@@ -201,6 +201,8 @@ def get_go_chebi_mapping(
             nx.descendants(graph_chebi_isa, chebi_id) | {chebi_id} if chebi_id in graph_chebi_isa.nodes() else {chebi_id}
             for chebi_id in df_go_to_chebi.chebi_id
         ]
+        # df_go_to_chebi = df_go_to_chebi[~df_go_to_chebi.chebi_id.isnull()]
+        # df_go_to_chebi = df_go_to_chebi[df_go_to_chebi.chebi_id.isin(graph_chebi_isa.nodes())]
         df_go_to_chebi = df_go_to_chebi.explode("chebi_id").reset_index(drop=True)
         chebi_id_to_name = {
             id: data["name"] for id, data in graph_chebi.nodes(data=True)
