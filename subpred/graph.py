@@ -84,9 +84,10 @@ def get_filtered_go_graph(
     inter_go_relations: set = {"is_a"},
     aspects: set = {"molecular_function"},
 ):
+    go_name_to_id = {name: id for id, name in graph_go.nodes(data="name")}
+
     ## Filter graph by protein dataset
     graph_go = graph_go.subgraph(nodes=protein_subset)
-    print(len(graph_go.nodes()))
     ## Filter graph by aspect/namespace
     graph_go = graph_go.subgraph(
         nodes=[
@@ -95,7 +96,6 @@ def get_filtered_go_graph(
             if data["namespace"] in aspects
         ]
     )
-    print(len(graph_go.nodes()))
 
     ## Filter graph by relations
     graph_go = graph_go.edge_subgraph(
@@ -103,13 +103,11 @@ def get_filtered_go_graph(
             edge for edge in graph_go.edges(keys=True) if edge[2] in inter_go_relations
         }
     )
-    print(len(graph_go.nodes()))
 
     ## Filter graph by function
-    go_name_to_id = {data["name"]: id for id, data in graph_go.nodes(data=True)}
     tmtp_ancestors = nx.ancestors(graph_go, go_name_to_id[root_node])
     graph_go = graph_go.subgraph(tmtp_ancestors | {go_name_to_id[root_node]})
-    print(len(graph_go.nodes()))
+
     return graph_go.copy()
 
 
@@ -198,7 +196,9 @@ def get_go_chebi_mapping(
         go_chebi_original_chebi_ids = set(df_go_to_chebi.chebi_id)
         df_go_to_chebi = df_go_to_chebi.drop("chebi_term", axis=1)
         df_go_to_chebi.chebi_id = [
-            nx.descendants(graph_chebi_isa, chebi_id) | {chebi_id} if chebi_id in graph_chebi_isa.nodes() else {chebi_id}
+            nx.descendants(graph_chebi_isa, chebi_id) | {chebi_id}
+            if chebi_id in graph_chebi_isa.nodes()
+            else {chebi_id}
             for chebi_id in df_go_to_chebi.chebi_id
         ]
         # df_go_to_chebi = df_go_to_chebi[~df_go_to_chebi.chebi_id.isnull()]
@@ -211,7 +211,7 @@ def get_go_chebi_mapping(
         # TODO remove this once an automatic mehtod has been implemented
         df_go_to_chebi = df_go_to_chebi[
             df_go_to_chebi.chebi_id.isin(go_chebi_original_chebi_ids)
-        ]  
+        ]
 
         df_go_to_chebi = df_go_to_chebi.assign(
             chebi_term=df_go_to_chebi.chebi_id.map(chebi_id_to_name)
@@ -378,7 +378,11 @@ def graph_plot(
 
 
 def preprocess_data(
-    organism_ids: set, datasets_folder_path: str, go_obo_path: str, chebi_obo_path: str
+    organism_ids: set,
+    datasets_folder_path: str,
+    go_obo_path: str,
+    chebi_obo_path: str,
+    root_node: str = "transmembrane transporter activity",
 ):
     df_uniprot = get_protein_dataset(
         datasets_folder_path=datasets_folder_path,
@@ -405,7 +409,7 @@ def preprocess_data(
     # Filtering GO graph
     graph_go = get_filtered_go_graph(
         graph_go=graph_go,
-        root_node="transmembrane transporter activity",
+        root_node=root_node,
         protein_subset=set(df_uniprot_goa.go_id.unique()),
         inter_go_relations={"is_a"},
         aspects={"molecular_function"},
@@ -478,8 +482,8 @@ def get_graph_plot(
     title: str,
     graph_output_path=None,
     node_size: int = 10000,
-    width:int = 20,
-    height:int=15
+    width: int = 20,
+    height: int = 15,
 ):
     # sort nodes by number of samples
     chebi_name_to_id = {data["name"]: id for id, data in graph_chebi.nodes(data=True)}
@@ -500,7 +504,7 @@ def get_graph_plot(
         node_size=node_size,
         output_path=graph_output_path,
         width=width,
-        height=height
+        height=height,
     )
 
 
