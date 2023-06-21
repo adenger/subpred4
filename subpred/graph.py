@@ -497,7 +497,7 @@ def get_graph_plot(
         relations_paths={"is_a", "is_tautomer_of"},
     )
 
-    return graph_plot(
+    return graph_chebi_heatmap, graph_plot(
         graph_chebi_heatmap,
         chebi_name_to_id["chemical entity"],
         title=title,
