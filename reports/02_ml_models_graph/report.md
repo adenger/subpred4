@@ -1,6 +1,6 @@
 # Training ML models on Chebi graph
 
-## Letztes meeting 
+## Letztes meeting
 
 BFS
 

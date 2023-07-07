@@ -2,7 +2,7 @@
 
 ## Ziel
 
-Ziel: Das Finden von Substratklassen mit genügend Samples, am Besten Automatisch. Clustering hat nicht sehr gut funktioniert, vermutlich wegen der Überlappung zwischen den Substratklassen und wegen den verschiedenen Transportmechanismen. 
+Ziel: Das Finden von Substratklassen mit genügend Samples, am Besten Automatisch. Clustering hat nicht sehr gut funktioniert, vermutlich wegen der Überlappung zwischen den Substratklassen und wegen den verschiedenen Transportmechanismen.
 
 Nun wollte ich diese Überlappungen und die logischen Beziehungen zwischen den Molekülen direkt darstellen, und mit einem Algorithmus die Daten so weit filtern, bis ich bei ca. 10-20 Substratklassen angekommen bin.
 
@@ -10,7 +10,7 @@ Diese Plots habe ich für vier Organismen, und für einen Meta-Datensatz aus all
 
 ### Ancestors
 
-Letzte Woche habe ich die Ancestors der jeweiligen Substrate hinzugefügt. 
+Letzte Woche habe ich die Ancestors der jeweiligen Substrate hinzugefügt.
 
 Dazu habe ich ausschließlich “is_a” relations zwischen molekülspezies benutzt, und nur Chebi-Einträge mit 3/3 Sternen benutzt (manuell überprüft).
 
@@ -28,7 +28,7 @@ Variablen:
 
 - Adjazenz-Matrix (directed, no labels, bool-Werte)
 
-Wenn ein Chebi-Term einen Overlap von 100% mit einem abstrakteren Chebi-Term hat, dann machen wir einen Eintrag in die Matrix. 
+Wenn ein Chebi-Term einen Overlap von 100% mit einem abstrakteren Chebi-Term hat, dann machen wir einen Eintrag in die Matrix.
 
 Nun hat ein abstrakter Term mit $n$ annotierten Proteinenen drei Arten von Kindern:
 
@@ -65,25 +65,25 @@ Die Matrizen/**Heatmaps** sehen nun besser aus, die "chemical entity" ist nun de
 
 ## Arabidopsis thaliana
 
-![](../plots/heatmap_athaliana.png)
-![](../plots/graph_athaliana.png)
+![.](../plots/heatmap_athaliana.png)
+![.](../plots/graph_athaliana.png)
 
 ## Escherichia coli
 
-![](../plots/heatmap_ecoli.png)
-![](../plots/graph_ecoli.png)
+![.](../plots/heatmap_ecoli.png)
+![.](../plots/graph_ecoli.png)
 
 ## Human
 
-![](../plots/heatmap_human.png)
-![](../plots/graph_human.png)
+![.](../plots/heatmap_human.png)
+![.](../plots/graph_human.png)
 
 ## Hefe (S. cerevisiae)
 
-![](../plots/heatmap_yeast.png)
-![](../plots/graph_yeast.png)
+![.](../plots/heatmap_yeast.png)
+![.](../plots/graph_yeast.png)
 
 ## Meta-Organism (all four together)
 
-![](../plots/heatmap_athaliana+ecoli+human+yeast.png)
-![](../plots/graph_athaliana+ecoli+human+yeast.png)
+![.](../plots/heatmap_athaliana+ecoli+human+yeast.png)
+![.](../plots/graph_athaliana+ecoli+human+yeast.png)
