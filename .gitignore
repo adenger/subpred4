@@ -8,6 +8,8 @@ data_full.tar
 data_bak/*
 plots/*
 reports/*.html
+data_backup.tar.gz
+data/raw/gene_ontology/go_preprocessing.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

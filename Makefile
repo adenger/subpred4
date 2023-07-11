@@ -1,11 +1,11 @@
-.PHONY: setup_ubuntu env_export requirements package raw_data extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90
+.PHONY: setup_ubuntu env_export requirements package raw_data extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90 data_export
 
 #################################################################################
 # Conventions                                                                   #
 #################################################################################
 
 # "human": 		9606
-# "athaliana":		3702
+# "athaliana":	3702
 # "ecoli": 		83333
 # "yeast": 		559292
 
@@ -13,16 +13,20 @@
 # Setup                                                                         #
 #################################################################################
 
-## Install packages required on Ubuntu 20.04 LTS WSL
+## Install packages required on Ubuntu 22.04 LTS WSL
 setup_ubuntu:
 	sudo apt update && sudo apt upgrade -y
-	sudo apt install build-essential
+	sudo apt install build-essential pigz
 	wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
 	bash ~/miniconda.sh -p ~/miniconda3
 	rm ~/miniconda.sh
 	@echo Reload shell to put conda in path: source ~/.bashrc
 
-## Install packages with mambaforge (conda takes hours, mamba <1 min)
+## Import raw data from archive created with data_export
+data_import:
+	tar xvf data_backup.tar.gz
+
+## Install packages with mambaforge (conda also works but takes hours)
 requirements:
 	# conda update -n base -c defaults conda
 	mamba env create --file environment.yml
@@ -36,11 +40,21 @@ env_export:
 	conda env export | sed '/^prefix/d' > environment.yml
 	conda env export --from-history | sed '/^prefix/d' > environment_history.yml
 
+## Export raw data for sharing
+data_export:
+	tar -cvf - -T data_backup_list.txt | pigz > data_backup.tar.gz
+
+## Create local databases for generating new PSSM files
+blast_dbs:
+	cd data/raw/uniref/uniref50 && makeblastdb -in uniref50.fasta -parse_seqids -dbtype prot
+	cd data/raw/uniref/uniref90 && makeblastdb -in uniref90.fasta -parse_seqids -dbtype prot
+
+
 #################################################################################
 # Raw data                                                                      #
 #################################################################################
 
-## Download raw data
+## Download raw data (not reccomended, use data_import instead, future datasets might be incompatible)
 raw_data:
 	curl "http://current.geneontology.org/ontology/go.owl" > "data/raw/ontologies/go.owl"
 	curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.owl.gz" | gunzip -c > data/raw/ontologies/chebi.owl
@@ -54,33 +68,33 @@ raw_data:
 # Link for old API
 #	curl "https://www.uniprot.org/uniprot/?query=reviewed:yes&format=tab&columns=id,genes,protein%20names,organism,organism-id,keyword-id,keywords,go-id,go,database(TCDB),existence,sequence,fragment&sort=score" > data/raw/swissprot/sp_data.tsv
 
-## Extract raw data from manuscript 1
-raw_data_manuscript: data_full.tar
-	tar xvf data_full.tar
-	mkdir data/intermediate/blast
-	tar xf data/intermediate/blast.tar.xz --directory=data/intermediate/blast
-	rm data/intermediate/blast.tar.xz
+# ## Extract raw data from manuscript 1
+# raw_data_manuscript: data_full.tar
+# 	tar xvf data_full.tar
+# 	mkdir data/intermediate/blast
+# 	tar xf data/intermediate/blast.tar.xz --directory=data/intermediate/blast
+# 	rm data/intermediate/blast.tar.xz
 
 #################################################################################
 # Raw data: BLAST                           		                            #
 #################################################################################
 
-## Extract pssms from archive
-extract_pssms: 
-	mkdir -p data/intermediate/blast
-	tar xf data/intermediate/blast.tar.xz --directory=data/intermediate/blast
-	rm data/intermediate/blast.tar.xz
+# ## Extract pssms from archive
+# extract_pssms: 
+# 	mkdir -p data/intermediate/blast
+# 	tar xf data/intermediate/blast.tar.xz --directory=data/intermediate/blast
+# 	rm data/intermediate/blast.tar.xz
 
-## Init blast dbs for creating additional PSSMs. >100GB needed
-blast_databases: blastdb_uniref50 blastdb_uniref90
+# ## Init blast dbs for creating additional PSSMs. >100GB needed
+# blast_databases: blastdb_uniref50 blastdb_uniref90
 
-blastdb_uniref50: 
-	@echo Creating BLASTDB...
-	$(MAKE) -C data/raw/uniref/uniref50 uniref50.fasta.pdb
+# blastdb_uniref50: 
+# 	@echo Creating BLASTDB...
+# 	$(MAKE) -C data/raw/uniref/uniref50 uniref50.fasta.pdb
 
-blastdb_uniref90: 
-	@echo Creating BLASTDB...
-	$(MAKE) -C data/raw/uniref/uniref90 uniref90.fasta.pdb
+# blastdb_uniref90: 
+# 	@echo Creating BLASTDB...
+# 	$(MAKE) -C data/raw/uniref/uniref90 uniref90.fasta.pdb
 
 
 #################################################################################

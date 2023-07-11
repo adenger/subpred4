@@ -1,0 +1,14 @@
+data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz
+data/raw/gene_ontology/go_preprocessing.txt
+data/raw/interpro/interpro_entries.tsv
+data/raw/ontologies/chebi.obo
+data/raw/ontologies/go.obo
+data/raw/tcdb/tcdb_substrates.tsv
+data/raw/uniprot/uniprot_2022_05_evidence1-2_nofragments.tsv
+data/intermediate/blast
+data/raw/uniref/preprocessing.md
+data/raw/uniref/uniref90/uniref90.fasta
+data/raw/uniref/uniref50/uniref50.fasta
+data/models/.gitkeep
+data/features/.gitkeep
+data/datasets/.gitkeep
