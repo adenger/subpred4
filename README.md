@@ -2,7 +2,7 @@
 
 1. Clone repository
 
-2. Download data_backup.tar.gz and place in repository folder
+2. Download subpred4_data.tar.gz and place in repository folder
 
 3. Extract raw data
 

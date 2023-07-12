@@ -24,7 +24,7 @@ setup_ubuntu:
 
 ## Import raw data from archive created with data_export
 data_import:
-	tar xvf data_backup.tar.gz
+	tar xvf subpred4_data.tar.gz
 
 ## Install packages with mambaforge (conda also works but takes hours)
 requirements:
@@ -40,9 +40,9 @@ env_export:
 	conda env export | sed '/^prefix/d' > environment.yml
 	conda env export --from-history | sed '/^prefix/d' > environment_history.yml
 
-## Export raw data for sharing
+## Export raw data for sharing (requires conda env)
 data_export:
-	tar -cvf - -T data_backup_list.txt | pigz > data_backup.tar.gz
+	tar -cvf - -T data_backup_list.txt | pigz > subpred4_data.tar.gz
 
 ## Create local databases for generating new PSSM files
 blast_databases:
