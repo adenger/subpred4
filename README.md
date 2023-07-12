@@ -4,58 +4,31 @@ TODO readme text for manuscript 2
 
 ## Setup:
 
-1. Install Mambaforge
+1. Clone repository
+2. Download data_backup.tar.gz and place in repository folder
+3. Extract raw data:
 ```
-https://github.com/conda-forge/miniforge#mambaforge
+make data_import
 ```
-2. Recreate conda environment:
+4. Install Mambaforge
+```
+wget "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+bash Mambaforge-$(uname)-$(uname -m).sh
+source ~/.bashrc
+```
+5. Recreate exact conda environment (use the other yml file if there is an error):
 ```
 mamba env create --file environment.yml
 ```
-3. Activate conda environment: 
+6. Activate conda environment: 
 ```
 conda activate subpred4
 ```
-4. Install code as python package into environment: 
+7. Install code as python package into environment: 
 ```
-pip install -e .
+make package
 ```
-5. Download raw data: 
-```
-make raw_data
-```
-6. Create BLAST databases (Needs >100GB of space and takes several hours): 
+8. Create BLAST databases (Needs >100GB of space and takes several hours, pre-computed pssms are availabe in data/intermediate):
 ```
 make blast_databases
 ```
-
-<!-- ## Reproduce results from manuscript:
-
- 1. Install miniconda
-2. Recreate conda environment:
-```
-conda env create --file environment.yml
-```
-3. Activate conda environment: 
-```
-conda activate subpred
-```
-4. Install code as python package into environment: 
-```
-pip install -e .
-```
-5. Download data_full.tar from https://cloud.hiz-saarland.de/s/sGTyGApAqdgAQiB and place it in repository
-6. Rename existing data folder:
-```
-mv data data_bak
-```
-7. Extract tar archive:
-```
-make raw_data_manuscript
-```
-8. Create BLAST databases (Needs >100GB of space and takes several hours):
-    - This step is optional, as the previous step extracts pre-computed PSSMs for all proteins to *data/intermediate/blast*
-  
-```
-make blast_databases
-``` -->

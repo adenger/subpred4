@@ -45,7 +45,7 @@ data_export:
 	tar -cvf - -T data_backup_list.txt | pigz > data_backup.tar.gz
 
 ## Create local databases for generating new PSSM files
-blast_dbs:
+blast_databases:
 	cd data/raw/uniref/uniref50 && makeblastdb -in uniref50.fasta -parse_seqids -dbtype prot
 	cd data/raw/uniref/uniref90 && makeblastdb -in uniref90.fasta -parse_seqids -dbtype prot
 
