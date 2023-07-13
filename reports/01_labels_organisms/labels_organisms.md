@@ -65,25 +65,25 @@ Die Matrizen/**Heatmaps** sehen nun besser aus, die "chemical entity" ist nun de
 
 ## Arabidopsis thaliana
 
-![.](../plots/heatmap_athaliana.png)
-![.](../plots/graph_athaliana.png)
+![.](heatmap_athaliana.png)
+![.](graph_athaliana.png)
 
 ## Escherichia coli
 
-![.](../plots/heatmap_ecoli.png)
-![.](../plots/graph_ecoli.png)
+![.](heatmap_ecoli.png)
+![.](graph_ecoli.png)
 
 ## Human
 
-![.](../plots/heatmap_human.png)
-![.](../plots/graph_human.png)
+![.](heatmap_human.png)
+![.](graph_human.png)
 
 ## Hefe (S. cerevisiae)
 
-![.](../plots/heatmap_yeast.png)
-![.](../plots/graph_yeast.png)
+![.](heatmap_yeast.png)
+![.](graph_yeast.png)
 
 ## Meta-Organism (all four together)
 
-![.](../plots/heatmap_athaliana+ecoli+human+yeast.png)
-![.](../plots/graph_athaliana+ecoli+human+yeast.png)
+![.](heatmap_athaliana+ecoli+human+yeast.png)
+![.](graph_athaliana+ecoli+human+yeast.png)
