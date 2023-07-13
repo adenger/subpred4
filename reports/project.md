@@ -49,6 +49,36 @@ Results:
 
 Next:
 
-TODO last meeting volkhard, scanned PDF file!
+Aufspaltungen im Graphen analysieren. Wie gut funktionieren die? Wie fein können wir die Proteine unterteilen?
 
 ## ML models on levels of tree
+
+Idee:
+
+- Auftrennen der Kategorien in den Graphen mit ML Modellen
+  - Einfache SVM Pipeline
+- Wann funktioniert das? Vergleichen mit verschiedenen Maßen
+  - Overlap der Samples
+  - GO term semantic similarity
+  - maximale Sequenzidentität zwischen Proteinen beider Gruppen
+- Vergleich Meta-Datensatz mit einzelnen Organismen
+  - Und Gruppen ähnlicher Spezies wie Hefen
+
+### SVM Pipeline
+
+Test cases:
+
+- athaliana
+  - Ca2+ und K+
+  - inorganic anion/cation
+  - carboxylic acid anion/inorganic anion
+- ecoli
+  - carbohydrate derivate / monosaccharide
+  - minicarboxylic acid / amino acid
+- human
+  - Ca2+ / Na1+
+  - Ca2+ / K+
+  - Na+ / K+
+  - inorganic anion/cation
+- hefe
+  - amid / amino acid derivative
