@@ -1,6 +1,5 @@
 from copy import deepcopy
 from subpred.util import load_df
-import obonet
 import networkx as nx
 import pandas as pd
 
@@ -390,7 +389,7 @@ def preprocess_data(
         reviewed=True,
     )
 
-    graph_go = load_df("go_obo", folder_path=datasets_folder_path)#obonet.read_obo(go_obo_path, ignore_obsolete=True)
+    graph_go = load_df("go_obo", folder_path=datasets_folder_path)
 
     df_uniprot_goa = get_go_annotations(
         datasets_folder_path=datasets_folder_path,
@@ -415,7 +414,7 @@ def preprocess_data(
     )
 
     # filter chebi
-    graph_chebi = load_df("chebi_obo", folder_path=datasets_folder_path)#obonet.read_obo(chebi_obo_path, ignore_obsolete=True)
+    graph_chebi = load_df("chebi_obo", folder_path=datasets_folder_path)
     ## Filter by manually annotated entries
     print(len(graph_chebi.nodes()))
     graph_chebi = graph_chebi.subgraph(
