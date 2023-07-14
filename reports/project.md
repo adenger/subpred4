@@ -57,6 +57,7 @@ Idee:
 
 - Auftrennen der Kategorien in den Graphen mit ML Modellen
   - Einfache SVM Pipeline
+  - Viele verschiedene Test cases
 - Wann funktioniert das? Vergleichen mit verschiedenen Maßen
   - Overlap der Samples
   - GO term semantic similarity
@@ -64,21 +65,4 @@ Idee:
 - Vergleich Meta-Datensatz mit einzelnen Organismen
   - Und Gruppen ähnlicher Spezies wie Hefen
 
-### SVM Pipeline
-
-Test cases:
-
-- athaliana
-  - Ca2+ und K+
-  - inorganic anion/cation
-  - carboxylic acid anion/inorganic anion
-- ecoli
-  - carbohydrate derivate / monosaccharide
-  - minicarboxylic acid / amino acid
-- human
-  - Ca2+ / Na1+
-  - Ca2+ / K+
-  - Na+ / K+
-  - inorganic anion/cation
-- hefe
-  - amid / amino acid derivative
+### SVM Pipeline results

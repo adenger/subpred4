@@ -1,29 +1,36 @@
 # Training ML models on Chebi graph
 
-## Letztes meeting
+## SVM models, comparisons
+
+TODO implement pipeline(s)
+
+Create all the datasets, apply pipeline to all of them.
+
+Test cases:
+
+- athaliana
+  - Ca2+ und K+
+  - inorganic anion/cation
+  - carboxylic acid anion/inorganic anion
+- ecoli
+  - carbohydrate derivate / monosaccharide
+  - minicarboxylic acid / amino acid
+- human
+  - Ca2+ / Na1+
+  - Ca2+ / K+
+  - Na+ / K+
+  - inorganic anion/cation
+- hefe
+  - amid / amino acid derivative
+
+## Comparison of SVM results with other measures
+
+je mehr trennung desto weniger accuracy?
+Macht auftrennung chemisch sinn?
+go semanitc smilarity, maximale sequenzidentit, overlap
+
+## One organism vs different meta organisms
+
+## Automate process?
 
 BFS
-
-Paare die man auftrennen kann
-
-chemisch gesehen und von overlap her
-
-ähnlichkeiten: alternaitv go semanitc smilarity, sequenzidentit
-
-y achse: svm accuracy
-x achse: ähnlichkeit
-
-slider: accuracy, trennung. je mehr trennung desto weniger accuracy
-
-paarweise vergleiche
-BFS -> wie fein?
-
-Siehe Meetings folder Onedrive
-
-## Next
-
-### A thaliana
-
-- Auftrennen von K+ und Ca+ mit ML modell
-- Inorganic anion/cation
-- carboxylic acid anion / inorganic anion
