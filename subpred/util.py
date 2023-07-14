@@ -1,28 +1,27 @@
-import pandas as pd
 import os
-
-# import numpy as np
-# from sklearn.pipeline import make_pipeline
-# from sklearn.preprocessing import StandardScaler
-# from sklearn.decomposition import PCA
-# from sklearn.feature_selection import f_classif, chi2
-# from sklearn.cluster import AgglomerativeClustering
-# Functions used my multiple notebooks and other functions
-
 from pathlib import Path
 import pandas as pd
-
+import networkx as nx
+import pickle
 
 def save_df(
-    df: pd.DataFrame,
+    df: pd.DataFrame | nx.Graph,
     dataset_name: str,
     folder_path: str = "../data/datasets",
-    method: str = "pickle",
+    method: str = "auto",
     **kwargs,
 ):
+    if method == "auto":
+        if isinstance(df, pd.DataFrame):
+            method = "pickle"
+        elif isinstance(df, nx.Graph):
+            method = "gpickle"
     match (method):
         case "pickle":
             df.to_pickle(f"{folder_path}/{dataset_name}.pickle", **kwargs)
+        case "gpickle":
+            with open(f"{folder_path}/{dataset_name}.gpickle", "wb") as pickle_file:
+                pickle.dump(df, pickle_file)
         # case "pickle_gz":
         #     df.to_pickle(
         #         f"{folder_path}/{dataset_name}.pickle_gz",
@@ -40,7 +39,18 @@ def load_df(dataset_name: str, folder_path: str = "../data/datasets", **kwargs):
         match (file_extension):
             case "pickle" | "pickle_gz":
                 return pd.read_pickle(file_path, **kwargs)
+            case "gpickle":
+                with open(file_path, "rb") as pickle_file:
+                    return pickle.load(pickle_file)
 
+
+# import numpy as np
+# from sklearn.pipeline import make_pipeline
+# from sklearn.preprocessing import StandardScaler
+# from sklearn.decomposition import PCA
+# from sklearn.feature_selection import f_classif, chi2
+# from sklearn.cluster import AgglomerativeClustering
+# Functions used my multiple notebooks and other functions
 
 # def get_protein_aac_stats(df_aac, accession):
 #     # compare the feature values of accession to the other features in the dataset

@@ -80,14 +80,15 @@ def update_identifiers(
 def get_filtered_go_graph(
     graph_go: nx.MultiDiGraph,
     root_node: str,
-    protein_subset: set,
+    protein_subset: set = None,
     inter_go_relations: set = {"is_a"},
     aspects: set = {"molecular_function"},
 ):
     go_name_to_id = {name: id for id, name in graph_go.nodes(data="name")}
 
     ## Filter graph by protein dataset
-    graph_go = graph_go.subgraph(nodes=protein_subset)
+    if protein_subset:
+        graph_go = graph_go.subgraph(nodes=protein_subset)
     ## Filter graph by aspect/namespace
     graph_go = graph_go.subgraph(
         nodes=[
@@ -380,8 +381,6 @@ def graph_plot(
 def preprocess_data(
     organism_ids: set,
     datasets_folder_path: str,
-    go_obo_path: str,
-    chebi_obo_path: str,
     root_node: str = "transmembrane transporter activity",
 ):
     df_uniprot = get_protein_dataset(
@@ -391,7 +390,7 @@ def preprocess_data(
         reviewed=True,
     )
 
-    graph_go = obonet.read_obo(go_obo_path, ignore_obsolete=True)
+    graph_go = load_df("go_obo", folder_path=datasets_folder_path)#obonet.read_obo(go_obo_path, ignore_obsolete=True)
 
     df_uniprot_goa = get_go_annotations(
         datasets_folder_path=datasets_folder_path,
@@ -416,7 +415,7 @@ def preprocess_data(
     )
 
     # filter chebi
-    graph_chebi = obonet.read_obo(chebi_obo_path, ignore_obsolete=True)
+    graph_chebi = load_df("chebi_obo", folder_path=datasets_folder_path)#obonet.read_obo(chebi_obo_path, ignore_obsolete=True)
     ## Filter by manually annotated entries
     print(len(graph_chebi.nodes()))
     graph_chebi = graph_chebi.subgraph(
@@ -508,66 +507,66 @@ def get_graph_plot(
     )
 
 
-if __name__ == "__main__":
-    organism_ids = {83333}
-    datasets_folder_path = "data/datasets"
-    go_obo_path = "data/raw/ontologies/go.obo"
-    chebi_obo_path = "data/raw/ontologies/chebi.obo"
-    heatmap_output_path = "plots/heatmap_ecoli.png"
-    graph_output_path = "plots/graph_ecoli.png"
-
-    ################
-    # Read datasets
-    ################
-
-    # Uniprot, GOA, GO, Chebi
-    df_uniprot, df_uniprot_goa, graph_go, graph_chebi = preprocess_data(
-        organism_ids=organism_ids,
-        datasets_folder_path=datasets_folder_path,
-        go_obo_path=go_obo_path,
-        chebi_obo_path=chebi_obo_path,
-    )
-
-    ###################
-    # Substrate matrix
-    ###################
-
-    df_substrate_overlaps, dict_chebi_to_uniprot = get_substrate_matrix(
-        datasets_folder_path=datasets_folder_path,
-        graph_chebi=graph_chebi,
-        graph_go=graph_go,
-        df_uniprot_goa=df_uniprot_goa,
-    )
-
-    ###############
-    # Heatmap
-    ##############
-
-    create_heatmap(
-        df_matrix=df_substrate_overlaps,
-        title="Substrate molecular species overlaps for substrates with 20 or more transport proteins",
-        width=15,
-        height=10,
-        lower_triangle_only=True,
-        output_path=heatmap_output_path,
-    )
-
-    ###########
-    # Graph
-    ###########
-
-    get_graph_plot(
-        df_substrate_overlaps=df_substrate_overlaps,
-        dict_chebi_to_uniprot=dict_chebi_to_uniprot,
-        graph_chebi=graph_chebi,
-    )
 # if __name__ == "__main__":
-#     for organism_id_individual in [3702, 9606, 83333, 559292]:
-#         organism_ids = {organism_id_individual}
-#         organism_ids_str = "+".join([str(i) for i in organism_ids])
-#         print(organism_ids_str)
-#         create_plots(
-#             organism_ids=organism_ids,
-#             heatmap_output_path=f"plots/heatmap_{organism_ids_str}.png",
-#             graph_output_path=f"plots/graph_{organism_ids_str}.png",
-#         )
+#     organism_ids = {83333}
+#     datasets_folder_path = "data/datasets"
+#     go_obo_path = "data/raw/ontologies/go.obo"
+#     chebi_obo_path = "data/raw/ontologies/chebi.obo"
+#     heatmap_output_path = "plots/heatmap_ecoli.png"
+#     graph_output_path = "plots/graph_ecoli.png"
+
+#     ################
+#     # Read datasets
+#     ################
+
+#     # Uniprot, GOA, GO, Chebi
+#     df_uniprot, df_uniprot_goa, graph_go, graph_chebi = preprocess_data(
+#         organism_ids=organism_ids,
+#         datasets_folder_path=datasets_folder_path,
+#         go_obo_path=go_obo_path,
+#         chebi_obo_path=chebi_obo_path,
+#     )
+
+#     ###################
+#     # Substrate matrix
+#     ###################
+
+#     df_substrate_overlaps, dict_chebi_to_uniprot = get_substrate_matrix(
+#         datasets_folder_path=datasets_folder_path,
+#         graph_chebi=graph_chebi,
+#         graph_go=graph_go,
+#         df_uniprot_goa=df_uniprot_goa,
+#     )
+
+#     ###############
+#     # Heatmap
+#     ##############
+
+#     create_heatmap(
+#         df_matrix=df_substrate_overlaps,
+#         title="Substrate molecular species overlaps for substrates with 20 or more transport proteins",
+#         width=15,
+#         height=10,
+#         lower_triangle_only=True,
+#         output_path=heatmap_output_path,
+#     )
+
+#     ###########
+#     # Graph
+#     ###########
+
+#     get_graph_plot(
+#         df_substrate_overlaps=df_substrate_overlaps,
+#         dict_chebi_to_uniprot=dict_chebi_to_uniprot,
+#         graph_chebi=graph_chebi,
+#     )
+# # if __name__ == "__main__":
+# #     for organism_id_individual in [3702, 9606, 83333, 559292]:
+# #         organism_ids = {organism_id_individual}
+# #         organism_ids_str = "+".join([str(i) for i in organism_ids])
+# #         print(organism_ids_str)
+# #         create_plots(
+# #             organism_ids=organism_ids,
+# #             heatmap_output_path=f"plots/heatmap_{organism_ids_str}.png",
+# #             graph_output_path=f"plots/graph_{organism_ids_str}.png",
+# #         )
