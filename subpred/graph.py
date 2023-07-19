@@ -381,12 +381,14 @@ def preprocess_data(
     organism_ids: set,
     datasets_folder_path: str,
     root_node: str = "transmembrane transporter activity",
+    evidence_at_protein_level=True,
+    reviewed_proteins_only=False,
 ):
     df_uniprot = get_protein_dataset(
         datasets_folder_path=datasets_folder_path,
         organism_ids=organism_ids,
-        evidence_at_protein_level=True,
-        reviewed=True,
+        evidence_at_protein_level=evidence_at_protein_level,
+        reviewed=reviewed_proteins_only,
     )
 
     graph_go = load_df("go_obo", folder_path=datasets_folder_path)
