@@ -430,10 +430,10 @@ def get_substrate_matrix(
     datasets_folder_path: str,
     graph_chebi,
     graph_go,
-    df_uniprot_goa,
-    min_overlap=20,
-    max_overlap="half",
-    include_ancestor_chebi_ids=False,
+    df_uniprot_goa: pd.DataFrame,
+    min_overlap: int = 20,
+    max_overlap: int | str = "half",
+    include_ancestor_chebi_ids: bool = False,
 ):
     # GO-Chebi mapping
     df_go_to_chebi = get_go_chebi_mapping(
