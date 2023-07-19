@@ -524,8 +524,6 @@ def get_graph_plot(
 #     df_uniprot, df_uniprot_goa, graph_go, graph_chebi = preprocess_data(
 #         organism_ids=organism_ids,
 #         datasets_folder_path=datasets_folder_path,
-#         go_obo_path=go_obo_path,
-#         chebi_obo_path=chebi_obo_path,
 #     )
 
 #     ###################
