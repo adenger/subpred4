@@ -10,6 +10,7 @@ plots/*
 reports/*.html
 data_backup.tar.gz
 data/raw/gene_ontology/go_preprocessing.txt
+data/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
