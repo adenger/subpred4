@@ -4,6 +4,7 @@ import os
 from sklearn.preprocessing import minmax_scale
 import subprocess
 import platform
+from threading import active_count
 from .fasta import read_fasta, write_fasta
 
 PSSM_AA_ORDER = "ARNDCQEGHILKMFPSTWYV"
@@ -81,6 +82,9 @@ def __create_pssm_file(
     threads: int,
 ) -> None:
 
+    if threads < 0:
+        active_threads = active_count()
+        threads = active_threads - threads  + 1
     # TODO create tmp files, then rename after program finished
     log_file_name = f"{pssm_file_name}.log"
     subprocess.run(
