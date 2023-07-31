@@ -1,4 +1,4 @@
-.PHONY: setup_ubuntu env_export requirements package raw_data extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90 data_export
+.PHONY: setup_ubuntu env_export requirements package raw_data sync_tmp_files extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90 data_export
 
 #################################################################################
 # Conventions                                                                   #
@@ -49,6 +49,10 @@ blast_databases:
 	cd data/raw/uniref/uniref50 && makeblastdb -in uniref50.fasta -parse_seqids -dbtype prot
 	cd data/raw/uniref/uniref90 && makeblastdb -in uniref90.fasta -parse_seqids -dbtype prot
 
+## sync temp files between server and local machine
+sync_tmp_files:
+	rsync -ruvhP data/intermediate/ ad@tera:~/manuscript2/subpred4/data/intermediate
+	rsync -ruvhP ad@tera:~/manuscript2/subpred4/data/intermediate/ data/intermediate
 
 #################################################################################
 # Raw data                                                                      #
