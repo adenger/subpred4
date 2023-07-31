@@ -166,6 +166,7 @@ def calculate_pssm_feature(
     psiblast_executable: str = "psiblast",
     psiblast_threads: int = 4,
     verbose: bool = False,
+    feature_name:str = None
 ):
     accessions = list()
     features = list()
@@ -200,12 +201,14 @@ def calculate_pssm_feature(
         print(error)
 
     # pssm_aa_order = "ARNDCQEGHILKMFPSTWYV"
-    pssm_aa_substitutions = [
+    col_names = [
         aa1 + aa2 for aa1 in PSSM_AA_ORDER for aa2 in PSSM_AA_ORDER
     ]
+    if feature_name:
+        col_names = [f"{feature_name}__{col_name}" for col_name in col_names]
 
     pssm_df = pd.DataFrame(
-        data=features, index=accessions, columns=pssm_aa_substitutions
+        data=features, index=accessions, columns=col_names
     )
     return pssm_df
 
