@@ -7,3 +7,5 @@ gunzip -c goa_uniprot_all_ebi.gaf.gz | awk 'BEGIN {OFS="\t";FS="\t"} ($1 == "Uni
 mv goa_uniprot_all_ebi_filtered.tsv.xz.tmp goa_uniprot_all_ebi_filtered.tsv.xz
 
 Created 17.02.2023
+
+Version: 2022-11-03: 43.303
