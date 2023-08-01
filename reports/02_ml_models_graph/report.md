@@ -13,6 +13,10 @@ TODO implement pipeline(s)
     - Actual fix: Create flowchart of dataset creation to check how hard it is to redo the dataset creation pipeline in a simpler way.
 - extract eval scores for train and test, put them into table
   - together with sample counts, dataset name, substrates
+- class for creating go-slims would make things easier
+- pipeline is not deterministic
+  - only changes sometimes
+  - tested: saving sequence dataset and comparing to new one, no difference. 
 
 ## Test cases
 
@@ -33,14 +37,12 @@ TODO implement pipeline(s)
 
 ## ML-Model
 
-I implemented a simple SVM-RBF model with basic hyperparameter optimization. 
-
-There are two kinds of optional features selection: 
+I implemented a simple SVM-RBF model with basic hyperparameter optimization. There are two kinds of (optional) features selection:
 
 - Anova-based feature selection that optimized the percentile of best features
 - FeatureCombinator from manuscript 1 tries all combinations of features and feature generation parameters (such as psiblast iterations or blast database) and selects the optimal one based on training data.
 
-The Chebi-terms are used as labels.
+The Chebi-terms are used as labels. 
 
 The model is optimized using F1 score, and evaluated with F1/precision/recall for the individual classes.
 
@@ -52,7 +54,7 @@ go semanitc smilarity, maximale sequenzidentit, overlap
 
 ## One organism vs different meta organisms
 
-## Automate process?
+## Automate process of property annotation
 
 BFS
 
