@@ -4,9 +4,17 @@
 
 TODO implement pipeline(s)
 
-Create all the datasets, apply pipeline to all of them.
+## TODOs
 
-Test cases:
+- test cases for organisms and substrates from chebi graph picture
+  - wait for PSSMs from tera to finish
+  - why are there non-transporters in the dataset?
+    - Quickfix: just filter them again in the notebook, see how many are left
+    - Actual fix: Create flowchart of dataset creation to check how hard it is to redo the dataset creation pipeline in a simpler way.
+- extract eval scores for train and test, put them into table
+  - together with sample counts, dataset name, substrates
+
+## Test cases
 
 - athaliana
   - Ca2+ und K+
@@ -23,6 +31,19 @@ Test cases:
 - hefe
   - amid / amino acid derivative
 
+## ML-Model
+
+I implemented a simple SVM-RBF model with basic hyperparameter optimization. 
+
+There are two kinds of optional features selection: 
+
+- Anova-based feature selection that optimized the percentile of best features
+- FeatureCombinator from manuscript 1 tries all combinations of features and feature generation parameters (such as psiblast iterations or blast database) and selects the optimal one based on training data.
+
+The Chebi-terms are used as labels.
+
+The model is optimized using F1 score, and evaluated with F1/precision/recall for the individual classes.
+
 ## Comparison of SVM results with other measures
 
 je mehr trennung desto weniger accuracy?
@@ -34,3 +55,5 @@ go semanitc smilarity, maximale sequenzidentit, overlap
 ## Automate process?
 
 BFS
+
+## Transfer learning from E coli to similar bacteria, compare to BLAST
