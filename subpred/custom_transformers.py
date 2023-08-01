@@ -2,12 +2,29 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 import re
 from sklearn.feature_selection import SelectorMixin
+from itertools import combinations
+import pandas as pd
 
+def get_feature_type_combinations(feature_names:pd.Series):
+    # get all feature combinations for use with featureselector
+    feature_types = set([feature_name.split("__")[0] for feature_name in feature_names])
+
+    feature_type_combinations = list()
+    for tuple_length in range(2,len(feature_types)):
+        # len(feature_types) adds a list with all features
+        combinations_length = combinations(feature_types, tuple_length)
+        combinations_length = [np.array(c) for c in combinations_length]
+        feature_type_combinations.extend(combinations_length)
+    # add single features
+    feature_type_combinations.extend([np.array([feature_type]) for feature_type in feature_types])
+
+    return feature_type_combinations
 
 # this should be used this in combination with a standardscaler, since the features might not in the same range.
 class FeatureCombinator(BaseEstimator, SelectorMixin):
     # feature_names have the shape "feature_type__feature_name", separated by two underscores.
     def __init__(self, feature_names: np.array, feature_types: np.array = None):
+        # feature_names are the columns of the feature dataframe, feature_types determine the columns to select.
         # grid search sets these fields with the values from the parameter grid, then fit is called.
         self.feature_names = feature_names
         self.feature_types = feature_types
