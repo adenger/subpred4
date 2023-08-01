@@ -1,4 +1,4 @@
-.PHONY: setup_ubuntu env_export requirements package raw_data sync_tmp_files extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90 data_export
+.PHONY: setup_ubuntu env_export requirements package raw_data data_import sync_tmp_files extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90 data_export
 
 #################################################################################
 # Conventions                                                                   #
