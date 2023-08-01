@@ -40,8 +40,10 @@ env_export:
 	conda env export | sed '/^prefix/d' > environment.yml
 	conda env export --from-history | sed '/^prefix/d' > environment_history.yml
 
-## Export raw data for sharing (requires conda env)
+## Export raw data for sharing (requires active conda env)
 data_export:
+	find data/intermediate/blast -name "*.log" -delete
+	find data/intermediate/blast -name "*.fasta" -delete
 	tar -cvf - -T data_backup_list.txt | pigz > subpred4_data.tar.gz
 
 ## Create local databases for generating new PSSM files
