@@ -10,10 +10,10 @@ TODO implement pipeline(s)
   - wait for PSSMs from tera to finish
   - why are there non-transporters in the dataset?
     - Quickfix: just filter them again in the notebook, see how many are left
+      - class for creating go-slims would make things easier
     - Actual fix: Create flowchart of dataset creation to check how hard it is to redo the dataset creation pipeline in a simpler way.
 - extract eval scores for train and test, put them into table
   - together with sample counts, dataset name, substrates
-- class for creating go-slims would make things easier
 - pipeline is not deterministic
   - only changes sometimes
   - tested: saving sequence dataset and comparing to new one, no difference. 
