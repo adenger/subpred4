@@ -130,7 +130,7 @@ test_cases = [
     ("athaliana", "potassium(1+)", "calcium(2+)"),
     ("athaliana", "inorganic anion", "inorganic cation"),
     ("athaliana", "carboxylic acid anion", "inorganic anion"),
-    ("ecoli", "carbohydrate derivate", "monosaccharide"),
+    ("ecoli", "carbohydrate derivative", "monosaccharide"),
     ("ecoli", "monocarboxylic acid", "amino acid"),
     ("human", "calcium(2+)", "sodium(1+)"),
     ("human", "calcium(2+)", "potassium(1+)"),
