@@ -52,6 +52,9 @@ je mehr trennung desto weniger accuracy?
 Macht auftrennung chemisch sinn?
 go semanitc smilarity, maximale sequenzidentit, overlap
 
+- blast/mmseqs2
+- try protein embeddings
+
 ## One organism vs different meta organisms
 
 ## Automate process of property annotation
