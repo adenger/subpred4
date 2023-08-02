@@ -178,15 +178,12 @@ def get_go_chebi_mapping(
         .drop("relation", axis=1)
     )
     ## Filter by filtered graphs:
-    print(df_go_to_chebi.shape[0])
     df_go_to_chebi = df_go_to_chebi[
         df_go_to_chebi.go_id.isin(graph_go.nodes())
     ].reset_index(drop=True)
-    print(df_go_to_chebi.shape[0])
     df_go_to_chebi = df_go_to_chebi[
         df_go_to_chebi.chebi_id.isin(graph_chebi.nodes())
     ].reset_index(drop=True)
-    print(df_go_to_chebi.shape[0])
 
     ## Add ancestors
     if include_ancestor_chebi_ids:
@@ -404,7 +401,6 @@ def preprocess_data(
 
     ## Add ancestors to goa, i.e. more abstract terms
     df_uniprot_goa = add_ancestors(df_uniprot_goa=df_uniprot_goa, graph_go=graph_go)
-    print(len(graph_go.nodes()))
 
     # Filtering GO graph
     graph_go = get_filtered_go_graph(
@@ -418,11 +414,9 @@ def preprocess_data(
     # filter chebi
     graph_chebi = load_df("chebi_obo", folder_path=datasets_folder_path)
     ## Filter by manually annotated entries
-    print(len(graph_chebi.nodes()))
     graph_chebi = graph_chebi.subgraph(
         [x for x, data in graph_chebi.nodes(data=True) if "3_STAR" in data["subset"]]
     )
-    print(len(graph_chebi.nodes()))
     return df_uniprot, df_uniprot_goa, graph_go, graph_chebi
 
 
