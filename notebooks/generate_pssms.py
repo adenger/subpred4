@@ -6,11 +6,13 @@ from subpred.compositions import calculate_aac, calculate_paac
 import pandas as pd
 from subpred.cdhit import cd_hit
 
+
 def get_classification_task(
     organism_ids: set,
     labels: set,
     clustering_threshold: int = None,
     dataset_folder_path: str = "../data/datasets",
+    include_ancestor_chebi_ids=True,
 ) -> pd.DataFrame:
     # TODO handling for multi-substrate
     # TODO ability to use go terms or chebi terms (compare sample count, performance)
@@ -31,6 +33,7 @@ def get_classification_task(
         df_uniprot_goa=df_uniprot_goa,
         min_overlap=0,
         max_overlap=int(1e6),
+        include_ancestor_chebi_ids=include_ancestor_chebi_ids,
     )
     assert df_substrate_overlaps.shape[0] == len(dict_chebi_to_uniprot.keys())
     chebi_name_to_term = {
@@ -68,7 +71,8 @@ def get_classification_task(
         df_labels = df_labels.loc[cluster_representatives]
     return pd.concat([df_sequences, df_labels], axis=1)
 
-def get_features(series_sequences:pd.Series):
+
+def get_features(series_sequences: pd.Series):
     # df_aac = calculate_aac(series_sequences)
     # df_paac = calculate_paac(series_sequences)
     df_pssm_50_1 = calculate_pssm_feature(
@@ -78,7 +82,7 @@ def get_features(series_sequences:pd.Series):
         iterations=1,
         psiblast_threads=-1,
         verbose=True,
-        feature_name="PSSM_50_1"
+        feature_name="PSSM_50_1",
     )
     df_pssm_50_3 = calculate_pssm_feature(
         series_sequences,
@@ -87,7 +91,7 @@ def get_features(series_sequences:pd.Series):
         iterations=3,
         psiblast_threads=-1,
         verbose=True,
-        feature_name="PSSM_50_3"
+        feature_name="PSSM_50_3",
     )
     df_pssm_90_1 = calculate_pssm_feature(
         series_sequences,
@@ -96,7 +100,7 @@ def get_features(series_sequences:pd.Series):
         iterations=1,
         psiblast_threads=-1,
         verbose=True,
-        feature_name="PSSM_90_1"
+        feature_name="PSSM_90_1",
     )
     df_pssm_90_3 = calculate_pssm_feature(
         series_sequences,
@@ -105,7 +109,7 @@ def get_features(series_sequences:pd.Series):
         iterations=3,
         psiblast_threads=-1,
         verbose=True,
-        feature_name="PSSM_90_3"
+        feature_name="PSSM_90_3",
     )
     df_features = pd.concat(
         [
@@ -115,9 +119,11 @@ def get_features(series_sequences:pd.Series):
             df_pssm_50_3,
             df_pssm_90_1,
             df_pssm_90_3,
-        ], axis=1
+        ],
+        axis=1,
     )
     return df_features
+
 
 dataset_name_to_organism_ids = {
     "human": {9606},
@@ -149,6 +155,7 @@ for dataset_name, substrate1, substrate2 in test_cases:
         organism_ids=organism_ids,
         labels={substrate1, substrate2},
         clustering_threshold=None,
+        include_ancestor_chebi_ids=True,
     )
 
     df_features = get_features(df_dataset.sequence)
