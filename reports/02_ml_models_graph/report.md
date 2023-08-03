@@ -16,7 +16,7 @@ TODO implement pipeline(s)
   - together with sample counts, dataset name, substrates
 - pipeline is not deterministic
   - only changes sometimes
-  - tested: saving sequence dataset and comparing to new one, no difference. 
+  - tested: saving sequence dataset and comparing to new one, no difference.
 
 ## Test cases
 
@@ -35,14 +35,18 @@ TODO implement pipeline(s)
 - hefe
   - amid / amino acid derivative
 
-## ML-Model
+## Done
 
-I implemented a simple SVM-RBF model with basic hyperparameter optimization. There are two kinds of (optional) features selection:
+I created a data flowchart to get an overview of the processing and went through all the code. Adding ancestor chebi terms did not make difference.
+
+I implemented a SVM-RBF model with basic hyperparameter optimization. There are three kinds of features selection that are compared:
 
 - Anova-based feature selection that optimized the percentile of best features
 - FeatureCombinator from manuscript 1 tries all combinations of features and feature generation parameters (such as psiblast iterations or blast database) and selects the optimal one based on training data.
+- FeatureCombinator followed by Anova
 
-The Chebi-terms are used as labels. 
+Precision-Recall curves are created for each test case and each model. ROC curves have problems with imbalanced data. Also there is the F1 score for the training dataset, and a classification_report for the testing dataset.
+
 
 The model is optimized using F1 score, and evaluated with F1/precision/recall for the individual classes.
 
