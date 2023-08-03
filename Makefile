@@ -53,8 +53,12 @@ blast_databases:
 
 ## sync temp files between server and local machine
 sync_tmp_files:
-	rsync -ruvhP data/intermediate/ ad@tera:~/manuscript2/subpred4/data/intermediate
 	rsync -ruvhP ad@tera:~/manuscript2/subpred4/data/intermediate/ data/intermediate
+	rsync -ruvhP data/intermediate/ ad@tera:~/manuscript2/subpred4/data/intermediate
+
+## Upload data archive to onedrive
+sync_backup_archive:
+	cp subpred4_data.tar.gz /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/
 
 #################################################################################
 # Raw data                                                                      #
