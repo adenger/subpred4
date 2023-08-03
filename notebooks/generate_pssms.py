@@ -148,7 +148,7 @@ for dataset_name, substrate1, substrate2 in test_cases:
     df_dataset = get_classification_task(
         organism_ids=organism_ids,
         labels={substrate1, substrate2},
-        clustering_threshold=70,
+        clustering_threshold=None,
     )
 
     df_features = get_features(df_dataset.sequence)
