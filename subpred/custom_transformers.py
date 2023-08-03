@@ -2,23 +2,56 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 import re
 from sklearn.feature_selection import SelectorMixin
+from sklearn.compose import (
+    make_column_selector,
+    make_column_transformer,
+    ColumnTransformer,
+)
 from itertools import combinations
 import pandas as pd
 
-def get_feature_type_combinations(feature_names:pd.Series):
+
+# ColumnTransformer(, remainder="drop")
+
+# TODO and: add StandardScaler instead of "passthrough" to the transformer tuples, to standardize them individually! 
+# TODO generalize
+def get_column_selector_transformer_combinations():
+    # return all combinations of column selectors for use of a ColumnTransformer with GridSearchCV
+    transformers = [
+        ("aac", "passthrough", make_column_selector("^AAC__[A-Z]+")),
+        ("paac", "passthrough", make_column_selector("^PAAC__[A-Z]{2}")),
+        ("pssm1", "passthrough", make_column_selector("PSSM_50_1__[A-Z]{2}")),
+        ("pssm2", "passthrough", make_column_selector("PSSM_50_3__[A-Z]{2}")),
+        ("pssm3", "passthrough", make_column_selector("PSSM_90_1__[A-Z]{2}")),
+        ("pssm4", "passthrough", make_column_selector("PSSM_90_3__[A-Z]{2}")),
+    ]
+    transformer_combinations = list()
+    for tuple_length in range(2, len(transformers)):
+        combinations_length = combinations(transformers, tuple_length)
+        transformer_combinations.extend(combinations_length)
+    transformer_combinations.extend(
+        [[transformer] for transformer in transformers]
+    )
+    return transformer_combinations
+
+
+def get_feature_type_combinations(feature_names: pd.Series):
     # get all feature combinations for use with featureselector
     feature_types = set([feature_name.split("__")[0] for feature_name in feature_names])
 
     feature_type_combinations = list()
-    for tuple_length in range(2,len(feature_types)):
+    for tuple_length in range(2, len(feature_types)):
         # len(feature_types) adds a list with all features
         combinations_length = combinations(feature_types, tuple_length)
         combinations_length = [np.array(c) for c in combinations_length]
         feature_type_combinations.extend(combinations_length)
     # add single features
-    feature_type_combinations.extend([np.array([feature_type]) for feature_type in feature_types])
+    feature_type_combinations.extend(
+        [np.array([feature_type]) for feature_type in feature_types]
+    )
 
     return feature_type_combinations
+
 
 # this should be used this in combination with a standardscaler, since the features might not in the same range.
 class FeatureCombinator(BaseEstimator, SelectorMixin):
@@ -31,9 +64,12 @@ class FeatureCombinator(BaseEstimator, SelectorMixin):
 
     def _get_support_mask(self):
         feature_types_individual = np.array(
-            [feature_name.split("__")[0] for feature_name in self.feature_names]
-        , dtype=str)
-        return np.isin(element=feature_types_individual, test_elements=self.feature_types)
+            [feature_name.split("__")[0] for feature_name in self.feature_names],
+            dtype=str,
+        )
+        return np.isin(
+            element=feature_types_individual, test_elements=self.feature_types
+        )
 
     def fit(self, X, y=None):
         return self
