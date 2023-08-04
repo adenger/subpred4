@@ -17,6 +17,7 @@ TODO implement pipeline(s)
 - pipeline is not deterministic
   - only changes sometimes
   - tested: saving sequence dataset and comparing to new one, no difference.
+- Include preprocessing in flowchart?
 
 ## Test cases
 
