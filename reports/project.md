@@ -49,7 +49,7 @@ Results:
 
 Next:
 
-Aufspaltungen im Graphen analysieren. Wie gut funktionieren die? Wie fein können wir die Proteine unterteilen?
+Aufspaltungen im Graphen analysieren. Wie gut funktionieren die? Wie fein können wir die Proteine unterteilen? Gibt es korrelationen?
 
 ## ML models on levels of tree
 
@@ -64,5 +64,23 @@ Idee:
   - maximale Sequenzidentität zwischen Proteinen beider Gruppen
 - Vergleich Meta-Datensatz mit einzelnen Organismen
   - Und Gruppen ähnlicher Spezies wie Hefen
+
+Data results:
+
+- For each (organism, substrate1, substrate2) multiple matrices/heatmaps:
+  - SVM scores for one model (select one)
+    - F1 train score for each substrate (or average)
+    - F1 test score for each substrate (or average)
+  - Overlap matrix
+  - average sequence similarity
+  - chemical similarity (smiles etc.)
+
+- For each (organism, go_term1, go_term2) multiple matrices/heatmaps:
+  - SVM scores for one model (select one)
+    - F1 train score for each substrate (or average)
+    - F1 test score for each substrate (or average)
+  - Overlap matrix
+  - average sequence similarity
+  - semantic similarity
 
 ### SVM Pipeline results
