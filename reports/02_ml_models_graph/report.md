@@ -45,7 +45,7 @@ I implemented a SVM-RBF model with basic hyperparameter optimization. There are 
 - FeatureCombinator from manuscript 1 tries all combinations of features and feature generation parameters (such as psiblast iterations or blast database) and selects the optimal one based on training data.
 - FeatureCombinator followed by Anova
 
-Precision-Recall curves are created for each test case and each model. ROC curves have problems with imbalanced data. Also there is the F1 score for the training dataset, and a classification_report for the testing dataset.
+Precision-Recall curves are created for each test case and each model. ROC curves have problems with imbalanced data. Also there is the F1 score for the training dataset, and a classification_report for the testing dataset. ROC curves showed misleading results. This could be due to the two separate evaluations, or because of PR curves in general. Link with explanation: <https://medium.com/@douglaspsteen/precision-recall-curves-d32e5b290248>
 
 
 The model is optimized using F1 score, and evaluated with F1/precision/recall for the individual classes.
