@@ -58,6 +58,7 @@ sync_tmp_files:
 
 ## Upload data archive to onedrive
 sync_backup_archive:
+	mv /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/subpred4_data.tar.gz /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/subpred4_data_prev.tar.gz
 	cp subpred4_data.tar.gz /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/
 
 #################################################################################
