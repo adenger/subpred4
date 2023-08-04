@@ -68,6 +68,7 @@ Idee:
 Data results:
 
 - For each (organism, substrate1, substrate2) multiple matrices/heatmaps:
+  - is_a connections
   - SVM scores for one model (select one)
     - F1 train score for each substrate (or average)
     - F1 test score for each substrate (or average)
@@ -76,6 +77,7 @@ Data results:
   - chemical similarity (smiles etc.)
 
 - For each (organism, go_term1, go_term2) multiple matrices/heatmaps:
+  - is_a connections
   - SVM scores for one model (select one)
     - F1 train score for each substrate (or average)
     - F1 test score for each substrate (or average)
