@@ -85,4 +85,7 @@ Data results:
   - average sequence similarity
   - semantic similarity
 
+- Then: calculate correlations, statistical tests, etc.
+- For adjacency matrix: If substrates are 1 in a column (or row?) then they have same parent
+
 ### SVM Pipeline results
