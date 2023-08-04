@@ -53,7 +53,9 @@ Aufspaltungen im Graphen analysieren. Wie gut funktionieren die? Wie fein könne
 
 ## ML models on levels of tree
 
-Idee:
+### Fragen
+
+Ideen:
 
 - Auftrennen der Kategorien in den Graphen mit ML Modellen
   - Einfache SVM Pipeline
@@ -62,30 +64,14 @@ Idee:
   - Overlap der Samples
   - GO term semantic similarity
   - maximale Sequenzidentität zwischen Proteinen beider Gruppen
+  - blast/mmseqs2 performance im Vergleich mit SVM
+  - protein embeddings cosine similarity
+  - Mehrere Matrizen mit LabelxLabel als row/col
+  - Je mehr trennung desto weniger accuracy?
+  - Macht auftrennung chemisch sinn?
 - Vergleich Meta-Datensatz mit einzelnen Organismen
   - Und Gruppen ähnlicher Spezies wie Hefen
 
 Data results:
-
-- For each (organism, substrate1, substrate2) multiple matrices/heatmaps:
-  - is_a connections (nx.from_pandas_adjacency, nx.adjacency_matrix)
-  - SVM scores for one model (select one)
-    - F1 train score for each substrate (or average)
-    - F1 test score for each substrate (or average)
-  - Overlap matrix
-  - average sequence similarity
-  - chemical similarity (smiles etc.)
-
-- For each (organism, go_term1, go_term2) multiple matrices/heatmaps:
-  - is_a connections (nx.from_pandas_adjacency, nx.adjacency_matrix)
-  - SVM scores for one model (select one)
-    - F1 train score for each substrate (or average)
-    - F1 test score for each substrate (or average)
-  - Overlap matrix
-  - average sequence similarity
-  - semantic similarity
-
-- Then: calculate correlations, statistical tests, etc.
-- For adjacency matrix: If substrates are 1 in a column (or row?) then they have same parent
 
 ### SVM Pipeline results
