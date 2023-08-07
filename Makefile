@@ -42,8 +42,6 @@ env_export:
 
 ## Export raw data for sharing (requires active conda env)
 data_export:
-	find data/intermediate/blast -name "*.log" -delete
-	find data/intermediate/blast -name "*.fasta" -delete
 	tar -cvf - -T data_backup_list.txt | pigz > subpred4_data.tar.gz
 
 ## Create local databases for generating new PSSM files
@@ -60,6 +58,11 @@ sync_tmp_files:
 sync_backup_archive:
 	mv /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/subpred4_data.tar.gz /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/subpred4_data_prev.tar.gz
 	cp subpred4_data.tar.gz /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/
+
+## Clean up tmp files that are not needed
+clear_tmp_files:
+	find data/intermediate/blast -name "*.log" -delete
+	find data/intermediate/blast -name "*.fasta" -delete
 
 #################################################################################
 # Raw data                                                                      #
