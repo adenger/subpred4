@@ -3,7 +3,7 @@ import networkx as nx
 import pandas as pd
 
 
-def __get_go_subgraph(
+def get_go_subgraph(
     graph_go,
     root_node: str = "GO:0022857",
     keys: set = {"is_a"},
@@ -101,7 +101,11 @@ def get_go_annotations_subset(
     datasets_path: str,
     root_go_term: str,
     inner_go_relations: set = {"is_a"},
-    namespaces_keep: set = {"biological_process", "molecular_function", "cellular_component"},
+    namespaces_keep: set = {
+        "biological_process",
+        "molecular_function",
+        "cellular_component",
+    },
     proteins_subset: set = None,
     go_protein_qualifiers_filter_set: set = None,
     annotations_evidence_codes_remove: set = None,
@@ -154,7 +158,7 @@ def get_go_annotations_subset(
     go_term_to_id = {go_term: go_id for go_id, go_term in graph_go.nodes(data="name")}
     go_id_update_dict = __get_id_update_dict(graph_go=graph_go)
     # This graph is not filtered by the protein set!
-    graph_go_subgraph = __get_go_subgraph(
+    graph_go_subgraph = get_go_subgraph(
         graph_go=graph_go,
         root_node=go_term_to_id[root_go_term],
         keys=inner_go_relations,
@@ -181,7 +185,9 @@ def get_go_annotations_subset(
     )
     # add go terms
     df_uniprot_goa["go_term"] = df_uniprot_goa.go_id.map(go_id_to_term)
-    df_uniprot_goa["go_term_ancestor"] = df_uniprot_goa.go_id_ancestor.map(go_id_to_term)
+    df_uniprot_goa["go_term_ancestor"] = df_uniprot_goa.go_id_ancestor.map(
+        go_id_to_term
+    )
     # sort columns
     df_uniprot_goa = df_uniprot_goa[
         [
