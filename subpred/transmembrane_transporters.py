@@ -31,10 +31,10 @@ def get_transmembrane_transporter_dataset(
     df_sequences = df_sequences[df_sequences.index.isin(df_uniprot_goa.Uniprot)]
 
     # Get chebi terms associated with go terms. Get them for ancestors, since go_id is subset of that.
-    # TODO does it include molecules that are not 3-star? No.
     df_go_chebi = get_go_chebi_annotations(
         dataset_path=datasets_path,
         go_ids_subset=set(df_uniprot_goa.go_id_ancestor),
         go_chebi_relations_subset={"has_primary_input", "has_participant"},
+        filter_by_3star=False  # TODO
     )
     return df_sequences, df_uniprot_goa, df_go_chebi

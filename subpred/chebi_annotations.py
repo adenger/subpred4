@@ -15,6 +15,7 @@ def get_go_chebi_annotations(
     dataset_path: str,
     go_ids_subset: set = None,
     go_chebi_relations_subset: set = {"has_primary_input", "has_participant"},
+    filter_by_3star:bool = False
 ):
     df_go_chebi = load_df("go_chebi", folder_path=dataset_path)
     graph_chebi = load_df("chebi_obo", folder_path=dataset_path)
@@ -38,6 +39,10 @@ def get_go_chebi_annotations(
 
     if go_ids_subset:
         df_go_chebi = df_go_chebi[df_go_chebi.go_id.isin(go_ids_subset)]
+
+    if filter_by_3star:
+        chebi_3star = {node for node, subset in graph_chebi.nodes(data="subset") if "3_STAR" in subset}
+        df_go_chebi = df_go_chebi[df_go_chebi.chebi_id.isin(chebi_3star)]
 
     df_go_chebi = df_go_chebi.sort_values(
         ["go_id", "chebi_id", "chebi_go_relation"]
