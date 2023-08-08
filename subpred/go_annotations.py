@@ -94,12 +94,13 @@ def __add_ancestors(df_uniprot_goa, graph_go):
     return df_uniprot_goa
 
 
+# TODO default parameters
 def get_go_annotations_subset(
     datasets_path: str,
     root_go_term: str,
     inner_go_relations: set,
     namespaces_keep: set,
-    proteins_keep: set,
+    proteins_subset: set,
     go_protein_qualifiers_keep: set,
     annotations_evidence_codes_remove: set = None,
 ) -> pd.DataFrame:
@@ -119,7 +120,7 @@ def get_go_annotations_subset(
         namespaces_keep (set): 
             limit go graph to namespace. 
             options are: "biological_process""molecular_function", "cellular_component"
-        proteins_keep (set): 
+        proteins_subset (set):
             subset the protein annotations to set of Uniprot accessions
             e.g.  to limit annotations to an organism
         go_protein_qualifiers_keep (set):
@@ -131,6 +132,19 @@ def get_go_annotations_subset(
     Returns:
         pd.DataFrame: Subset of go annotations, with added ancestors
     """
+
+    # Example:
+
+    # df_uniprot_goa = get_go_annotations_subset(
+    #     datasets_path="../data/datasets/",
+    #     root_go_term="transmembrane transporter activity",
+    #     inner_go_relations={"is_a"},
+    #     namespaces_keep={"molecular_function"},
+    #     proteins_subset=set(df_sequences.index),
+    #     go_protein_qualifiers_keep={"enables"},
+    #     annotations_evidence_codes_remove={"IEA"},
+    # )
+
 
     graph_go = load_df("go_obo", folder_path=datasets_path)
     go_id_to_term = {go_id: go_term for go_id, go_term in graph_go.nodes(data="name")}
@@ -151,7 +165,7 @@ def get_go_annotations_subset(
     # get all go annotations, filtered by parameters, with updated ids
     df_uniprot_goa = __get_go_annotations(
         go_id_update_dict=go_id_update_dict,
-        proteins_subset=proteins_keep,
+        proteins_subset=proteins_subset,
         go_ids_subset=set(graph_go_transmembrane_transport.nodes()),
         qualifiers_keep=go_protein_qualifiers_keep,
         aspects_keep={namespace_to_aspect[namespace] for namespace in namespaces_keep}
@@ -181,3 +195,4 @@ def get_go_annotations_subset(
     ]
 
     return df_uniprot_goa
+
