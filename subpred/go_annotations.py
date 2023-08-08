@@ -87,11 +87,11 @@ def __get_go_annotations(
 
 
 def __add_ancestors(df_uniprot_goa, graph_go):
-    df_uniprot_goa["ancestor"] = df_uniprot_goa.go_id.map(
+    df_uniprot_goa["go_id_ancestor"] = df_uniprot_goa.go_id.map(
         lambda go_id: {go_id} | set(nx.descendants(graph_go, go_id))
     )
 
-    df_uniprot_goa = df_uniprot_goa.explode("ancestor")
+    df_uniprot_goa = df_uniprot_goa.explode("go_id_ancestor")
     df_uniprot_goa = df_uniprot_goa.reset_index(drop=True)
 
     return df_uniprot_goa
@@ -153,7 +153,8 @@ def get_go_annotations_subset(
     go_id_to_term = {go_id: go_term for go_id, go_term in graph_go.nodes(data="name")}
     go_term_to_id = {go_term: go_id for go_id, go_term in graph_go.nodes(data="name")}
     go_id_update_dict = __get_id_update_dict(graph_go=graph_go)
-    graph_go_transmembrane_transport = __get_go_subgraph(
+    # This graph is not filtered by the protein set!
+    graph_go_subgraph = __get_go_subgraph(
         graph_go=graph_go,
         root_node=go_term_to_id[root_go_term],
         keys=inner_go_relations,
@@ -169,18 +170,18 @@ def get_go_annotations_subset(
     df_uniprot_goa = __get_go_annotations(
         go_id_update_dict=go_id_update_dict,
         proteins_subset=proteins_subset,
-        go_ids_subset=set(graph_go_transmembrane_transport.nodes()),
+        go_ids_subset=set(graph_go_subgraph.nodes()),
         qualifiers_keep=go_protein_qualifiers_filter_set,
         aspects_keep={namespace_to_aspect[namespace] for namespace in namespaces_keep},
         evidence_codes_remove=annotations_evidence_codes_remove,
     )
     # add ancestors
     df_uniprot_goa = __add_ancestors(
-        df_uniprot_goa=df_uniprot_goa, graph_go=graph_go_transmembrane_transport
+        df_uniprot_goa=df_uniprot_goa, graph_go=graph_go_subgraph
     )
     # add go terms
     df_uniprot_goa["go_term"] = df_uniprot_goa.go_id.map(go_id_to_term)
-    df_uniprot_goa["go_term_ancestor"] = df_uniprot_goa.ancestor.map(go_id_to_term)
+    df_uniprot_goa["go_term_ancestor"] = df_uniprot_goa.go_id_ancestor.map(go_id_to_term)
     # sort columns
     df_uniprot_goa = df_uniprot_goa[
         [
@@ -190,7 +191,7 @@ def get_go_annotations_subset(
             "go_term",
             "evidence_code",
             "aspect",
-            "ancestor",
+            "go_id_ancestor",
             "go_term_ancestor",
         ]
     ]
