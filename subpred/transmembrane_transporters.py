@@ -2,6 +2,10 @@ from subpred.protein_dataset import get_sequence_dataset
 from subpred.go_annotations import get_go_annotations_subset
 from subpred.chebi_annotations import get_go_chebi_annotations
 
+# "human": 		9606
+# "athaliana":	3702
+# "ecoli": 		83333
+# "yeast": 		559292
 
 def get_transmembrane_transporter_dataset(
     organism_ids: set = None,
