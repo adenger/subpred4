@@ -7,6 +7,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import numpy as np
 
+# TODO this file is deprecated, rewrite graph plot methods for new data
 
 def get_protein_dataset(
     datasets_folder_path: str,
