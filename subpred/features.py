@@ -1,9 +1,10 @@
 from subpred.compositions import calculate_aac, calculate_paac
 from subpred.pssm import calculate_pssm_feature
 import pandas as pd
+from sklearn.preprocessing import scale
 
 
-def calculate_features(series_sequences: pd.Series):
+def calculate_features(series_sequences: pd.Series, standardize_samples: bool = False):
     df_aac = calculate_aac(series_sequences)
     df_paac = calculate_paac(series_sequences)
     df_pssm_50_1 = calculate_pssm_feature(
@@ -42,15 +43,25 @@ def calculate_features(series_sequences: pd.Series):
         verbose=False,
         feature_name="PSSM_90_3",
     )
+    features_list = [
+        df_aac,
+        df_paac,
+        df_pssm_50_1,
+        df_pssm_50_3,
+        df_pssm_90_1,
+        df_pssm_90_3,
+    ]
+    if standardize_samples:
+        features_list = [
+            pd.DataFrame(
+                data=scale(feature, axis=1),
+                index=feature.index,
+                columns=feature.columns,
+            )
+            for feature in features_list
+        ]
     df_features = pd.concat(
-        [
-            df_aac,
-            df_paac,
-            df_pssm_50_1,
-            df_pssm_50_3,
-            df_pssm_90_1,
-            df_pssm_90_3,
-        ],
+        features_list,
         axis=1,
     )
     return df_features
