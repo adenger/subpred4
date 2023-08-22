@@ -35,3 +35,6 @@ dependencies:
   - pygraphviz
   - pigz
   - rdkit
+  - rpy2
+  - bioconductor-gosemsim
+  - r-future.apply
