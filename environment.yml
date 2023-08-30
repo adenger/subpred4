@@ -32,6 +32,7 @@ dependencies:
   - bioconductor-gosemsim=2.26.0=r43hf17093f_0
   - bioconductor-iranges=2.34.1=r43ha9d7317_0
   - bioconductor-keggrest=1.40.0=r43hdfd78af_0
+  - bioconductor-org.sc.sgd.db=3.17.0=r43hdfd78af_0
   - bioconductor-s4vectors=0.38.1=r43ha9d7317_0
   - bioconductor-xvector=0.40.0=r43ha9d7317_0
   - bioconductor-zlibbioc=1.46.0=r43ha9d7317_0

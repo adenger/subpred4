@@ -38,3 +38,4 @@ dependencies:
   - rpy2
   - bioconductor-gosemsim
   - r-future.apply
+  - bioconductor-org.sc.sgd.db
