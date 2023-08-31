@@ -295,7 +295,7 @@ def get_model_evaluation_matrix_parallel(
 
 
 def process_pairwise_eval_results(
-    pairwise_eval_results: tuple, df_uniprot_goa: pd.DataFrame
+    pairwise_eval_results: tuple, df_uniprot_goa: pd.DataFrame, convert_go_ids_to_terms:bool = True
 ):
     go_id_to_term = {
         go_id: go_term
@@ -316,7 +316,7 @@ def process_pairwise_eval_results(
         y,
         sample_names,
     ) in pairwise_eval_results:
-        go_term0, go_term1 = [go_id_to_term[go_id] for go_id in class_names]
+        go_term0, go_term1 = [go_id_to_term[go_id] for go_id in class_names] if convert_go_ids_to_terms else list(class_names)
         records_train.append([go_term0, go_term1, train_scores_label0.mean()])
         records_train.append([go_term1, go_term0, train_scores_label1.mean()])
         # records_train.append([go_term1,go_term0,train_scores[1]])
