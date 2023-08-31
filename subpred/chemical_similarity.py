@@ -101,18 +101,18 @@ def get_fingerprint(
 
 
 def get_pairwise_similarity(chebi_ids: list, fingerprint_method: str = "morgan"):
-    """Calculate pairwise tanimoto similarities 
+    """Calculate pairwise tanimoto similarities
 
     Args:
         chebi_ids (list): list of chebi identifiers
-        fingerprint_method (str, optional): 
-            Options: "morgan", "atompairs", "torsions", "maccs". 
+        fingerprint_method (str, optional):
+            Options: "morgan", "atompairs", "torsions", "maccs".
             Defaults to "morgan".
 
     Returns:
-        pd.DataFrame: DataFrame with pairwise tanimoto scores. 
+        pd.DataFrame: DataFrame with pairwise tanimoto scores.
             Only keeps ids for which a smiles string can be found
-            and for which a fingerprint can be calculated 
+            and for which a fingerprint can be calculated
     """
     graph_chebi = load_df("chebi_obo")
     chebi_smiles_dict = get_chebi_smiles_dict(graph_chebi=graph_chebi)
@@ -137,6 +137,51 @@ def get_pairwise_similarity(chebi_ids: list, fingerprint_method: str = "morgan")
             for finterprint2 in df_smiles.fingerprint
         ],
         index=df_smiles.index,
-        columns=df_smiles.index,
+        columns=df_smiles.index.rename("chebi_id2"),
     )
     return df_chem_similarity
+
+
+def tanimoto_chebi_to_go(
+    df_tanimoto_chebi: pd.DataFrame,
+    df_go_chebi: pd.DataFrame,
+    agg_function="mean",
+    primary_input_only: bool = True,
+) -> pd.DataFrame:
+    """Converts tanimoto scores between molecules into aggregated tanimoto scores between go terms annotated with those molecules.
+
+    Args:
+        df_tanimoto_chebi (pd.DataFrame): The dataframe to convert. Created with get_pairwise_similarity
+        df_go_chebi (pd.DataFrame): GO-Chebi mapping df from subpred.transmembrane_transporters
+        agg_function (str, optional): aggregation function, if two GO terms have multiple tanimoto scores.
+            Can be any aggr. function, for example min, max, median, mean, etc. Defaults to "mean".
+        primary_input_only (bool, optional): Whether to only look at transported substrates (True),
+            Or also at interacting molecules such as ATP, H2O, etc. Defaults to True.
+
+    Returns:
+        pd.DataFrame: Aggretated Tanimoto scores between go terms, based on the substrates of their proteins.
+    """
+    df_go_chebi_local = (
+        df_go_chebi[df_go_chebi.chebi_go_relation == "has_primary_input"].copy()
+        if primary_input_only
+        else df_go_chebi.copy()
+    )
+
+    df_tanimoto_go = df_tanimoto_chebi.unstack().reset_index(name="tanimoto")
+    chebi_id_to_go_ids = (
+        df_go_chebi_local.groupby("chebi_id")
+        .apply(lambda x: x.go_id.sort_values().unique().tolist())
+        .to_dict()
+    )
+    df_tanimoto_go["go_id1"] = df_tanimoto_go.chebi_id.map(chebi_id_to_go_ids)
+    df_tanimoto_go["go_id2"] = df_tanimoto_go.chebi_id2.map(chebi_id_to_go_ids)
+    df_tanimoto_go = (
+        df_tanimoto_go.explode("go_id1").explode("go_id2").reset_index(drop=True)
+    )
+
+    df_tanimoto_go = (
+        df_tanimoto_go.drop(["chebi_id", "chebi_id2"], axis=1)
+        .groupby(["go_id1", "go_id2"], as_index=False)
+        .agg(agg_function)
+    )
+    return df_tanimoto_go.pivot(index="go_id1", columns="go_id2", values="tanimoto")
