@@ -100,11 +100,15 @@ def get_fingerprint(
 #     return tanimoto
 
 
-def get_pairwise_similarity(chebi_ids: list, fingerprint_method: str = "morgan"):
+def get_pairwise_similarity(
+    df_go_chebi: pd.DataFrame,
+    fingerprint_method: str = "morgan",
+    primary_input_only: bool = True,
+):
     """Calculate pairwise tanimoto similarities
 
     Args:
-        chebi_ids (list): list of chebi identifiers
+        df_go_chebi (pd.DataFrame): DataFrame created with get_go_chebi_annotations
         fingerprint_method (str, optional):
             Options: "morgan", "atompairs", "torsions", "maccs".
             Defaults to "morgan".
@@ -114,6 +118,13 @@ def get_pairwise_similarity(chebi_ids: list, fingerprint_method: str = "morgan")
             Only keeps ids for which a smiles string can be found
             and for which a fingerprint can be calculated
     """
+    df_go_chebi_copy = df_go_chebi.copy()
+    if primary_input_only:
+        df_go_chebi_copy = df_go_chebi_copy[
+            df_go_chebi_copy.chebi_go_relation == "has_primary_input"
+        ]
+    chebi_ids = df_go_chebi_copy.chebi_id.unique()
+
     graph_chebi = load_df("chebi_obo")
     chebi_smiles_dict = get_chebi_smiles_dict(graph_chebi=graph_chebi)
     smiles = [chebi_smiles_dict.get(chebi_id) for chebi_id in chebi_ids]
