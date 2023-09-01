@@ -1,6 +1,5 @@
 # What determines a good classification performance of a substrate class?
 
-TODO try different correlation measures?
 
 ## Overview
 
@@ -27,7 +26,7 @@ After filtering the proteins from UniprotKB, a subset of membrane transporter su
 - Only terms that have the *enables* relation to their protein, which means that the function is directly carried out by the protein. The *part_of* relation only added outliers, like parts of transport protein complexes that don't carry out the transport directly.
 - Finally, the each term is annotated with its ancestors, all the way up to the root node, but only using *is_a* edges. This increases the number of samples drastically. For example, a protein annotated with *sugar transmembrane transporter activity* is also annotated with *carbohydrate transmembrane transporter activity*, because there is an *is_a* relation between the two terms.
 
-Lastly, the chebi terms for the GO terms are retrieved from a dataset of cross-ontology relations. ChEBI is a database of biologically relevant molecules, and also an ontology. These can be filtered by 3-star terms, which are manually curated. For our yeast dataset, this did not make a difference. There are two types of cross-ontology relations that are relevant: *has_primary_input* typically denotes the transported substrate or substrates, and *has_participant* typically includes other molecules that contribute to the transport, such as ATP or H2O. 
+Lastly, the chebi terms for the GO terms are retrieved from a dataset of cross-ontology relations. ChEBI is a database of biologically relevant molecules, and also an ontology. These can be filtered by 3-star terms, which are manually curated. For our yeast dataset, this did not make a difference. There are two types of cross-ontology relations that are relevant: *has_primary_input* typically denotes the transported substrate or substrates, and *has_participant* typically includes other molecules that contribute to the transport, such as ATP or H2O.
 
 In contrast to GO, ChEBI is not acyclid. This means that adding ancestors is not as trivial as with GO, and traversing the graph to find ancestors can often add thousands of terms that have some path to the term we are looking at. Therefore, we decided against using ChEBI terms and the ChEBI ontology directly, and instead see them as annotations for our GO graph.
 
@@ -55,9 +54,10 @@ The yeast dataset contains:
 - 131 unique GO terms annotated to the 89 ChEBI terms that are usable for Tanimoto coefficient
 - 36 GO terms with more than 20 samples per class and at least 20 unique proteins per class (i.e. usable for ML). We could try going down to at least 15 unique proteins per class.
 
+
 ## Matrices
 
-### GO matrices
+### GO pairwise score matrices
 
 - Binary adjacency matrix of GO terms, only using *is_a* relations. **$288 \times 288$**
 - Overlap matrix of GO terms, i.e. how many proteins two terms have in common. **$288 \times 288$**
@@ -88,3 +88,17 @@ The yeast dataset contains:
     - Matrices are asymetrical: score (i,j) is classification if GO term i is positive class, and GO term j is negative class. The average of i,j and j,i is the macro-averaged F1 score.
   - SVM pipeline with feature selection TODO
   - SVM pipeline with PCA TODO
+
+## Analysis
+
+TODO try different correlation measures?
+TODO try averaging train/test scores before
+
+### Pearson correlation between matrices and train/test score
+
+## Next steps/TODOs
+
+- graph with sample count depending on min sample count and max overlap count
+- ML models with feature selection and/or PCA
+- is_a is not working, since no two go terms in the ML dataset are direct descendants. 
+  - Other graph similarity score, like distance of common ancestor, or whether they have the same parent
