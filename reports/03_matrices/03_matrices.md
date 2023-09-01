@@ -92,9 +92,18 @@ The yeast dataset contains:
 ## Analysis
 
 TODO try different correlation measures?
-TODO try averaging train/test scores before
+TODO try averaging train/test scores before!!!
+
+### Stats
+
+describe()
 
 ### Pearson correlation between matrices and train/test score
+
+
+### Score distribution
+
+TODO Max, min, hist
 
 ## Next steps/TODOs
 
