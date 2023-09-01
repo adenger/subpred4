@@ -141,22 +141,16 @@ def get_pairwise_go_scores(
     return df_results
 
 
-def get_pairwise_similarity_matrix(
-    df_uniprot_goa: pd.DataFrame,
-    df_sequences: pd.DataFrame,
-    exclude_iea: bool = True,
-    score: str = "identity",
-    aggr_method: str = "median",
+def get_pairwise_alignment_scores(
+    df_sequences: pd.DataFrame, df_uniprot_goa: pd.DataFrame, exclude_iea: bool
 ):
     df_uniprot_goa_copy = df_uniprot_goa.copy(deep=True)
     if exclude_iea:
-        df_uniprot_goa_copy = df_uniprot_goa[df_uniprot_goa.evidence_code != "IEA"]
+        df_uniprot_goa_copy = df_uniprot_goa_copy[
+            df_uniprot_goa_copy.evidence_code != "IEA"
+        ]
     # go_ids_unique = sorted(df_uniprot_goa_copy.go_id_ancestor.unique())
-    go_to_proteins_arr = (
-        df_uniprot_goa_copy[["Uniprot", "go_id_ancestor"]]
-        .groupby("go_id_ancestor")
-        .apply(lambda x: np.sort(x.Uniprot.unique().to_numpy()))
-    )
+
     series_sequences = (
         df_sequences.loc[df_uniprot_goa_copy.Uniprot.unique()]
         .sequence.drop_duplicates()
@@ -165,14 +159,31 @@ def get_pairwise_similarity_matrix(
     df_protein_identity, df_protein_alignment_scores = get_pairwise_sequence_identities(
         series_sequences=series_sequences
     )
+    return df_protein_identity, df_protein_alignment_scores
+
+
+def get_aggregated_sequence_alignments_go(
+    df_uniprot_goa: pd.DataFrame,
+    df_protein_scores: pd.DataFrame,
+    exclude_iea: bool = True,
+    aggr_method: str = "median",
+):
+    df_uniprot_goa_copy = df_uniprot_goa.copy(deep=True)
+    if exclude_iea:
+        df_uniprot_goa_copy = df_uniprot_goa_copy[
+            df_uniprot_goa_copy.evidence_code != "IEA"
+        ]
     go_terms_unique_sorted = np.sort(df_uniprot_goa_copy.go_id_ancestor.unique())
-    df_go_median_sequence_identity = get_pairwise_go_scores(
+    go_to_proteins_arr = (
+        df_uniprot_goa_copy[["Uniprot", "go_id_ancestor"]]
+        .groupby("go_id_ancestor")
+        .apply(lambda x: np.sort(x.Uniprot.unique().to_numpy()))
+    )
+    df_go_pairwise_score = get_pairwise_go_scores(
         go_terms=go_terms_unique_sorted,
         go_to_proteins_arr=go_to_proteins_arr,
-        df_protein_scores=df_protein_identity
-        if score == "identity"
-        else df_protein_alignment_scores,
+        df_protein_scores=df_protein_scores,
         aggr_method=aggr_method,
     )
 
-    return df_go_median_sequence_identity
+    return df_go_pairwise_score
