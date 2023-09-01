@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>What determines a good classification performance of a
+substrate class?</title>
+  <style>
+html {
+color: #1a1a1a;
+background-color: #fdfdfd;
+}
+body {
+margin: 0 auto;
+max-width: 36em;
+padding-left: 50px;
+padding-right: 50px;
+padding-top: 50px;
+padding-bottom: 50px;
+hyphens: auto;
+overflow-wrap: break-word;
+text-rendering: optimizeLegibility;
+font-kerning: normal;
+}
+@media (max-width: 600px) {
+body {
+font-size: 0.9em;
+padding: 12px;
+}
+h1 {
+font-size: 1.8em;
+}
+}
+@media print {
+html {
+background-color: white;
+}
+body {
+background-color: transparent;
+color: black;
+font-size: 12pt;
+}
+p, h2, h3 {
+orphans: 3;
+widows: 3;
+}
+h2, h3, h4 {
+page-break-after: avoid;
+}
+}
+p {
+margin: 1em 0;
+}
+a {
+color: #1a1a1a;
+}
+a:visited {
+color: #1a1a1a;
+}
+img {
+max-width: 100%;
+}
+h1, h2, h3, h4, h5, h6 {
+margin-top: 1.4em;
+}
+h5, h6 {
+font-size: 1em;
+font-style: italic;
+}
+h6 {
+font-weight: normal;
+}
+ol, ul {
+padding-left: 1.7em;
+margin-top: 1em;
+}
+li > ol, li > ul {
+margin-top: 0;
+}
+blockquote {
+margin: 1em 0 1em 1.7em;
+padding-left: 1em;
+border-left: 2px solid #e6e6e6;
+color: #606060;
+}
+code {
+font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+font-size: 85%;
+margin: 0;
+hyphens: manual;
+}
+pre {
+margin: 1em 0;
+overflow: auto;
+}
+pre code {
+padding: 0;
+overflow: visible;
+overflow-wrap: normal;
+}
+.sourceCode {
+background-color: transparent;
+overflow: visible;
+}
+hr {
+background-color: #1a1a1a;
+border: none;
+height: 1px;
+margin: 1em 0;
+}
+table {
+margin: 1em 0;
+border-collapse: collapse;
+width: 100%;
+overflow-x: auto;
+display: block;
+font-variant-numeric: lining-nums tabular-nums;
+}
+table caption {
+margin-bottom: 0.75em;
+}
+tbody {
+margin-top: 0.5em;
+border-top: 1px solid #1a1a1a;
+border-bottom: 1px solid #1a1a1a;
+}
+th {
+border-top: 1px solid #1a1a1a;
+padding: 0.25em 0.5em 0.25em 0.5em;
+}
+td {
+padding: 0.125em 0.5em 0.25em 0.5em;
+}
+header {
+margin-bottom: 4em;
+text-align: center;
+}
+#TOC li {
+list-style: none;
+}
+#TOC ul {
+padding-left: 1.3em;
+}
+#TOC > ul {
+padding-left: 0;
+}
+#TOC a:not(:hover) {
+text-decoration: none;
+}
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+
+ul.task-list[class]{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+font-size: inherit;
+width: 0.8em;
+margin: 0 0.8em 0.2em -1.6em;
+vertical-align: middle;
+}
+.display.math{display: block; text-align: center; margin: 0.5rem auto;}
+
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="what-determines-a-good-classification-performance-of-a-substrate-class">What
+determines a good classification performance of a substrate class?</h1>
+<h2 id="overview">Overview</h2>
+<p>On one hand, we have a sub-graph of the Gene Ontology, which contains
+all GO terms that are descendants of <em>transmembrane transporter
+activity</em>, a molecular function term. On the other hand, we have a
+set of proteins that are annotated with at least one term in that
+sub-graph. The task is to predict the transport function term or terms
+with which a particular protein is annotated.</p>
+<p>There are two issues: There are too many terms for multiclass
+classification, and there are too few samples per term. There are
+approaches that train a classifier for each term in GO, but they don’t
+achieve accuracies above 0.65.</p>
+<p>This is called <em>hierarchical classification</em>, and there are
+multiple apporaches:</p>
+<ul>
+<li>Multi-Class classification between all leafs. There are many leafs,
+and they often have very few samples.</li>
+<li>Find a set of abstract terms with little overlap in terms of
+descendants and annotated proteins, and put all of their respective
+descendant terms into a single class</li>
+<li>Train a classifier for each junction in the tree. Since we have to
+multiply the accuracies, this will automatically become less accurate
+the more we move down the tree.</li>
+</ul>
+<h2 id="dataset-creation">Dataset creation</h2>
+<p>The dataset creation is abstracted to a point where it only needs a
+set of organism identifiers, a flag that includes or excludes proteins
+that have not been manually reviewed (TrEMBL), a flag that can exclude
+electronically inferred GO terms (useful for organisms that are not
+model organisms), and the evidence code for the existence of the
+sequence (proven at transcript level, or proven at protein level).</p>
+<p>After filtering the proteins from UniprotKB, a subset of membrane
+transporter substrate predictions is created:</p>
+<ul>
+<li>The root term is <em>transmembrane transporter activity</em></li>
+<li>We only keep edges that are annotated with <em>is_a</em> (direct
+logical relation)</li>
+<li>Only keep <em>molecular_function</em> terms</li>
+<li>Only terms that annotate proteins from our filtered protein set</li>
+<li>Only terms that have the <em>enables</em> relation to their protein,
+which means that the function is directly carried out by the protein.
+The <em>part_of</em> relation only added outliers, like parts of
+transport protein complexes that don’t carry out the transport
+directly.</li>
+<li>Finally, the each term is annotated with its ancestors, all the way
+up to the root node, but only using <em>is_a</em> edges. This increases
+the number of samples drastically. For example, a protein annotated with
+<em>sugar transmembrane transporter activity</em> is also annotated with
+<em>carbohydrate transmembrane transporter activity</em>, because there
+is an <em>is_a</em> relation between the two terms.</li>
+</ul>
+<p>Lastly, the chebi terms for the GO terms are retrieved from a dataset
+of cross-ontology relations. ChEBI is a database of biologically
+relevant molecules, and also an ontology. These can be filtered by
+3-star terms, which are manually curated. For our yeast dataset, this
+did not make a difference. There are two types of cross-ontology
+relations that are relevant: <em>has_primary_input</em> typically
+denotes the transported substrate or substrates, and
+<em>has_participant</em> typically includes other molecules that
+contribute to the transport, such as ATP or H2O.</p>
+<p>In contrast to GO, ChEBI is not acyclid. This means that adding
+ancestors is not as trivial as with GO, and traversing the graph to find
+ancestors can often add thousands of terms that have some path to the
+term we are looking at. Therefore, we decided against using ChEBI terms
+and the ChEBI ontology directly, and instead see them as annotations for
+our GO graph.</p>
+<p>Another point is that not every GO term has its appropriate ChEBI
+term in the database. For example, there is a ChEBI term for
+<em>Ion</em>, but the <em>monoatomic ion transmembrane transport</em> GO
+term is not annotated with that.</p>
+<h2 id="stats">Stats</h2>
+<p>For our test notebook, we created a dataset of <em>S. cerevisiae</em>
+transporters, with the following parameters:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>    ORGANISM_IDS<span class="op">=</span>{<span class="dv">559292</span>}</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    SWISSPROT_ONLY<span class="op">=</span><span class="va">False</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    MAX_SEQUENCE_EVIDENCE_CODE <span class="op">=</span> <span class="dv">1</span>  <span class="co"># Only evidence at protein level</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    EXCLUDE_IEA_GO_TERMS<span class="op">=</span><span class="va">False</span></span></code></pre></div>
+<p>The yeast dataset contains:</p>
+<ul>
+<li>322 unique proteins before filtering out similar sequences with
+cd-hit.</li>
+<li>288 unique GO terms related to <em>transmembrane transporter
+activity</em>, after adding ancestors</li>
+<li>211 unique GO terms related to <em>transmembrane transporter
+activity</em>, <em>before</em> adding ancestors</li>
+<li>226 GO term are annotated with ChEBI terms</li>
+<li>181 unique ChEBI terms (some of them abstract, not directly
+usable)</li>
+<li>89 unique ChEBI terms that are usable for Tanimoto coefficient
+(which usually means they are concrete molecules, not abstract
+terms)</li>
+<li>131 unique GO terms annotated to the 89 ChEBI terms that are usable
+for Tanimoto coefficient</li>
+<li>36 GO terms with more than 20 samples per class and at least 20
+unique proteins per class (i.e. usable for ML). We could try going down
+to at least 15 unique proteins per class.</li>
+</ul>
+<h2 id="matrices">Matrices</h2>
+<h3 id="go-pairwise-score-matrices">GO pairwise score matrices</h3>
+<ul>
+<li>Binary adjacency matrix of GO terms, only using <em>is_a</em>
+relations. <strong><span class="math inline">288 × 288</span></strong></li>
+<li>Overlap matrix of GO terms, i.e. how many proteins two terms have in
+common. <strong><span class="math inline">288 × 288</span></strong></li>
+<li>Semantic similarity matrices. <strong><span class="math inline">288 × 288</span></strong>
+<ul>
+<li>Wang similarity algorithm: Fast, parallel</li>
+<li>TODO: other five algorithms (only one core, takes very long)</li>
+</ul></li>
+<li>Sequence scores. <strong><span class="math inline">288 × 288</span></strong>, 8 matrices
+<ul>
+<li>Sequence identity between proteins annotated with GO terms. Identity
+function: (identical positions) / (aligned positions + internal gap
+positions)</li>
+<li>Needleman-Wunsch alignment score between sequences</li>
+<li>Aggr. functions: mean, median, max, min</li>
+</ul></li>
+<li>Tanimoto coefficients between ChEBI terms related to GO terms.
+<strong><span class="math inline">131 × 131</span></strong> 16 matrices
+<ul>
+<li>Fingerprint algorithms: Morgan, atom pairs, topological torsions,
+MACCS</li>
+<li>Aggr. functions: mean, median, max, min</li>
+<li>Problem: GO terms with enough proteins for ML are too abstract to
+have concrete ChEBI terms, only two molecules available for a total of
+12/36 terms</li>
+</ul></li>
+</ul>
+<h3 id="chebi-matrices">ChEBI matrices</h3>
+<ul>
+<li>ChEBI adjacency matrix of ChEBI terms directly annotated to ancestor
+GO terms <strong><span class="math inline">159 × 159</span></strong></li>
+<li>ChEBI overlap matrix (of proteins related to go terms related to
+ChEBI terms) <strong><span class="math inline">159 × 159</span></strong></li>
+<li>Tanimoto coefficients <strong><span class="math inline">89 × 89</span></strong>, four matrices</li>
+</ul>
+<h3 id="ml-results-matrices">ML results matrices</h3>
+<ul>
+<li>GO terms Machine learning F1 score matrices <strong><span class="math inline">36 × 36</span></strong>
+<ul>
+<li>SVM pipeline with no feature selection, all 1600 features
+<ul>
+<li>training scores</li>
+<li>test scores</li>
+<li>Matrices are asymetrical: score (i,j) is classification if GO term i
+is positive class, and GO term j is negative class. The average of i,j
+and j,i is the macro-averaged F1 score.</li>
+</ul></li>
+<li>SVM pipeline with feature selection TODO</li>
+<li>SVM pipeline with PCA TODO</li>
+</ul></li>
+</ul>
+<h2 id="analysis">Analysis</h2>
+<p>TODO try different correlation measures? TODO try averaging
+train/test scores before!!!</p>
+<h3 id="stats-1">Stats</h3>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 25%" />
+<col style="width: 24%" />
+<col style="width: 14%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mean_train_score</th>
+<th style="text-align: right;">mean_test_score</th>
+<th style="text-align: right;">overlap</th>
+<th style="text-align: right;">semantic_sim_wang</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">count</td>
+<td style="text-align: right;">404</td>
+<td style="text-align: right;">404</td>
+<td style="text-align: right;">404</td>
+<td style="text-align: right;">404</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mean</td>
+<td style="text-align: right;">0.86</td>
+<td style="text-align: right;">0.87</td>
+<td style="text-align: right;">4.86</td>
+<td style="text-align: right;">0.37</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">std</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">11.82</td>
+<td style="text-align: right;">0.13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">min</td>
+<td style="text-align: right;">0.52</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.13</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">25%</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">0.83</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.27</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">50%</td>
+<td style="text-align: right;">0.87</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.35</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">75%</td>
+<td style="text-align: right;">0.93</td>
+<td style="text-align: right;">0.94</td>
+<td style="text-align: right;">3.25</td>
+<td style="text-align: right;">0.45</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">max</td>
+<td style="text-align: right;">0.98</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">89</td>
+<td style="text-align: right;">0.74</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pearson-correlation-between-matrices-and-traintest-score">Pearson
+correlation between matrices and train/test score</h3>
+<table>
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 26%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mean_train_score</th>
+<th style="text-align: right;">mean_test_score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">mean_train_score</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.971266</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mean_test_score</td>
+<td style="text-align: right;">0.971266</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">overlap</td>
+<td style="text-align: right;">-0.0288888</td>
+<td style="text-align: right;">-0.0469669</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">semantic_sim_wang</td>
+<td style="text-align: right;">-0.281933</td>
+<td style="text-align: right;">-0.257315</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go_median_sequence_identity</td>
+<td style="text-align: right;">-0.0563852</td>
+<td style="text-align: right;">-0.0619873</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">go_median_sequence_alignment_score</td>
+<td style="text-align: right;">-0.245457</td>
+<td style="text-align: right;">-0.250395</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go_mean_sequence_identity</td>
+<td style="text-align: right;">0.0426981</td>
+<td style="text-align: right;">0.022596</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">go_mean_sequence_alignment_score</td>
+<td style="text-align: right;">-0.148291</td>
+<td style="text-align: right;">-0.156709</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go_max_sequence_identity</td>
+<td style="text-align: right;">-0.317217</td>
+<td style="text-align: right;">-0.285438</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">go_max_sequence_alignment_score</td>
+<td style="text-align: right;">-0.214941</td>
+<td style="text-align: right;">-0.204546</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go_min_sequence_identity</td>
+<td style="text-align: right;">0.304803</td>
+<td style="text-align: right;">0.275133</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">go_min_sequence_alignment_score</td>
+<td style="text-align: right;">0.450618</td>
+<td style="text-align: right;">0.425358</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_morgan_go_mean</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_atompairs_go_mean</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_torsions_go_mean</td>
+<td style="text-align: right;">0.160065</td>
+<td style="text-align: right;">0.277435</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_maccs_go_mean</td>
+<td style="text-align: right;">0.160065</td>
+<td style="text-align: right;">0.277435</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_morgan_go_median</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_atompairs_go_median</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_torsions_go_median</td>
+<td style="text-align: right;">0.160065</td>
+<td style="text-align: right;">0.277435</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_maccs_go_median</td>
+<td style="text-align: right;">0.160065</td>
+<td style="text-align: right;">0.277435</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_morgan_go_min</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_atompairs_go_min</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_torsions_go_min</td>
+<td style="text-align: right;">0.160065</td>
+<td style="text-align: right;">0.277435</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_maccs_go_min</td>
+<td style="text-align: right;">0.160065</td>
+<td style="text-align: right;">0.277435</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_morgan_go_max</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_atompairs_go_max</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_torsions_go_max</td>
+<td style="text-align: right;">0.160065</td>
+<td style="text-align: right;">0.277435</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_maccs_go_max</td>
+<td style="text-align: right;">0.160065</td>
+<td style="text-align: right;">0.277435</td>
+</tr>
+</tbody>
+</table>
+<h3 id="spearman-correlation-between-matrices-and-traintest-score">Spearman
+correlation between matrices and train/test score</h3>
+<table>
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 26%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mean_train_score</th>
+<th style="text-align: right;">mean_test_score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">mean_train_score</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.9683</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mean_test_score</td>
+<td style="text-align: right;">0.9683</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">overlap</td>
+<td style="text-align: right;">-0.390259</td>
+<td style="text-align: right;">-0.387189</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">semantic_sim_wang</td>
+<td style="text-align: right;">-0.341199</td>
+<td style="text-align: right;">-0.317716</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go_median_sequence_identity</td>
+<td style="text-align: right;">-0.0515734</td>
+<td style="text-align: right;">-0.0645598</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">go_median_sequence_alignment_score</td>
+<td style="text-align: right;">-0.11866</td>
+<td style="text-align: right;">-0.120075</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go_mean_sequence_identity</td>
+<td style="text-align: right;">-0.0232387</td>
+<td style="text-align: right;">-0.0385864</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">go_mean_sequence_alignment_score</td>
+<td style="text-align: right;">-0.0239223</td>
+<td style="text-align: right;">-0.035882</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go_max_sequence_identity</td>
+<td style="text-align: right;">-0.550163</td>
+<td style="text-align: right;">-0.520922</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">go_max_sequence_alignment_score</td>
+<td style="text-align: right;">-0.535236</td>
+<td style="text-align: right;">-0.533938</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">go_min_sequence_identity</td>
+<td style="text-align: right;">0.398639</td>
+<td style="text-align: right;">0.378385</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">go_min_sequence_alignment_score</td>
+<td style="text-align: right;">0.503448</td>
+<td style="text-align: right;">0.477742</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_morgan_go_mean</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_atompairs_go_mean</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_torsions_go_mean</td>
+<td style="text-align: right;">0.09759</td>
+<td style="text-align: right;">0.29277</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_maccs_go_mean</td>
+<td style="text-align: right;">0.09759</td>
+<td style="text-align: right;">0.29277</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_morgan_go_median</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_atompairs_go_median</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_torsions_go_median</td>
+<td style="text-align: right;">0.09759</td>
+<td style="text-align: right;">0.29277</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_maccs_go_median</td>
+<td style="text-align: right;">0.09759</td>
+<td style="text-align: right;">0.29277</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_morgan_go_min</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_atompairs_go_min</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_torsions_go_min</td>
+<td style="text-align: right;">0.09759</td>
+<td style="text-align: right;">0.29277</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_maccs_go_min</td>
+<td style="text-align: right;">0.09759</td>
+<td style="text-align: right;">0.29277</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_morgan_go_max</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_atompairs_go_max</td>
+<td style="text-align: right;">nan</td>
+<td style="text-align: right;">nan</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tanimoto_torsions_go_max</td>
+<td style="text-align: right;">0.09759</td>
+<td style="text-align: right;">0.29277</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tanimoto_maccs_go_max</td>
+<td style="text-align: right;">0.09759</td>
+<td style="text-align: right;">0.29277</td>
+</tr>
+</tbody>
+</table>
+<h3 id="score-distribution">Score distribution</h3>
+<p>TODO Max, min, hist</p>
+<h2 id="next-stepstodos">Next steps/TODOs</h2>
+<ul>
+<li>graph with sample count depending on min sample count and max
+overlap count</li>
+<li>ML models with feature selection and/or PCA</li>
+<li>is_a is not working, since no two go terms in the ML dataset are
+direct descendants.
+<ul>
+<li>Other graph similarity score, like distance of common ancestor, or
+whether they have the same parent</li>
+</ul></li>
+<li>Find way to implement other semantic similarity algorithms more
+efficiently (parallel)</li>
+</ul>
+</body>
+</html>

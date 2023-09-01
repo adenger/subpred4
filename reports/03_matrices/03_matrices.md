@@ -91,15 +91,90 @@ The yeast dataset contains:
 
 ## Analysis
 
-TODO try different correlation measures?
-TODO try averaging train/test scores before!!!
+TODO method that exports pandas to markdown file, then include file here
 
 ### Stats
 
-describe()
+|       |   mean_train_score |   mean_test_score |   overlap |   semantic_sim_wang |
+|:------|-------------------:|------------------:|----------:|--------------------:|
+| count |             404    |            404    |    404    |              404    |
+| mean  |               0.86 |              0.87 |      4.86 |                0.37 |
+| std   |               0.09 |              0.09 |     11.82 |                0.13 |
+| min   |               0.52 |              0.54 |      0    |                0.13 |
+| 25%   |               0.82 |              0.83 |      0    |                0.27 |
+| 50%   |               0.87 |              0.89 |      0    |                0.35 |
+| 75%   |               0.93 |              0.94 |      3.25 |                0.45 |
+| max   |               0.98 |              0.99 |     89    |                0.74 |
 
 ### Pearson correlation between matrices and train/test score
 
+|                                    |   mean_train_score |   mean_test_score |
+|:-----------------------------------|-------------------:|------------------:|
+| mean_train_score                   |          1         |         0.971266  |
+| mean_test_score                    |          0.971266  |         1         |
+| overlap                            |         -0.0288888 |        -0.0469669 |
+| semantic_sim_wang                  |         -0.281933  |        -0.257315  |
+| go_median_sequence_identity        |         -0.0563852 |        -0.0619873 |
+| go_median_sequence_alignment_score |         -0.245457  |        -0.250395  |
+| go_mean_sequence_identity          |          0.0426981 |         0.022596  |
+| go_mean_sequence_alignment_score   |         -0.148291  |        -0.156709  |
+| go_max_sequence_identity           |         -0.317217  |        -0.285438  |
+| go_max_sequence_alignment_score    |         -0.214941  |        -0.204546  |
+| go_min_sequence_identity           |          0.304803  |         0.275133  |
+| go_min_sequence_alignment_score    |          0.450618  |         0.425358  |
+| tanimoto_morgan_go_mean            |        nan         |       nan         |
+| tanimoto_atompairs_go_mean         |        nan         |       nan         |
+| tanimoto_torsions_go_mean          |          0.160065  |         0.277435  |
+| tanimoto_maccs_go_mean             |          0.160065  |         0.277435  |
+| tanimoto_morgan_go_median          |        nan         |       nan         |
+| tanimoto_atompairs_go_median       |        nan         |       nan         |
+| tanimoto_torsions_go_median        |          0.160065  |         0.277435  |
+| tanimoto_maccs_go_median           |          0.160065  |         0.277435  |
+| tanimoto_morgan_go_min             |        nan         |       nan         |
+| tanimoto_atompairs_go_min          |        nan         |       nan         |
+| tanimoto_torsions_go_min           |          0.160065  |         0.277435  |
+| tanimoto_maccs_go_min              |          0.160065  |         0.277435  |
+| tanimoto_morgan_go_max             |        nan         |       nan         |
+| tanimoto_atompairs_go_max          |        nan         |       nan         |
+| tanimoto_torsions_go_max           |          0.160065  |         0.277435  |
+| tanimoto_maccs_go_max              |          0.160065  |         0.277435  |
+
+### Spearman correlation between matrices and train/test score
+
+|                                    |   mean_train_score |   mean_test_score |
+|:-----------------------------------|-------------------:|------------------:|
+| mean_train_score                   |          1         |         0.9683    |
+| mean_test_score                    |          0.9683    |         1         |
+| overlap                            |         -0.390259  |        -0.387189  |
+| semantic_sim_wang                  |         -0.341199  |        -0.317716  |
+| go_median_sequence_identity        |         -0.0515734 |        -0.0645598 |
+| go_median_sequence_alignment_score |         -0.11866   |        -0.120075  |
+| go_mean_sequence_identity          |         -0.0232387 |        -0.0385864 |
+| go_mean_sequence_alignment_score   |         -0.0239223 |        -0.035882  |
+| go_max_sequence_identity           |         -0.550163  |        -0.520922  |
+| go_max_sequence_alignment_score    |         -0.535236  |        -0.533938  |
+| go_min_sequence_identity           |          0.398639  |         0.378385  |
+| go_min_sequence_alignment_score    |          0.503448  |         0.477742  |
+| tanimoto_morgan_go_mean            |        nan         |       nan         |
+| tanimoto_atompairs_go_mean         |        nan         |       nan         |
+| tanimoto_torsions_go_mean          |          0.09759   |         0.29277   |
+| tanimoto_maccs_go_mean             |          0.09759   |         0.29277   |
+| tanimoto_morgan_go_median          |        nan         |       nan         |
+| tanimoto_atompairs_go_median       |        nan         |       nan         |
+| tanimoto_torsions_go_median        |          0.09759   |         0.29277   |
+| tanimoto_maccs_go_median           |          0.09759   |         0.29277   |
+| tanimoto_morgan_go_min             |        nan         |       nan         |
+| tanimoto_atompairs_go_min          |        nan         |       nan         |
+| tanimoto_torsions_go_min           |          0.09759   |         0.29277   |
+| tanimoto_maccs_go_min              |          0.09759   |         0.29277   |
+| tanimoto_morgan_go_max             |        nan         |       nan         |
+| tanimoto_atompairs_go_max          |        nan         |       nan         |
+| tanimoto_torsions_go_max           |          0.09759   |         0.29277   |
+| tanimoto_maccs_go_max              |          0.09759   |         0.29277   |
+
+### Scatter plots between pairs of scores
+
+train/test scores, and sequence identity scores
 
 ### Score distribution
 
@@ -111,3 +186,4 @@ TODO Max, min, hist
 - ML models with feature selection and/or PCA
 - is_a is not working, since no two go terms in the ML dataset are direct descendants. 
   - Other graph similarity score, like distance of common ancestor, or whether they have the same parent
+- Find way to implement other semantic similarity algorithms more efficiently (parallel)
