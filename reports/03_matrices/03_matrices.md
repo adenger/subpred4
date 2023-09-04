@@ -141,7 +141,15 @@ Mean sequence identities seem to be very low, with an average of just 13.3, stan
 
 Tanimoto scores are only available for six pairs of GO terms. This is because we are looking at GO terms with many samples, which means they are abstrat GO terms, which means they are annotated with abstract ChEBI terms with no actual atoms to calculate the molecular fingerprints from. 89 out of 181 ChEBI terms have fingerprints, which is roughly how many are actual molecules.
 
-- Only use GO terms with ChEBI terms: Problem lack of annotations
+#### F1 Score distribution
+
+![F1 scores between pairs of GO terms](ml_scores_dist.png)
+
+Most GO term pairs with enough samples to be included (at least 20 unique proteins per class) have good scores (above 0.8). It would be interesting to look at lower thresholds than 20, and compare that to the number of classes available at that threshold.
+
+#### Highest-ranking and lowest-ranking pairs
+
+
 
 ### Pearson and Kendall correlation between matrices and train/test score
 
@@ -184,7 +192,7 @@ This dataset also contains proteins with both substrates, in which case the GO t
 
 The F1 scores also have a negative Kendall correlation of -0.25 with the overlap, which also shows that overlapping GO terms perform worse on average, but not significantly.
 
-The Wang semantic similarity between the GO terms also has a slightly negative correlation with scores, which makes sense. 
+The Wang semantic similarity between the GO terms also has a slightly negative correlation with scores, which makes sense.
 
 #### Max sequence identity
 
@@ -235,16 +243,16 @@ Below a median sequence identity of 12.5%, all models have good performance (cou
 
 The same plot for the test dataset looks almost identical, but the combined plot was misleading because the orange dots were on top of blue dots. A high overlap does not seem to have much of a negative impact on classification performance with our multi-output SVMs.
 
-### Score distribution
 
-TODO Max, min, hist
 
 ## Issues & TODOs
 
+- Only 32/288 GO terms available as classes, most of them relatively abstract
+  - Try lower threshold (e.g. only 15 unique proteins per class) to get more GO terms/classes
+  - Line plot with number of classes depending on threshold of unique samples per class
+  - Histogram of F1 scores at different thresholds (unique samples per class)
 - Adjacency matrix is not working for ML score correlation calculation, since no two go terms in the ML dataset are direct descendants of each other.
   - Come up with other GO graph-based similarity score, like distance of closest common ancestor
-- Try lower overlap threshold to get more GO pairs for machine learning
-  - Line plot with number of classes vs. unique samples per class
 - At the moment, we are using all 1600 feature dimensions and that is not the model we would use in practice.
   - ML models with automatic feature selection and/or PCA.
 - Tanimoto matrices are not usable for ML comparison
