@@ -2,7 +2,7 @@
 
 ``` {=html}
 <style>
-body { min-width: 60% !important; }
+body { min-width: 50% !important; }
 </style>
 ```
 
@@ -139,74 +139,83 @@ Tanimoto scores are only available for six pairs of GO terms. This is because we
 
 - Only use GO terms with ChEBI terms: Problem lack of annotations
 
-### Pearson correlation between matrices and train/test score
+### Pearson and Kendall correlation between matrices and train/test score
 
-TODO put this into one matrix, what about kendall?
-TODO re-order
+Including Kendall, since some variables are not normally distributed:
 
-|                                    |   mean_train_score |   mean_test_score |
-|:-----------------------------------|-------------------:|------------------:|
-| mean_train_score                   |              1     |             0.971 |
-| mean_test_score                    |              0.971 |             1     |
-| overlap                            |             -0.029 |            -0.047 |
-| semantic_sim_wang                  |             -0.282 |            -0.257 |
-| go_median_sequence_identity        |             -0.056 |            -0.062 |
-| go_median_sequence_alignment_score |             -0.245 |            -0.25  |
-| go_mean_sequence_identity          |              0.043 |             0.023 |
-| go_mean_sequence_alignment_score   |             -0.148 |            -0.157 |
-| go_max_sequence_identity           |             -0.317 |            -0.285 |
-| go_max_sequence_alignment_score    |             -0.215 |            -0.205 |
-| go_min_sequence_identity           |              0.305 |             0.275 |
-| go_min_sequence_alignment_score    |              0.451 |             0.425 |
-| tanimoto_morgan_go_mean            |            nan     |           nan     |
-| tanimoto_atompairs_go_mean         |            nan     |           nan     |
-| tanimoto_torsions_go_mean          |              0.16  |             0.277 |
-| tanimoto_maccs_go_mean             |              0.16  |             0.277 |
-| tanimoto_morgan_go_median          |            nan     |           nan     |
-| tanimoto_atompairs_go_median       |            nan     |           nan     |
-| tanimoto_torsions_go_median        |              0.16  |             0.277 |
-| tanimoto_maccs_go_median           |              0.16  |             0.277 |
-| tanimoto_morgan_go_min             |            nan     |           nan     |
-| tanimoto_atompairs_go_min          |            nan     |           nan     |
-| tanimoto_torsions_go_min           |              0.16  |             0.277 |
-| tanimoto_maccs_go_min              |              0.16  |             0.277 |
-| tanimoto_morgan_go_max             |            nan     |           nan     |
-| tanimoto_atompairs_go_max          |            nan     |           nan     |
-| tanimoto_torsions_go_max           |              0.16  |             0.277 |
-| tanimoto_maccs_go_max              |              0.16  |             0.277 |
+|                                    |   f1_train_pearson |   f1_test_pearson |   f1_train_kendall |   f1_test_kendall |
+|:-----------------------------------|-------------------:|------------------:|-------------------:|------------------:|
+| mean_train_score                   |              1     |             0.971 |              1     |             0.856 |
+| mean_test_score                    |              0.971 |             1     |              0.856 |             1     |
+| overlap                            |             -0.029 |            -0.047 |             -0.281 |            -0.284 |
+| semantic_sim_wang                  |             -0.282 |            -0.257 |             -0.232 |            -0.214 |
+| go_median_sequence_identity        |             -0.056 |            -0.062 |             -0.02  |            -0.028 |
+| go_mean_sequence_identity          |              0.043 |             0.023 |             -0.012 |            -0.024 |
+| go_max_sequence_identity           |             -0.317 |            -0.285 |             -0.406 |            -0.378 |
+| go_min_sequence_identity           |              0.305 |             0.275 |              0.26  |             0.25  |
+| go_median_sequence_alignment_score |             -0.245 |            -0.25  |             -0.073 |            -0.072 |
+| go_mean_sequence_alignment_score   |             -0.148 |            -0.157 |             -0.007 |            -0.011 |
+| go_max_sequence_alignment_score    |             -0.215 |            -0.205 |             -0.372 |            -0.369 |
+| go_min_sequence_alignment_score    |              0.451 |             0.425 |              0.347 |             0.329 |
+| tanimoto_morgan_go_mean            |            nan     |           nan     |            nan     |           nan     |
+| tanimoto_morgan_go_median          |            nan     |           nan     |            nan     |           nan     |
+| tanimoto_morgan_go_min             |            nan     |           nan     |            nan     |           nan     |
+| tanimoto_morgan_go_max             |            nan     |           nan     |            nan     |           nan     |
+| tanimoto_atompairs_go_mean         |            nan     |           nan     |            nan     |           nan     |
+| tanimoto_atompairs_go_median       |            nan     |           nan     |            nan     |           nan     |
+| tanimoto_atompairs_go_min          |            nan     |           nan     |            nan     |           nan     |
+| tanimoto_atompairs_go_max          |            nan     |           nan     |            nan     |           nan     |
+| tanimoto_torsions_go_mean          |              0.16  |             0.277 |              0.086 |             0.258 |
+| tanimoto_torsions_go_median        |              0.16  |             0.277 |              0.086 |             0.258 |
+| tanimoto_torsions_go_min           |              0.16  |             0.277 |              0.086 |             0.258 |
+| tanimoto_torsions_go_max           |              0.16  |             0.277 |              0.086 |             0.258 |
+| tanimoto_maccs_go_mean             |              0.16  |             0.277 |              0.086 |             0.258 |
+| tanimoto_maccs_go_median           |              0.16  |             0.277 |              0.086 |             0.258 |
+| tanimoto_maccs_go_min              |              0.16  |             0.277 |              0.086 |             0.258 |
+| tanimoto_maccs_go_max              |              0.16  |             0.277 |              0.086 |             0.258 |
 
-### Spearman correlation between matrices and train/test score
+Tanimoto can be ignored, since it is only available for six pairs. The strongest correlations with average train and test F1 scores are with the max and min sequence identity. The max identity has a negative correlation and the min identity has a positive correlation.
 
-|                                    |   mean_train_score |   mean_test_score |
-|:-----------------------------------|-------------------:|------------------:|
-| mean_train_score                   |              1     |             0.968 |
-| mean_test_score                    |              0.968 |             1     |
-| overlap                            |             -0.39  |            -0.387 |
-| semantic_sim_wang                  |             -0.341 |            -0.318 |
-| go_median_sequence_identity        |             -0.052 |            -0.065 |
-| go_median_sequence_alignment_score |             -0.119 |            -0.12  |
-| go_mean_sequence_identity          |             -0.023 |            -0.039 |
-| go_mean_sequence_alignment_score   |             -0.024 |            -0.036 |
-| go_max_sequence_identity           |             -0.55  |            -0.521 |
-| go_max_sequence_alignment_score    |             -0.535 |            -0.534 |
-| go_min_sequence_identity           |              0.399 |             0.378 |
-| go_min_sequence_alignment_score    |              0.503 |             0.478 |
-| tanimoto_morgan_go_mean            |            nan     |           nan     |
-| tanimoto_atompairs_go_mean         |            nan     |           nan     |
-| tanimoto_torsions_go_mean          |              0.098 |             0.293 |
-| tanimoto_maccs_go_mean             |              0.098 |             0.293 |
-| tanimoto_morgan_go_median          |            nan     |           nan     |
-| tanimoto_atompairs_go_median       |            nan     |           nan     |
-| tanimoto_torsions_go_median        |              0.098 |             0.293 |
-| tanimoto_maccs_go_median           |              0.098 |             0.293 |
-| tanimoto_morgan_go_min             |            nan     |           nan     |
-| tanimoto_atompairs_go_min          |            nan     |           nan     |
-| tanimoto_torsions_go_min           |              0.098 |             0.293 |
-| tanimoto_maccs_go_min              |              0.098 |             0.293 |
-| tanimoto_morgan_go_max             |            nan     |           nan     |
-| tanimoto_atompairs_go_max          |            nan     |           nan     |
-| tanimoto_torsions_go_max           |              0.098 |             0.293 |
-| tanimoto_maccs_go_max              |              0.098 |             0.293 |
+This dataset also contains proteins with both substrates, in which case the GO term pair has a max sequence identity of 100%. This could be the reason for the negative correlation with the max identity: if a protein is in both classes then the performance is, on average, worse. 
+
+The F1 scores also have a negative Kendall correlation of -0.25 with the overlap, which also shows that overlapping GO terms perform worse on average, but not significantly.
+
+The Wang semantic similarity between the GO terms also has a slightly negative correlation with scores, which makes sense. 
+
+#### Max sequence identity
+
+Generally, the max sequence identities are either very low (10%-20%) or 100%, there is nothing in between. Also, there is a high number of go term pairs with 100% max sequence identity and good SVM scores, meaning that the multi-output classification does not lead to significantly worse scores than the binary classification:
+
+![Scatter plot of pairs of go terms, including those with overlapping samples (proteins)](max_ident_mean_train_scatter.png)
+
+If we remove the pairs of GO terms with max sequence identity of 100%, we get a higher kendall correlation of -0.412 to the train score, and -0.368 to the test set:
+
+![Scatter plot of pairs of go terms, excluding those with overlapping samples (proteins)](max_ident_mean_train_scatter_no100.png)
+
+Which (non-overlapping) GO term pairs have the lowest scores (less than 0.6) in this plot?
+
+| go_id1                                                        | go_id2                                                        |   mean_train_score |
+|:--------------------------------------------------------------|:--------------------------------------------------------------|-------------------:|
+| protein transmembrane transporter activity                    | monoatomic ion transmembrane transporter activity             |              0.523 |
+| monoatomic ion transmembrane transporter activity             | macromolecule transmembrane transporter activity              |              0.523 |
+| macromolecule transmembrane transporter activity              | inorganic cation transmembrane transporter activity           |              0.526 |
+| protein transmembrane transporter activity                    | inorganic cation transmembrane transporter activity           |              0.526 |
+| protein transmembrane transporter activity                    | inorganic molecular entity transmembrane transporter activity |              0.535 |
+| inorganic molecular entity transmembrane transporter activity | macromolecule transmembrane transporter activity              |              0.535 |
+| monoatomic cation transmembrane transporter activity          | macromolecule transmembrane transporter activity              |              0.56  |
+| protein transmembrane transporter activity                    | monoatomic cation transmembrane transporter activity          |              0.56  |
+| protein transmembrane transporter activity                    | proton transmembrane transporter activity                     |              0.576 |
+| proton transmembrane transporter activity                     | macromolecule transmembrane transporter activity              |              0.576 |
+| active monoatomic ion transmembrane transporter activity      | macromolecule transmembrane transporter activity              |              0.69  |
+| protein transmembrane transporter activity                    | active monoatomic ion transmembrane transporter activity      |              0.69  |
+| protein transmembrane transporter activity                    | salt transmembrane transporter activity                       |              0.691 |
+| macromolecule transmembrane transporter activity              | salt transmembrane transporter activity                       |              0.691 |
+
+It seems that all of them are related to protein transport. In total, there are 31/404 pairs that are annotated with both *protein transmembrane transporter activity* and *macromolecule transmembrane transporter activity*, none are annotated with only one of them.
+
+#### Min sequence identity
+
+![Min sequence identity vs. F1 score](min_ident_mean_train_scatter.png)
 
 ### Scatter plots between pairs of scores
 
@@ -218,10 +227,15 @@ TODO Max, min, hist
 
 ## Next steps/TODOs
 
-- Try lower overlap threshold
-  - graph with sample count depending on min sample count and max overlap count
-- ML models with feature selection and/or PCA
-- is_a is not working, since no two go terms in the ML dataset are direct descendants. 
-  - Other graph similarity score, like distance of common ancestor, or whether they have the same parent
-- Find way to implement other semantic similarity algorithms more efficiently (parallel)
-- Filter for multi-substrate proteins
+TODO correlations between other features, also without just looking at train scores
+
+- Try lower overlap threshold to get more GO pairs for machine learning
+  - Line plot with number of classes vs. unique samples per class
+- ML models with feature selection and/or PCA. At the moment, we are using all 1600 feature dimensions and that is not the model we would use in practice.
+- Adjacency matrix is not working for ML score correlation calculation, since no two go terms in the ML dataset are direct descendants.
+  - Come up with other graph-based similarity score, like distance of common ancestor, or whether they have the same parent
+- Tanimoto matrices are not usable for ML comparison
+  - Only 6/404 pairs have them available.
+  - Possible solution: Add ChEBI ancestor terms. Problem: Millions of molecules, cyclic graph
+- Find way to implement the other semantic similarity algorithms more efficiently (parallel), at the moment they each take hours to calculate for all pairs
+- Filter for multi-substrate proteins, compare performance to single-substrate

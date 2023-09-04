@@ -1,4 +1,4 @@
-.PHONY: setup_ubuntu env_export clear_tmp_files requirements package raw_data data_import sync_tmp_files extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90 data_export
+.PHONY: setup_ubuntu reports env_export clear_tmp_files requirements package raw_data data_import sync_tmp_files extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90 data_export
 
 #################################################################################
 # Conventions                                                                   #
@@ -63,6 +63,9 @@ sync_backup_archive:
 clear_tmp_files:
 	find data/intermediate/blast -name "*.log" -delete
 	find data/intermediate/blast -name "*.fasta" -delete
+
+reports:
+	cd reports/03_matrices && bash render.sh
 
 #################################################################################
 # Raw data                                                                      #
