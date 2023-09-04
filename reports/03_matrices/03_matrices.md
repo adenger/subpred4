@@ -65,7 +65,7 @@ There are three types of matrices: Those calculated for GO terms based on their 
 
 ### GO pairwise score matrices
 
-- Binary adjacency matrix of GO terms, only using *is_a* relations. **$288 \times 288$**
+- Adjacency matrix: binary relations between GO terms, only using *is_a* relations. **$288 \times 288$**
 - Overlap matrix of GO terms, i.e. how many proteins two terms have in common. **$288 \times 288$**
 - Semantic similarity matrices. **$288 \times 288$**
   - Wang similarity algorithm: Fast, parallel
@@ -97,6 +97,10 @@ There are three types of matrices: Those calculated for GO terms based on their 
   - SVM pipeline with PCA TODO
 
 ## Analysis
+
+To analyze the relationships between the pairwise scores, we combined them into a dataframe where each row corresponds to a unique pair of GO terms, and the columns to their corresponding values in the matrices. This dataframe only contains pairs for which a ML model was able to be trained, i.e. with at least 20 samples, and at least 20 unique samples (in case of overlapping proteins annotated with both GO terms).
+
+The adjacency matrix was excluded, because no pairs of GO terms with enough samples had a connection in that matrix. In the future, it could be a good idea to create a different matrix that contains the similarity of two terms in the GO hierarchy, for example the distance of the closest common ancestor (NetworkX has algorithms for that).
 
 ### Stats of combined dataframe
 
@@ -217,25 +221,37 @@ It seems that all of them are related to protein transport. In total, there are 
 
 ![Min sequence identity vs. F1 score](min_ident_mean_train_scatter.png)
 
-### Scatter plots between pairs of scores
+The lowest F1 scores have the lowest sequence identity, although there are GO pairs with lower identity that have very high scores. Above a certain threshold, there are no more bad models (as in F1 less than 0.8)
 
-train/test scores, and sequence identity scores
+#### Median sequence identity
+
+![Median sequence identity vs. F1 score](median_ident_mean_train_scatter.png)
+
+Below a median sequence identity of 12.5%, all models have good performance (could be coincidence?)
+
+#### Overlap
+
+![Sample overlap vs. F1 score](overlap_ident_mean_train_scatter.png)
+
+The same plot for the test dataset looks almost identical, but the combined plot was misleading because the orange dots were on top of blue dots. A high overlap does not seem to have much of a negative impact on classification performance with our multi-output SVMs.
 
 ### Score distribution
 
 TODO Max, min, hist
 
-## Next steps/TODOs
+## Issues & TODOs
 
-TODO correlations between other features, also without just looking at train scores
-
+- Adjacency matrix is not working for ML score correlation calculation, since no two go terms in the ML dataset are direct descendants of each other.
+  - Come up with other GO graph-based similarity score, like distance of closest common ancestor
 - Try lower overlap threshold to get more GO pairs for machine learning
   - Line plot with number of classes vs. unique samples per class
-- ML models with feature selection and/or PCA. At the moment, we are using all 1600 feature dimensions and that is not the model we would use in practice.
-- Adjacency matrix is not working for ML score correlation calculation, since no two go terms in the ML dataset are direct descendants.
-  - Come up with other graph-based similarity score, like distance of common ancestor, or whether they have the same parent
+- At the moment, we are using all 1600 feature dimensions and that is not the model we would use in practice.
+  - ML models with automatic feature selection and/or PCA.
 - Tanimoto matrices are not usable for ML comparison
   - Only 6/404 pairs have them available.
   - Possible solution: Add ChEBI ancestor terms. Problem: Millions of molecules, cyclic graph
-- Find way to implement the other semantic similarity algorithms more efficiently (parallel), at the moment they each take hours to calculate for all pairs
+- All GO semantic similarity measures except Wang (the simplest one that does not use annotation data or information content) throw errors when running them in parallel for loop.
+  - On single core, they each take hours to calculate for all pairs
+  - Find other way to implement them more efficiently (parallel)
 - Filter for multi-substrate proteins, compare performance to single-substrate
+- Correlations between other measures (excluding ML scores) could be interesting
