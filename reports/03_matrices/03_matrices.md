@@ -1,5 +1,10 @@
 # What determines a good classification performance of a substrate class?
 
+``` {=html}
+<style>
+body { min-width: 60% !important; }
+</style>
+```
 
 ## Overview
 
@@ -54,8 +59,9 @@ The yeast dataset contains:
 - 131 unique GO terms annotated to the 89 ChEBI terms that are usable for Tanimoto coefficient
 - 36 GO terms with more than 20 samples per class and at least 20 unique proteins per class (i.e. usable for ML). We could try going down to at least 15 unique proteins per class.
 
-
 ## Matrices
+
+There are three types of matrices: Those calculated for GO terms based on their annotations, those directly created for their annotated ChEBI terms, and those with the evaluation results of the ML models.
 
 ### GO pairwise score matrices
 
@@ -86,91 +92,121 @@ The yeast dataset contains:
     - training scores
     - test scores
     - Matrices are asymetrical: score (i,j) is classification if GO term i is positive class, and GO term j is negative class. The average of i,j and j,i is the macro-averaged F1 score.
+    - For comparison with other matrices, the matrices were macro-averaged.
   - SVM pipeline with feature selection TODO
   - SVM pipeline with PCA TODO
 
 ## Analysis
 
-TODO method that exports pandas to markdown file, then include file here
+### Stats of combined dataframe
 
-### Stats
+|                                    |   count |     mean |     std |      min |      25% |      50% |      75% |      max |
+|:-----------------------------------|--------:|---------:|--------:|---------:|---------:|---------:|---------:|---------:|
+| mean_train_score                   |     404 |     0.86 |    0.09 |     0.52 |     0.82 |     0.87 |     0.93 |     0.98 |
+| mean_test_score                    |     404 |     0.87 |    0.09 |     0.54 |     0.83 |     0.89 |     0.94 |     0.99 |
+| overlap                            |     404 |     4.86 |   11.82 |     0    |     0    |     0    |     3.25 |    89    |
+| semantic_sim_wang                  |     404 |     0.37 |    0.13 |     0.13 |     0.27 |     0.35 |     0.45 |     0.74 |
+| go_median_sequence_identity        |     404 |    13.26 |    0.76 |     9.55 |    12.82 |    13.41 |    13.7  |    14.37 |
+| go_median_sequence_alignment_score |     404 | -1129.41 |  520.36 | -3426    | -1179.5  |  -949    |  -883.25 |  -425.5  |
+| go_mean_sequence_identity          |     404 |    12.96 |    0.92 |     9.4  |    12.33 |    12.97 |    13.56 |    15.84 |
+| go_mean_sequence_alignment_score   |     404 | -1349.23 |  488.31 | -3356.48 | -1580.94 | -1229.41 | -1030.23 |  -602.91 |
+| go_max_sequence_identity           |     404 |    59.06 |   40.41 |    16.62 |    18.98 |    24.41 |   100    |   100    |
+| go_max_sequence_alignment_score    |     404 |  2483.14 | 3233.31 |  -451    |  -175    |   111    |  5091    | 10676    |
+| go_min_sequence_identity           |     404 |     3.93 |    2.47 |     1.33 |     2.29 |     3.01 |     5.17 |    10    |
+| go_min_sequence_alignment_score    |     404 | -5512.98 | 1709.78 | -7903    | -6794    | -5687    | -4255    | -2082    |
+| tanimoto_morgan_go_mean            |       6 |     0    |    0    |     0    |     0    |     0    |     0    |     0    |
+| tanimoto_atompairs_go_mean         |       6 |     0    |    0    |     0    |     0    |     0    |     0    |     0    |
+| tanimoto_torsions_go_mean          |       6 |     0.5  |    0.55 |     0    |     0    |     0.5  |     1    |     1    |
+| tanimoto_maccs_go_mean             |       6 |     0.1  |    0.02 |     0.08 |     0.08 |     0.1  |     0.12 |     0.12 |
+| tanimoto_morgan_go_median          |       6 |     0    |    0    |     0    |     0    |     0    |     0    |     0    |
+| tanimoto_atompairs_go_median       |       6 |     0    |    0    |     0    |     0    |     0    |     0    |     0    |
+| tanimoto_torsions_go_median        |       6 |     0.5  |    0.55 |     0    |     0    |     0.5  |     1    |     1    |
+| tanimoto_maccs_go_median           |       6 |     0.1  |    0.02 |     0.08 |     0.08 |     0.1  |     0.12 |     0.12 |
+| tanimoto_morgan_go_min             |       6 |     0    |    0    |     0    |     0    |     0    |     0    |     0    |
+| tanimoto_atompairs_go_min          |       6 |     0    |    0    |     0    |     0    |     0    |     0    |     0    |
+| tanimoto_torsions_go_min           |       6 |     0.5  |    0.55 |     0    |     0    |     0.5  |     1    |     1    |
+| tanimoto_maccs_go_min              |       6 |     0.1  |    0.02 |     0.08 |     0.08 |     0.1  |     0.12 |     0.12 |
+| tanimoto_morgan_go_max             |       6 |     0    |    0    |     0    |     0    |     0    |     0    |     0    |
+| tanimoto_atompairs_go_max          |       6 |     0    |    0    |     0    |     0    |     0    |     0    |     0    |
+| tanimoto_torsions_go_max           |       6 |     0.5  |    0.55 |     0    |     0    |     0.5  |     1    |     1    |
+| tanimoto_maccs_go_max              |       6 |     0.1  |    0.02 |     0.08 |     0.08 |     0.1  |     0.12 |     0.12 |
 
-|       |   mean_train_score |   mean_test_score |   overlap |   semantic_sim_wang |
-|:------|-------------------:|------------------:|----------:|--------------------:|
-| count |             404    |            404    |    404    |              404    |
-| mean  |               0.86 |              0.87 |      4.86 |                0.37 |
-| std   |               0.09 |              0.09 |     11.82 |                0.13 |
-| min   |               0.52 |              0.54 |      0    |                0.13 |
-| 25%   |               0.82 |              0.83 |      0    |                0.27 |
-| 50%   |               0.87 |              0.89 |      0    |                0.35 |
-| 75%   |               0.93 |              0.94 |      3.25 |                0.45 |
-| max   |               0.98 |              0.99 |     89    |                0.74 |
+The ML scores look good, the max average F1 score is 0.99, the min is .52, and the 50th percentile is already at 0.89.
+
+Mean sequence identities seem to be very low, with an average of just 13.3, standard deviation of 0.76 and max of 14.37. We are only looking at classes with at least 20 unique proteins per class, so this also makes sense.
+
+Tanimoto scores are only available for six pairs of GO terms. This is because we are looking at GO terms with many samples, which means they are abstrat GO terms, which means they are annotated with abstract ChEBI terms with no actual atoms to calculate the molecular fingerprints from. 89 out of 181 ChEBI terms have fingerprints, which is roughly how many are actual molecules.
+
+- Only use GO terms with ChEBI terms: Problem lack of annotations
 
 ### Pearson correlation between matrices and train/test score
 
+TODO put this into one matrix, what about kendall?
+TODO re-order
+
 |                                    |   mean_train_score |   mean_test_score |
 |:-----------------------------------|-------------------:|------------------:|
-| mean_train_score                   |          1         |         0.971266  |
-| mean_test_score                    |          0.971266  |         1         |
-| overlap                            |         -0.0288888 |        -0.0469669 |
-| semantic_sim_wang                  |         -0.281933  |        -0.257315  |
-| go_median_sequence_identity        |         -0.0563852 |        -0.0619873 |
-| go_median_sequence_alignment_score |         -0.245457  |        -0.250395  |
-| go_mean_sequence_identity          |          0.0426981 |         0.022596  |
-| go_mean_sequence_alignment_score   |         -0.148291  |        -0.156709  |
-| go_max_sequence_identity           |         -0.317217  |        -0.285438  |
-| go_max_sequence_alignment_score    |         -0.214941  |        -0.204546  |
-| go_min_sequence_identity           |          0.304803  |         0.275133  |
-| go_min_sequence_alignment_score    |          0.450618  |         0.425358  |
-| tanimoto_morgan_go_mean            |        nan         |       nan         |
-| tanimoto_atompairs_go_mean         |        nan         |       nan         |
-| tanimoto_torsions_go_mean          |          0.160065  |         0.277435  |
-| tanimoto_maccs_go_mean             |          0.160065  |         0.277435  |
-| tanimoto_morgan_go_median          |        nan         |       nan         |
-| tanimoto_atompairs_go_median       |        nan         |       nan         |
-| tanimoto_torsions_go_median        |          0.160065  |         0.277435  |
-| tanimoto_maccs_go_median           |          0.160065  |         0.277435  |
-| tanimoto_morgan_go_min             |        nan         |       nan         |
-| tanimoto_atompairs_go_min          |        nan         |       nan         |
-| tanimoto_torsions_go_min           |          0.160065  |         0.277435  |
-| tanimoto_maccs_go_min              |          0.160065  |         0.277435  |
-| tanimoto_morgan_go_max             |        nan         |       nan         |
-| tanimoto_atompairs_go_max          |        nan         |       nan         |
-| tanimoto_torsions_go_max           |          0.160065  |         0.277435  |
-| tanimoto_maccs_go_max              |          0.160065  |         0.277435  |
+| mean_train_score                   |              1     |             0.971 |
+| mean_test_score                    |              0.971 |             1     |
+| overlap                            |             -0.029 |            -0.047 |
+| semantic_sim_wang                  |             -0.282 |            -0.257 |
+| go_median_sequence_identity        |             -0.056 |            -0.062 |
+| go_median_sequence_alignment_score |             -0.245 |            -0.25  |
+| go_mean_sequence_identity          |              0.043 |             0.023 |
+| go_mean_sequence_alignment_score   |             -0.148 |            -0.157 |
+| go_max_sequence_identity           |             -0.317 |            -0.285 |
+| go_max_sequence_alignment_score    |             -0.215 |            -0.205 |
+| go_min_sequence_identity           |              0.305 |             0.275 |
+| go_min_sequence_alignment_score    |              0.451 |             0.425 |
+| tanimoto_morgan_go_mean            |            nan     |           nan     |
+| tanimoto_atompairs_go_mean         |            nan     |           nan     |
+| tanimoto_torsions_go_mean          |              0.16  |             0.277 |
+| tanimoto_maccs_go_mean             |              0.16  |             0.277 |
+| tanimoto_morgan_go_median          |            nan     |           nan     |
+| tanimoto_atompairs_go_median       |            nan     |           nan     |
+| tanimoto_torsions_go_median        |              0.16  |             0.277 |
+| tanimoto_maccs_go_median           |              0.16  |             0.277 |
+| tanimoto_morgan_go_min             |            nan     |           nan     |
+| tanimoto_atompairs_go_min          |            nan     |           nan     |
+| tanimoto_torsions_go_min           |              0.16  |             0.277 |
+| tanimoto_maccs_go_min              |              0.16  |             0.277 |
+| tanimoto_morgan_go_max             |            nan     |           nan     |
+| tanimoto_atompairs_go_max          |            nan     |           nan     |
+| tanimoto_torsions_go_max           |              0.16  |             0.277 |
+| tanimoto_maccs_go_max              |              0.16  |             0.277 |
 
 ### Spearman correlation between matrices and train/test score
 
 |                                    |   mean_train_score |   mean_test_score |
 |:-----------------------------------|-------------------:|------------------:|
-| mean_train_score                   |          1         |         0.9683    |
-| mean_test_score                    |          0.9683    |         1         |
-| overlap                            |         -0.390259  |        -0.387189  |
-| semantic_sim_wang                  |         -0.341199  |        -0.317716  |
-| go_median_sequence_identity        |         -0.0515734 |        -0.0645598 |
-| go_median_sequence_alignment_score |         -0.11866   |        -0.120075  |
-| go_mean_sequence_identity          |         -0.0232387 |        -0.0385864 |
-| go_mean_sequence_alignment_score   |         -0.0239223 |        -0.035882  |
-| go_max_sequence_identity           |         -0.550163  |        -0.520922  |
-| go_max_sequence_alignment_score    |         -0.535236  |        -0.533938  |
-| go_min_sequence_identity           |          0.398639  |         0.378385  |
-| go_min_sequence_alignment_score    |          0.503448  |         0.477742  |
-| tanimoto_morgan_go_mean            |        nan         |       nan         |
-| tanimoto_atompairs_go_mean         |        nan         |       nan         |
-| tanimoto_torsions_go_mean          |          0.09759   |         0.29277   |
-| tanimoto_maccs_go_mean             |          0.09759   |         0.29277   |
-| tanimoto_morgan_go_median          |        nan         |       nan         |
-| tanimoto_atompairs_go_median       |        nan         |       nan         |
-| tanimoto_torsions_go_median        |          0.09759   |         0.29277   |
-| tanimoto_maccs_go_median           |          0.09759   |         0.29277   |
-| tanimoto_morgan_go_min             |        nan         |       nan         |
-| tanimoto_atompairs_go_min          |        nan         |       nan         |
-| tanimoto_torsions_go_min           |          0.09759   |         0.29277   |
-| tanimoto_maccs_go_min              |          0.09759   |         0.29277   |
-| tanimoto_morgan_go_max             |        nan         |       nan         |
-| tanimoto_atompairs_go_max          |        nan         |       nan         |
-| tanimoto_torsions_go_max           |          0.09759   |         0.29277   |
-| tanimoto_maccs_go_max              |          0.09759   |         0.29277   |
+| mean_train_score                   |              1     |             0.968 |
+| mean_test_score                    |              0.968 |             1     |
+| overlap                            |             -0.39  |            -0.387 |
+| semantic_sim_wang                  |             -0.341 |            -0.318 |
+| go_median_sequence_identity        |             -0.052 |            -0.065 |
+| go_median_sequence_alignment_score |             -0.119 |            -0.12  |
+| go_mean_sequence_identity          |             -0.023 |            -0.039 |
+| go_mean_sequence_alignment_score   |             -0.024 |            -0.036 |
+| go_max_sequence_identity           |             -0.55  |            -0.521 |
+| go_max_sequence_alignment_score    |             -0.535 |            -0.534 |
+| go_min_sequence_identity           |              0.399 |             0.378 |
+| go_min_sequence_alignment_score    |              0.503 |             0.478 |
+| tanimoto_morgan_go_mean            |            nan     |           nan     |
+| tanimoto_atompairs_go_mean         |            nan     |           nan     |
+| tanimoto_torsions_go_mean          |              0.098 |             0.293 |
+| tanimoto_maccs_go_mean             |              0.098 |             0.293 |
+| tanimoto_morgan_go_median          |            nan     |           nan     |
+| tanimoto_atompairs_go_median       |            nan     |           nan     |
+| tanimoto_torsions_go_median        |              0.098 |             0.293 |
+| tanimoto_maccs_go_median           |              0.098 |             0.293 |
+| tanimoto_morgan_go_min             |            nan     |           nan     |
+| tanimoto_atompairs_go_min          |            nan     |           nan     |
+| tanimoto_torsions_go_min           |              0.098 |             0.293 |
+| tanimoto_maccs_go_min              |              0.098 |             0.293 |
+| tanimoto_morgan_go_max             |            nan     |           nan     |
+| tanimoto_atompairs_go_max          |            nan     |           nan     |
+| tanimoto_torsions_go_max           |              0.098 |             0.293 |
+| tanimoto_maccs_go_max              |              0.098 |             0.293 |
 
 ### Scatter plots between pairs of scores
 
@@ -182,8 +218,10 @@ TODO Max, min, hist
 
 ## Next steps/TODOs
 
-- graph with sample count depending on min sample count and max overlap count
+- Try lower overlap threshold
+  - graph with sample count depending on min sample count and max overlap count
 - ML models with feature selection and/or PCA
 - is_a is not working, since no two go terms in the ML dataset are direct descendants. 
   - Other graph similarity score, like distance of common ancestor, or whether they have the same parent
 - Find way to implement other semantic similarity algorithms more efficiently (parallel)
+- Filter for multi-substrate proteins
