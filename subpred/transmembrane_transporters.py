@@ -12,7 +12,8 @@ def get_transmembrane_transporter_dataset(
     swissprot_only: bool = False,
     datasets_path: str = "../data/datasets/",
     exclude_iea_go_terms: bool = False,
-    max_sequence_evidence_code:int = 1
+    max_sequence_evidence_code:int = 1,
+    additional_proteins:set=None
 ):
     # First, get all sequences with filtering criteria:
     df_sequences = get_sequence_dataset(
@@ -20,6 +21,7 @@ def get_transmembrane_transporter_dataset(
         organism_ids=organism_ids,
         swissprot_only=swissprot_only,
         max_sequence_evidence_code=max_sequence_evidence_code,
+        additional_proteins=additional_proteins
     )
     # Get GO annotations from subset of transmembrane transporter go terms
     df_uniprot_goa = get_go_annotations_subset(
