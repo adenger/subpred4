@@ -14,7 +14,7 @@ def get_transmembrane_transporter_dataset(
     exclude_iea_go_terms: bool = False,
     max_sequence_evidence_code:int = 1
 ):
-    # First, get all sequences with filtering criteriou:
+    # First, get all sequences with filtering criteria:
     df_sequences = get_sequence_dataset(
         datasets_path=datasets_path,
         organism_ids=organism_ids,
