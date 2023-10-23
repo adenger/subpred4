@@ -7,6 +7,7 @@ def get_sequence_dataset(
     swissprot_only: bool = False,
     max_sequence_evidence_code: int = 2,
     additional_proteins: set = None,
+    remove_proteins_without_gene_names:bool = True
 ):
     df_uniprot = load_df("uniprot", folder_path=datasets_path)
     if swissprot_only:
@@ -20,6 +21,8 @@ def get_sequence_dataset(
                 additional_proteins if additional_proteins else set()
             )
         ]
+    if remove_proteins_without_gene_names:
+        df_uniprot = df_uniprot[~df_uniprot.gene_names.isnull()]
     df_uniprot = df_uniprot[
         ["sequence", "reviewed", "protein_existence", "organism_id", "protein_names"]
     ].drop_duplicates()

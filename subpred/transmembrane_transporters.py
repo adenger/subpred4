@@ -16,6 +16,7 @@ def get_transmembrane_transporter_dataset(
     max_sequence_evidence_code: int = 1,
     additional_proteins: set = None,
     anatomical_entities_whitelist: set = None,
+    remove_proteins_without_gene_names:bool=True
 ):
     # First, get all sequences with filtering criteria:
     df_sequences = get_sequence_dataset(
@@ -24,6 +25,7 @@ def get_transmembrane_transporter_dataset(
         swissprot_only=swissprot_only,
         max_sequence_evidence_code=max_sequence_evidence_code,
         additional_proteins=additional_proteins,
+        remove_proteins_without_gene_names=remove_proteins_without_gene_names
     )
 
 
