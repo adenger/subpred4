@@ -232,7 +232,7 @@ dependencies:
   - obonet=1.0.0=pyh7cba7a3_0
   - openjpeg=2.5.0=hfec8fc6_2
   - openpyxl=3.1.2=py310h2372a71_0
-  - openssl=3.1.2=hd590300_0
+  - openssl=3.1.3=hd590300_0
   - overrides=7.3.1=pyhd8ed1ab_0
   - owlready2=0.43=py310h2372a71_0
   - packaging=23.1=pyhd8ed1ab_0
