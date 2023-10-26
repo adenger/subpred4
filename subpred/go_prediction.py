@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.feature_selection import SelectPercentile
 from sklearn.preprocessing import MultiLabelBinarizer, LabelEncoder
 from sklearn.model_selection import (
     StratifiedKFold,
@@ -167,6 +168,10 @@ def get_model_scores(
             PCA(),
             MultiOutputClassifier(SVC(class_weight="balanced")),
         ),
+        "pbest_svc_multi": make_pipeline(
+            StandardScaler(),
+            MultiOutputClassifier(make_pipeline(SelectPercentile(),SVC(class_weight="balanced"))),
+        ),
         "rf": make_pipeline(
             StandardScaler(),
             RandomForestClassifier(),
@@ -179,8 +184,13 @@ def get_model_scores(
         },
         "pca_svc_multi": {
             "multioutputclassifier__estimator__C": [0.1, 1, 10],
-            "pca__n_components": list(range(1,int(X.shape[0]*0.8 * 0.75))),
+            # "pca__n_components": list(range(1,int(X.shape[0]*0.8 * 0.75))),
             "multioutputclassifier__estimator__gamma": ["scale", "auto"],
+        },
+        "pbest_svc_multi" : {
+            "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
+            "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
+            "multioutputclassifier__estimator__selectpercentile__percentile": [10,20,30,40,50,60,70,80,90,100]
         },
         "svc": {
             "svc__C": [0.1, 1, 10],
