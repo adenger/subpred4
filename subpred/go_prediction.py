@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.feature_selection import SelectPercentile
+from sklearn.feature_selection import SelectKBest, SelectPercentile
 from sklearn.preprocessing import MultiLabelBinarizer, LabelEncoder
 from sklearn.model_selection import (
     StratifiedKFold,
@@ -126,6 +126,7 @@ def get_classification_tasks(
                 ]
             yield transform_labels(df_features, df_labels, multilabel=multi_output)
 
+
 def stratify_multioutput(element):
     if (element == [0, 1]).all():
         return 1
@@ -142,7 +143,6 @@ def get_stratification_array(arr):
     seed(1)
     y_stratify = np.array([stratify_multioutput(el) for el in arr])
     return y_stratify
-
 
 
 def get_model_scores(
@@ -170,11 +170,19 @@ def get_model_scores(
         ),
         "pbest_svc_multi": make_pipeline(
             StandardScaler(),
-            MultiOutputClassifier(make_pipeline(SelectPercentile(),SVC(class_weight="balanced"))),
+            MultiOutputClassifier(
+                make_pipeline(SelectPercentile(), SVC(class_weight="balanced"))
+            ),
+        ),
+        "kbest_svc_multi": make_pipeline(
+            StandardScaler(),
+            MultiOutputClassifier(
+                make_pipeline(SelectKBest(), SVC(class_weight="balanced"))
+            ),
         ),
         "rf": make_pipeline(
             StandardScaler(),
-            RandomForestClassifier(),
+            RandomForestClassifier(),  # TODO test other model.
         ),
     }
     param_grids = {
@@ -187,10 +195,15 @@ def get_model_scores(
             # "pca__n_components": list(range(1,int(X.shape[0]*0.8 * 0.75))),
             "multioutputclassifier__estimator__gamma": ["scale", "auto"],
         },
-        "pbest_svc_multi" : {
+        "pbest_svc_multi": {
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
-            "multioutputclassifier__estimator__selectpercentile__percentile": [10,20,30,40,50,60,70,80,90,100]
+            # "multioutputclassifier__estimator__selectpercentile__percentile": [10,20,30,40,50,60,70,80,90,100]
+        },
+        "kbest_svc_multi": {
+            "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
+            "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
+            # "multioutputclassifier__estimator__selectkbest__k": [10,20,100,200,500,1000]
         },
         "svc": {
             "svc__C": [0.1, 1, 10],
@@ -234,7 +247,7 @@ def get_model_scores(
             },
             refit="f1_macro",
             n_jobs=n_threads,
-            cv=grid_search_splits_multioutput_statified if multi_output else 4
+            cv=grid_search_splits_multioutput_statified if multi_output else 4,
         )
         gs.fit(X_train, y_train)
 
@@ -305,7 +318,9 @@ def get_model_evaluation_matrix_parallel(
 
 
 def process_pairwise_eval_results(
-    pairwise_eval_results: tuple, df_uniprot_goa: pd.DataFrame, convert_go_ids_to_terms:bool = True
+    pairwise_eval_results: tuple,
+    df_uniprot_goa: pd.DataFrame,
+    convert_go_ids_to_terms: bool = True,
 ):
     go_id_to_term = {
         go_id: go_term
@@ -326,7 +341,11 @@ def process_pairwise_eval_results(
         y,
         sample_names,
     ) in pairwise_eval_results:
-        go_term0, go_term1 = [go_id_to_term[go_id] for go_id in class_names] if convert_go_ids_to_terms else list(class_names)
+        go_term0, go_term1 = (
+            [go_id_to_term[go_id] for go_id in class_names]
+            if convert_go_ids_to_terms
+            else list(class_names)
+        )
         records_train.append([go_term0, go_term1, train_scores_label0.mean()])
         records_train.append([go_term1, go_term0, train_scores_label1.mean()])
         # records_train.append([go_term1,go_term0,train_scores[1]])
@@ -370,6 +389,7 @@ def plot_results_as_heatmap(
     )
     ax.set_title(title)
     return g
+
 
 # Example:
 # ----------------
