@@ -2,7 +2,9 @@ from rpy2.robjects import r, StrVector, packages, pandas2ri
 import rpy2.robjects as ro
 
 
-def get_semantic_similarities(go_terms, measure, organism, ont="MF"):
+def get_semantic_similarities(
+    go_terms, measure, organism, ont="MF", tcss_cutoff="NULL"
+):
     # DOC: https://yulab-smu.top/biomedical-knowledge-mining-book/GOSemSim.html
     assert measure in {"Resnik", "Lin", "Rel", "Jiang", "TCSS", "Wang"}
     assert organism in {"yeast"}
@@ -16,7 +18,7 @@ def get_semantic_similarities(go_terms, measure, organism, ont="MF"):
     packages.importr("Rcpp")
     r(
         """
-        get_semantic_similarity_scores <- function(go_filter_input,measure, ont, orgDbName){
+        get_semantic_similarity_scores <- function(go_filter_input,measure, ont, orgDbName, tcss_cutoff=NULL){
             # also add libraries for other organism here:
             go_annot <- godata(
                 OrgDb = orgDbName,
@@ -24,6 +26,7 @@ def get_semantic_similarities(go_terms, measure, organism, ont="MF"):
                 computeIC = TRUE, 
                 processTCSS = TRUE,
                 # keytype = "UNIPROT"
+                cutoff=tcss_cutoff
             )
             
             # unique_go_terms <- unique(as.vector(go_annot@geneAnno[["GO"]]))
@@ -35,16 +38,25 @@ def get_semantic_similarities(go_terms, measure, organism, ont="MF"):
             # }
             go_filter_input <- as.character(go_filter_input)
             
-            values <- mgoSim(go_filter_input,go_filter_input,semData=go_annot,measure=measure,combine=NULL)
+            values <- mgoSim(
+                go_filter_input,
+                go_filter_input,
+                semData=go_annot,
+                measure=measure,
+                combine=NULL
+            )
             
             return (as.data.frame(values))
         }
     """
     )
 
-    # TODO tcss cutoff?
     matr = r["get_semantic_similarity_scores"](
-        go_terms, measure=measure, ont=ont, orgDbName=organism_to_orgdb[organism]
+        go_terms,
+        measure=measure,
+        ont=ont,
+        orgDbName=organism_to_orgdb[organism],
+        tcss_cutoff=ro.NULL if tcss_cutoff == "NULL" else tcss_cutoff,
     )
 
     with (ro.default_converter + pandas2ri.converter).context():
