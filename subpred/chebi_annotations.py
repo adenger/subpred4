@@ -6,7 +6,8 @@ import re
 import pandas as pd
 
 
-def get_chebi_molecular_properties(graph_chebi):
+def get_chebi_molecular_properties(dataset_path):
+    graph_chebi = load_df("chebi_obo", dataset_path)
     records = list()
     pattern_property_val = re.compile(
         '^http://purl.obolibrary.org/obo/chebi/[a-z]+ "(.*?)"'
@@ -28,7 +29,9 @@ def get_chebi_molecular_properties(graph_chebi):
         .reset_index(drop=True)
     )
 
-    return df_chebi_properties
+    return df_chebi_properties.sort_values(
+        ["chebi_id", "property", "value"]
+    ).reset_index(drop=True)
 
 
 def get_id_update_dict(graph):
@@ -50,7 +53,6 @@ def get_go_chebi_annotations(
     go_chebi_relations_subset: set = {"has_primary_input", "has_participant"},
     filter_by_3star: bool = False,
     add_ancestors: bool = False,
-    molecules_only: bool = True,
 ):
     df_go_chebi = load_df("go_chebi", folder_path=dataset_path)
     graph_chebi = load_df("chebi_obo", folder_path=dataset_path)
@@ -110,22 +112,22 @@ def get_go_chebi_annotations(
             df_go_chebi = df_go_chebi[df_go_chebi.chebi_id_ancestor.isin(chebi_3star)]
         df_go_chebi = df_go_chebi.reset_index(drop=True)
 
-    if molecules_only:
-        # get molecular properties
-        df_molecular_properties = get_chebi_molecular_properties(
-            graph_chebi=graph_chebi
-        )
-        # here, we consider a chebi term a molecule if it has a formula
-        # this removes very abstract terms, but also keeps some parent terms like D-glucose
-        chebi_terms_with_formula = df_molecular_properties[
-            df_molecular_properties.property == "formula"
-        ].chebi_id.unique()
-        df_go_chebi = df_go_chebi[
-            df_go_chebi.chebi_id_ancestor.isin(chebi_terms_with_formula)
-        ]
-        df_go_chebi = df_go_chebi[
-            df_go_chebi.chebi_id.isin(chebi_terms_with_formula)
-        ]
+    # if molecules_only:
+    #     # get molecular properties
+    #     df_molecular_properties = get_chebi_molecular_properties(
+    #         graph_chebi=graph_chebi
+    #     )
+    #     # here, we consider a chebi term a molecule if it has a formula
+    #     # this removes very abstract terms, but also keeps some parent terms like D-glucose
+    #     chebi_terms_with_formula = df_molecular_properties[
+    #         df_molecular_properties.property == "formula"
+    #     ].chebi_id.unique()
+    #     df_go_chebi = df_go_chebi[
+    #         df_go_chebi.chebi_id_ancestor.isin(chebi_terms_with_formula)
+    #     ]
+    #     df_go_chebi = df_go_chebi[
+    #         df_go_chebi.chebi_id.isin(chebi_terms_with_formula)
+    #     ]
     # if chebi_ancestors_molecular_properties:
 
     go_id_to_term = {go_id: go_term for go_id, go_term in graph_go.nodes(data="name")}

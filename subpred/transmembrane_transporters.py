@@ -70,6 +70,5 @@ def get_transmembrane_transporter_dataset(
         go_chebi_relations_subset={"has_primary_input", "has_participant"},
         filter_by_3star=False,  
         add_ancestors=True,
-        molecules_only=True
     )
     return df_sequences, df_uniprot_goa, df_go_chebi
