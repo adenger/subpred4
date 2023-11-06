@@ -17,7 +17,6 @@ def get_transmembrane_transporter_dataset(
     additional_proteins: set = None,
     anatomical_entities_whitelist: set = None,
     remove_proteins_without_gene_names:bool=True,
-    add_chebi_ancestors:bool=False
 ):
     # First, get all sequences with filtering criteria:
     df_sequences = get_sequence_dataset(
@@ -70,6 +69,7 @@ def get_transmembrane_transporter_dataset(
         go_ids_subset=set(df_uniprot_goa.go_id_ancestor),
         go_chebi_relations_subset={"has_primary_input", "has_participant"},
         filter_by_3star=False,  
-        add_ancestors=add_chebi_ancestors
+        add_ancestors=True,
+        molecules_only=True
     )
     return df_sequences, df_uniprot_goa, df_go_chebi
