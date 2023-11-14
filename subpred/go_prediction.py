@@ -192,18 +192,26 @@ def get_model_scores(
         },
         "pca_svc_multi": {
             "multioutputclassifier__estimator__C": [0.1, 1, 10],
-            # "pca__n_components": list(range(1,int(X.shape[0]*0.8 * 0.75))),
             "multioutputclassifier__estimator__gamma": ["scale", "auto"],
+            "multioutputclassifier__pca__n_components": [2, 40, None],
         },
         "pbest_svc_multi": {
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
-            # "multioutputclassifier__estimator__selectpercentile__percentile": [10,20,30,40,50,60,70,80,90,100]
+            "multioutputclassifier__estimator__selectpercentile__percentile": [
+                10,
+                20,
+                50,
+            ],  # 10 default
         },
         "kbest_svc_multi": {
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
-            # "multioutputclassifier__estimator__selectkbest__k": [10,20,100,200,500,1000]
+            "multioutputclassifier__estimator__selectkbest__k": [
+                10,
+                40,
+                200,
+            ],  # 10 is default, 40 is sqrt(1600)
         },
         "svc": {
             "svc__C": [0.1, 1, 10],
