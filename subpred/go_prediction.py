@@ -193,7 +193,7 @@ def get_model_scores(
         "pca_svc_multi": {
             "multioutputclassifier__estimator__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__gamma": ["scale", "auto"],
-            "multioutputclassifier__pca__n_components": [2, 40, None],
+            "pca__n_components": [2, 20, None],
         },
         "pbest_svc_multi": {
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
