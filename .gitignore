@@ -190,3 +190,4 @@ data/raw/ontologies/chebi.obo
 subpred4_data.tar.gz
 data/datasets/go_obo.gpickle
 data/datasets/chebi_obo.gpickle
+notebooks/ml_models_results.pickle
