@@ -199,9 +199,9 @@ def get_model_scores(
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
             "multioutputclassifier__estimator__selectpercentile__percentile": [
-                10,
-                20,
-                50,
+                10,  # 160
+                20,  # 320
+                50,  # 800
             ],  # 10 default
         },
         "kbest_svc_multi": {
