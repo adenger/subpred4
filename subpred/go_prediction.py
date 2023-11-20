@@ -174,18 +174,6 @@ def get_model_scores(
                 make_pipeline(SelectPercentile(), SVC(class_weight="balanced"))
             ),
         ),
-        "pbest_svc_multi_low": make_pipeline(
-            StandardScaler(),
-            MultiOutputClassifier(
-                make_pipeline(SelectPercentile(), SVC(class_weight="balanced"))
-            ),
-        ),
-        "pbest_svc_multi_high": make_pipeline(
-            StandardScaler(),
-            MultiOutputClassifier(
-                make_pipeline(SelectPercentile(), SVC(class_weight="balanced"))
-            ),
-        ),
         "kbest_svc_multi": make_pipeline(
             StandardScaler(),
             MultiOutputClassifier(
@@ -205,33 +193,15 @@ def get_model_scores(
         "pca_svc_multi": {
             "multioutputclassifier__estimator__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__gamma": ["scale", "auto"],
-            "pca__n_components": [2, 20, None],
+            "pca__n_components": [10, 20, None],
         },
         "pbest_svc_multi": {
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
             "multioutputclassifier__estimator__selectpercentile__percentile": [
-                10,     # 160
-                20,     # 320
-                50,   # 800
-            ],  # 10 default
-        },
-        "pbest_svc_multi_low": {
-            "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
-            "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
-            "multioutputclassifier__estimator__selectpercentile__percentile": [
-                1,     # 160
-                2,     # 320
-                5,   # 800
-            ],  # 10 default
-        },
-        "pbest_svc_multi_high": {
-            "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
-            "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
-            "multioutputclassifier__estimator__selectpercentile__percentile": [
-                50,     # 160
-                75,     # 320
-                100,   # 800
+                10,  # 160
+                20,  # 320
+                50   # 800
             ],  # 10 default
         },
         "kbest_svc_multi": {
@@ -239,8 +209,8 @@ def get_model_scores(
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
             "multioutputclassifier__estimator__selectkbest__k": [
                 10,
-                40,
-                200,
+                20,
+                40
             ],  # 10 is default, 40 is sqrt(1600)
         },
         "svc": {
