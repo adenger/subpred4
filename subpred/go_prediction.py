@@ -202,16 +202,16 @@ def get_model_scores(
                 10,  # 160
                 20,  # 320
                 50   # 800
-            ],  # 10 default
+            ],  # percentage of dimensions, 10 default
         },
         "kbest_svc_multi": {
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
             "multioutputclassifier__estimator__selectkbest__k": [
                 10,
-                20,
-                40
-            ],  # 10 is default, 40 is sqrt(1600)
+                40,
+                80
+            ],  # number of dimensions. 10 is default, 40 is sqrt(1600)
         },
         "svc": {
             "svc__C": [0.1, 1, 10],
