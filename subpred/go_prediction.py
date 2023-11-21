@@ -145,10 +145,14 @@ def get_stratification_array(arr):
     return y_stratify
 
 
+# def get_model_and_grid(model_name:str):
+
+
 def get_model_scores(
     X,
     y,
     model_name: str = "svc_multi",
+    feature_selection_parameters: list = None,
     multi_output: bool = True,
     n_threads: int = -1,
     class_names: np.array = np.array([]),
@@ -193,25 +197,33 @@ def get_model_scores(
         "pca_svc_multi": {
             "multioutputclassifier__estimator__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__gamma": ["scale", "auto"],
-            "pca__n_components": [10, 20, None],
+            "pca__n_components": feature_selection_parameters
+            if feature_selection_parameters
+            else None,
         },
         "pbest_svc_multi": {
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
-            "multioutputclassifier__estimator__selectpercentile__percentile": [
-                10,  # 160
-                20,  # 320
-                50   # 800
-            ],  # percentage of dimensions, 10 default
+            "multioutputclassifier__estimator__selectpercentile__percentile": feature_selection_parameters
+            if feature_selection_parameters
+            else 10
+            # [
+            #     10,  
+            #     20,  
+            #     50   
+            # ],  # percentage of dimensions, 10 default
         },
         "kbest_svc_multi": {
             "multioutputclassifier__estimator__svc__C": [0.1, 1, 10],
             "multioutputclassifier__estimator__svc__gamma": ["scale", "auto"],
-            "multioutputclassifier__estimator__selectkbest__k": [
-                10,
-                40,
-                80
-            ],  # number of dimensions. 10 is default, 40 is sqrt(1600)
+            "multioutputclassifier__estimator__selectkbest__k": feature_selection_parameters
+            if feature_selection_parameters
+            else 10
+            # [
+            #     10,
+            #     40,
+            #     80,
+            # ],  # number of dimensions. 10 is default, 40 is sqrt(1600)
         },
         "svc": {
             "svc__C": [0.1, 1, 10],
@@ -292,6 +304,7 @@ def get_model_evaluation_matrix_parallel(
     min_samples_per_class: int = 20,
     min_unique_samples_per_class: int = 15,
     model_name="svc_multi",
+    feature_selection_parameters=None,
     n_jobs: int = -1,
     n_jobs_gridsearch: int = 1,
 ):
@@ -310,6 +323,7 @@ def get_model_evaluation_matrix_parallel(
             X,
             y,
             model_name=model_name,
+            feature_selection_parameters=feature_selection_parameters,
             multi_output=multi_output,
             n_threads=n_jobs_gridsearch,
             class_names=class_names,
