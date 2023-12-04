@@ -1,5 +1,6 @@
 data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz
 data/raw/gene_ontology/go_preprocessing.txt
+data/raw/gene_ontology/go_xrel.json
 data/raw/interpro/interpro_entries.tsv
 data/raw/ontologies/chebi.obo
 data/raw/ontologies/go.obo
