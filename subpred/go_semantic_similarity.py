@@ -24,7 +24,7 @@ def get_semantic_similarities(
                 OrgDb = orgDbName,
                 ont=ont, 
                 computeIC = TRUE, 
-                processTCSS = TRUE,
+                processTCSS = FALSE,
                 # keytype = "UNIPROT"
                 cutoff=tcss_cutoff
             )
