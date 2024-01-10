@@ -38,7 +38,7 @@ package:
 ## Export current env to new file
 env_export:
 	conda env export | sed '/^prefix/d' > environment.yml
-	conda env export --from-history | sed '/^prefix/d' > environment_history.yml
+	# conda env export --from-history | sed '/^prefix/d' > environment_history.yml
 
 ## Export raw data for sharing (requires active conda env)
 data_export:
