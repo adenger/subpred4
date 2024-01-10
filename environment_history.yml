@@ -1,7 +1,7 @@
 name: subpred4
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
 dependencies:
   - python=3.10
   - cython
@@ -37,5 +37,6 @@ dependencies:
   - pigz
   - rdkit
   - rpy2
-  - bioconda::bioconductor-gosemsim
-  - bioconda::bioconductor-org.sc.sgd.db
+  - bioconductor-gosemsim
+  - r-future.apply
+  - bioconductor-org.sc.sgd.db
