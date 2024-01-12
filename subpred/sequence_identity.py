@@ -121,7 +121,7 @@ def get_pairwise_go_scores(
     df_protein_scores: pd.DataFrame,
     aggr_method: str = "mean",
 ):
-    func = {"mean": np.mean, "median": np.median, "min": np.min, "max": np.max}[
+    func = {"mean": np.mean, "median": np.median, "min": np.min, "max": np.max, "std": np.std}[
         aggr_method
     ]
     records = list()
