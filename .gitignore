@@ -193,3 +193,4 @@ data/datasets/chebi_obo.gpickle
 notebooks/ml_models_results.pickle
 notebooks/ml_models_min5.pickle
 notebooks/ml_models_min20.pickle
+notebooks/ml_models_min10.pickle
