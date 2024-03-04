@@ -57,10 +57,14 @@ def get_go_subset(
 def get_pairwise_test_scores(
     df_sequences,
     df_uniprot_goa,
+    dataset_name="",
     min_samples_unique=5,
     exclude_iea_go_terms=False,
 ):
-    file_name = f"ml_models_min{min_samples_unique}.pickle"
+    if dataset_name:
+        file_name = f"ml_models_min{min_samples_unique}_{dataset_name}.pickle"
+    else:
+        file_name = f"ml_models_min{min_samples_unique}.pickle"
 
     if not os.path.isfile(file_name):
         # recalculating with lower threshold to include more terms
