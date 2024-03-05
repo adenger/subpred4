@@ -251,7 +251,8 @@ def subset_pipeline(
     random_seed=1,
     return_scores=True,
     return_baseline_scores=False,
-    exclude_iea_go_terms=False
+    exclude_iea_go_terms=False,
+    dataset_name=""
 ):
     go_id_to_proteins = get_go_id_to_proteins(df_uniprot_goa)
 
@@ -268,7 +269,8 @@ def subset_pipeline(
         df_sequences=df_sequences,
         df_uniprot_goa=df_uniprot_goa,
         min_samples_unique=min_unique_samples_per_term,
-        exclude_iea_go_terms=exclude_iea_go_terms
+        exclude_iea_go_terms=exclude_iea_go_terms,
+        dataset_name=dataset_name
     )
     if return_baseline_scores:
         scores_before = get_subset_eval(
