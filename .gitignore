@@ -4,6 +4,7 @@ data/raw/uniprot/uniprot-reviewed_yes.tab.gz
 data/raw/uniref/uniref50/uniref50*
 data/raw/uniref/uniref90/uniref90*
 data/datasets/*.pickle
+notebooks/df_plot_uniprot.pickle
 data_full.tar
 data_bak/*
 plots/*
