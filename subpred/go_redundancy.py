@@ -17,7 +17,7 @@ def get_proteins(go_set: set, go_id_to_proteins: dict):
 
 
 def get_go_subset(
-    df_uniprot_goa, root_node="GO:0022857", min_samples=20, excluded_terms=None
+    df_uniprot_goa, root_node="GO:0022857", min_samples=20, max_samples_percentile=None,excluded_terms=None
 ):
 
     graph_go = get_go_subgraph(
@@ -44,6 +44,17 @@ def get_go_subset(
                 go_term
                 for go_term, sample_count in go_term_to_sample_count.items()
                 if sample_count >= min_samples
+            }
+        )
+
+    if max_samples_percentile:
+        sample_counts = list(go_term_to_sample_count.values())
+        sample_count_percentile = np.percentile(sample_counts, max_samples_percentile)
+        go_terms_set = go_terms_set & set(
+            {
+                go_term
+                for go_term, sample_count in go_term_to_sample_count.items()
+                if sample_count <= sample_count_percentile
             }
         )
 
@@ -241,6 +252,7 @@ def subset_pipeline(
     df_sequences,
     root_node="GO:0022857",
     min_samples_per_term=20,
+    max_samples_percentile:int=None,
     min_unique_samples_per_term=5,
     min_coverage=0.8,
     epsilon_f1=0.0,
@@ -260,6 +272,7 @@ def subset_pipeline(
         df_uniprot_goa=df_uniprot_goa,
         root_node=root_node,
         min_samples=min_samples_per_term,
+        max_samples_percentile=max_samples_percentile,
         excluded_terms=excluded_terms,
     )
 
