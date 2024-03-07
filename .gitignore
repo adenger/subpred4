@@ -212,3 +212,17 @@ notebooks/ml_models_min5_meta4.pickle
 notebooks/ml_models_min10_meta4.pickle
 notebooks/ml_models_min15_meta4.pickle
 notebooks/ml_models_min20_meta4.pickle
+notebooks/go_protein_dist_log_meta4.png
+notebooks/mean_meta4_95.png
+notebooks/mean_meta4_99.png
+notebooks/mean_meta4_100.png
+notebooks/median_meta4_95.png
+notebooks/median_meta4_99.png
+notebooks/median_meta4_100.png
+notebooks/nans_meta4_95.png
+notebooks/nans_meta4_99.png
+notebooks/nans_meta4_100.png
+notebooks/overlaps_meta4.png
+notebooks/subset_size_meta4_95.png
+notebooks/subset_size_meta4_99.png
+notebooks/subset_size_meta4_100.png
