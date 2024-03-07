@@ -207,3 +207,8 @@ notebooks/ml_models_min5_uniprot.pickle
 notebooks/ml_models_min10_uniprot.pickle
 notebooks/ml_models_min15_uniprot.pickle
 notebooks/ml_models_min20_uniprot.pickle
+notebooks/df_plot_meta4.pickle
+notebooks/ml_models_min5_meta4.pickle
+notebooks/ml_models_min10_meta4.pickle
+notebooks/ml_models_min15_meta4.pickle
+notebooks/ml_models_min20_meta4.pickle
