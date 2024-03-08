@@ -226,3 +226,16 @@ notebooks/overlaps_meta4.png
 notebooks/subset_size_meta4_95.png
 notebooks/subset_size_meta4_99.png
 notebooks/subset_size_meta4_100.png
+notebooks/mean_yeast.png
+notebooks/median_yeast.png
+notebooks/nans_yeast.png
+notebooks/overlaps_meta4_95_60_m20.png
+notebooks/overlaps_meta4_95_67_m20.png
+notebooks/overlaps_meta4_95_68_m20.png
+notebooks/overlaps_meta4_100_50.png
+notebooks/overlaps_meta4_100_60_m20.png
+notebooks/overlaps_meta4_100_60.png
+notebooks/overlaps_meta4_100.png
+notebooks/overlaps-abstract-yeast.png
+notebooks/overlaps-concrete-yeast.png
+notebooks/subset_size_yeast.png
