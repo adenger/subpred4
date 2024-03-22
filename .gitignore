@@ -13,6 +13,7 @@ data_backup.tar.gz
 data/raw/gene_ontology/go_preprocessing.txt
 data/raw/gene_ontology/go_xrel.json
 data/datasets/proteins_nonstandard_codes.txt
+data/intermediate/notebooks_cache/*.pickle
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -192,27 +193,12 @@ data/raw/ontologies/chebi.obo
 subpred4_data.tar.gz
 data/datasets/go_obo.gpickle
 data/datasets/chebi_obo.gpickle
-notebooks/ml_models_results.pickle
-notebooks/ml_models_min5.pickle
-notebooks/ml_models_min20.pickle
-notebooks/ml_models_min10.pickle
-notebooks/ml_models_min15.pickle
 notebooks/mean.png
 notebooks/median.png
 notebooks/nans.png
 notebooks/subset_size.png
 notebooks/overlaps-abstract.png
 notebooks/overlaps-concrete.png
-notebooks/df_plot_uniprot.pickle
-notebooks/ml_models_min5_uniprot.pickle
-notebooks/ml_models_min10_uniprot.pickle
-notebooks/ml_models_min15_uniprot.pickle
-notebooks/ml_models_min20_uniprot.pickle
-notebooks/df_plot_meta4.pickle
-notebooks/ml_models_min5_meta4.pickle
-notebooks/ml_models_min10_meta4.pickle
-notebooks/ml_models_min15_meta4.pickle
-notebooks/ml_models_min20_meta4.pickle
 notebooks/go_protein_dist_log_meta4.png
 notebooks/mean_meta4_95.png
 notebooks/mean_meta4_99.png
