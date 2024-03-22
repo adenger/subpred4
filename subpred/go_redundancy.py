@@ -6,7 +6,11 @@ import networkx as nx
 import os
 from subpred.go_annotations import get_go_subgraph
 from subpred.util import load_df
-from subpred.go_prediction import get_model_evaluation_matrix_parallel, process_pairwise_eval_results
+from subpred.go_prediction import (
+    get_model_evaluation_matrix_parallel,
+    process_pairwise_eval_results,
+)
+
 
 def get_proteins(go_set: set, go_id_to_proteins: dict):
 
@@ -17,7 +21,11 @@ def get_proteins(go_set: set, go_id_to_proteins: dict):
 
 
 def get_go_subset(
-    df_uniprot_goa, root_node="GO:0022857", min_samples=20, max_samples_percentile=None,excluded_terms=None
+    df_uniprot_goa,
+    root_node="GO:0022857",
+    min_samples=20,
+    max_samples_percentile=None,
+    excluded_terms=None,
 ):
 
     graph_go = get_go_subgraph(
@@ -71,11 +79,15 @@ def get_pairwise_test_scores(
     dataset_name="",
     min_samples_unique=5,
     exclude_iea_go_terms=False,
+    cache_folder=""
 ):
     if dataset_name:
         file_name = f"ml_models_min{min_samples_unique}_{dataset_name}.pickle"
     else:
         file_name = f"ml_models_min{min_samples_unique}.pickle"
+
+    if cache_folder:
+        file_name = f"{cache_folder}/{file_name}"
 
     if not os.path.isfile(file_name):
         # recalculating with lower threshold to include more terms
@@ -252,7 +264,7 @@ def subset_pipeline(
     df_sequences,
     root_node="GO:0022857",
     min_samples_per_term=20,
-    max_samples_percentile:int=None,
+    max_samples_percentile: int = None,
     min_unique_samples_per_term=5,
     min_coverage=0.8,
     epsilon_f1=0.0,
@@ -264,7 +276,8 @@ def subset_pipeline(
     return_scores=True,
     return_baseline_scores=False,
     exclude_iea_go_terms=False,
-    dataset_name=""
+    dataset_name="",
+    cache_folder="../data/intermediate/notebooks_cache",
 ):
     go_id_to_proteins = get_go_id_to_proteins(df_uniprot_goa)
 
@@ -283,7 +296,8 @@ def subset_pipeline(
         df_uniprot_goa=df_uniprot_goa,
         min_samples_unique=min_unique_samples_per_term,
         exclude_iea_go_terms=exclude_iea_go_terms,
-        dataset_name=dataset_name
+        dataset_name=dataset_name,
+        cache_folder=cache_folder,
     )
     if return_baseline_scores:
         scores_before = get_subset_eval(
