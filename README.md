@@ -44,12 +44,14 @@
     make blast_databases
     ```
 
-## Data concept
+9. Run the notebooks in order, according to their filenames
 
-All raw data is left untouched in data/raw. The download commands can be found in the Makefile, and in the preprocessing notebook. We made sure that all files are based on the same version of Uniprot (2022_05). Re-downloading the raw data will upgrade then to the latest version, although that can lead to incompatibilities, since not all databases based on a particular Uniprot version are released at the same time.
+## API concept
 
-Preprocessing if performed on the raw data, then the processed data is saved as pickles in data/datasets for fast i/o. The method subpred.util.load_df can be used to read these pickles.
+All raw data is left untouched in data/raw. The download commands and versions can be found in the Makefile, and in the preprocessing notebook. All files are based on the same version of Uniprot (2022_05). Re-downloading the raw data can upgrade them to the latest version, which that can lead to incompatibilities, since not all databases based on a particular Uniprot version are released at the same time.
 
-A transporter dataset can be created manually with all parameters using the methods in *subpred.protein_dataset*, *subpred.go_annotations* and *subpred.chebi_annotations*. This process is simplified by the function *subpred.transmembrane_transporters.get_transmembrane_transporter_dataset*, which sets most of the parameters for you.
+Preprocessing is performed on the raw data, then the processed data is saved as pickles in data/datasets for fast i/o. The method subpred.util.load_df can be used to read these pickles.
 
-The function *get_transmembrane_transporter_dataset* returns three dataframes: One with sequences, one with GO annotations, and one with ChEBI annotations. All of the remaining methods in the package take one or multiple of these dataframes as input to carry out their calculations, since they contain all the necessary data.
+A transporter dataset can be created manually with all parameters using the methods in *subpred.protein_dataset*, *subpred.go_annotations* and *subpred.chebi_annotations*. This process is simplified by using the function *subpred.transmembrane_transporters.get_transmembrane_transporter_dataset*, which sets most of the parameters for you.
+
+The function *get_transmembrane_transporter_dataset* returns three dataframes: One with sequences, one with GO annotations, and one with ChEBI annotations. These three dataframes essentially act like data classes. All of the remaining methods in the package take one or multiple of these dataframes as input to carry out their calculations, and the data should ideally not be changed before using the methods on them.

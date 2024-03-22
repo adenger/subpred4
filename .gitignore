@@ -11,7 +11,8 @@ plots/*
 reports/*.html
 data_backup.tar.gz
 data/raw/gene_ontology/go_preprocessing.txt
-data/*
+data/raw/gene_ontology/go_xrel.json
+data/datasets/proteins_nonstandard_codes.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
