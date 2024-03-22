@@ -1,7 +1,11 @@
 from subpred.protein_dataset import get_sequence_dataset
 from subpred.go_annotations import get_go_annotations_subset
 from subpred.chebi_annotations import get_go_chebi_annotations
-
+import numpy as np
+import pandas as pd
+from subpred.cdhit import cd_hit
+from subpred.util import load_df
+import multiprocessing
 # "human": 		9606
 # "athaliana":	3702
 # "ecoli": 		83333
@@ -72,3 +76,98 @@ def get_transmembrane_transporter_dataset(
         add_ancestors=True,
     )
     return df_sequences, df_uniprot_goa, df_go_chebi
+
+
+
+
+def get_stats(df_sequences, df_uniprot_goa):
+
+    df_sequences_merge = df_sequences.join(load_df("uniprot")["gene_names"], how="left")
+    df_sequences_merge["has_gene_name"] = ~df_sequences_merge.gene_names.isnull()
+    df_sequences_merge = df_sequences_merge.drop(
+        ["gene_names", "protein_names"], axis=1
+    )
+
+    df_sequences_merge = df_sequences_merge.reset_index().drop_duplicates()
+    df_sequences_merge
+
+    df_sequences_goa_merged = pd.merge(
+        df_sequences_merge[
+            ["Uniprot", "reviewed", "protein_existence", "has_gene_name"]
+        ],
+        df_uniprot_goa[["Uniprot", "evidence_code", "go_term_ancestor"]],
+        on="Uniprot",
+        how="inner",
+    )
+    df_sequences_goa_merged
+    df_sequences_goa_merged["evidence_code"] = df_sequences_goa_merged[
+        "evidence_code"
+    ].transform(lambda x: "computational" if x == "IEA" else "experiment")
+    df_sequences_goa_merged["protein_existence_evidence"] = df_sequences_goa_merged[
+        "protein_existence"
+    ].map({1: "protein_level", 2: "transcript_level"})
+    df_sequences_goa_merged = df_sequences_goa_merged.drop("protein_existence", axis=1)
+    df_sequences_goa_merged["clustering"] = "None"
+    cdhit_cores = min(multiprocessing.cpu_count(), 12)
+
+    for thresh in [50, 70, 90, 100]:
+        cluster_representatives = cd_hit(
+            df_sequences.sequence, identity_threshold=thresh, n_threads=cdhit_cores
+        )
+
+        df_sequences_goa_merged_clustered = (
+            df_sequences_goa_merged[
+                df_sequences_goa_merged.Uniprot.isin(cluster_representatives)
+            ]
+            .drop("clustering", axis=1)
+            .assign(clustering=thresh)
+            .drop_duplicates()
+        )
+
+        df_sequences_goa_merged = pd.concat(
+            [df_sequences_goa_merged, df_sequences_goa_merged_clustered]
+        ).reset_index(drop=True)
+    df_sequences_goa_merged = df_sequences_goa_merged.rename(
+        columns={
+            "evidence_code": "go_evidence",
+            "reviewed": "swissprot_reviewed",
+            "go_term_ancestor": "go_term",
+        }
+    )
+
+    df_sequences_goa_merged = df_sequences_goa_merged.drop_duplicates()
+
+    df_stats_transporters = (
+        df_sequences_goa_merged.drop("go_term", axis=1)
+        .drop_duplicates()
+        .groupby(
+            [
+                "swissprot_reviewed",
+                "has_gene_name",
+                "go_evidence",
+                "protein_existence_evidence",
+                "clustering",
+            ]
+        )
+        .apply(np.unique)
+        .apply(len)
+        .to_frame("n_transporters")
+    )
+
+    df_stats_go = (
+        df_sequences_goa_merged.drop("Uniprot", axis=1)
+        .drop_duplicates()
+        .groupby(
+            [
+                "swissprot_reviewed",
+                "has_gene_name",
+                "go_evidence",
+                "protein_existence_evidence",
+                "clustering",
+            ]
+        )
+        .apply(np.unique)
+        .apply(len)
+        .to_frame("n_terms")
+    )
+    return df_stats_transporters.join(df_stats_go)
