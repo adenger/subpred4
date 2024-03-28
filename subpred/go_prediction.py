@@ -145,8 +145,6 @@ def get_stratification_array(arr):
     return y_stratify
 
 
-# def get_model_and_grid(model_name:str):
-
 
 def get_model_scores(
     X,
@@ -186,7 +184,7 @@ def get_model_scores(
         ),
         "rf": make_pipeline(
             StandardScaler(),
-            RandomForestClassifier(),  # TODO test other model.
+            RandomForestClassifier(), 
         ),
     }
     param_grids = {

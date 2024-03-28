@@ -6,6 +6,7 @@ import pandas as pd
 from subpred.cdhit import cd_hit
 from subpred.util import load_df
 import multiprocessing
+
 # "human": 		9606
 # "athaliana":	3702
 # "ecoli": 		83333
@@ -20,8 +21,36 @@ def get_transmembrane_transporter_dataset(
     max_sequence_evidence_code: int = 1,
     additional_proteins: set = None,
     anatomical_entities_whitelist: set = None,
-    remove_proteins_without_gene_names:bool=True,
+    remove_proteins_without_gene_names: bool = True,
 ):
+    """Creates the data that is used by many of the remaining methods as input
+
+    Args:
+        organism_ids (set, optional): Set of taxonomy identifiers, e.g. 9606 for human.
+            No filtering occurs when set to None. Defaults to None.
+        swissprot_only (bool, optional):
+            Only keep proteins that have been manually curated by SwissProt. Defaults to False.
+        datasets_path (str, optional):
+            Path to the pickles from the preprocessing notebook. Defaults to "../data/datasets/".
+        exclude_iea_go_terms (bool, optional):
+            Whether to exclude GO term annotations that were inferred electronically. Defaults to False.
+        max_sequence_evidence_code (int, optional):
+            1 for evidence at protein level
+            2 for evidence at protein or transcript level.
+            Defaults to 1.
+        additional_proteins (set, optional):
+            Proteins to add to the dataset, for example from other organisms. Defaults to None.
+        anatomical_entities_whitelist (set, optional):
+            Only keep proteins annotated with these CC GO terms. Defaults to None.
+        remove_proteins_without_gene_names (bool, optional):
+            Remove proteins that have not been annotated with a gene name in Uniprot. Defaults to True.
+
+    Returns:
+        df_sequences: Proteins dataset
+        df_uniprot_goa: GO annotations for proteins
+        df_go_chebi: ChEBI annotations for GO terms
+    """
+
     # First, get all sequences with filtering criteria:
     df_sequences = get_sequence_dataset(
         datasets_path=datasets_path,
@@ -29,9 +58,8 @@ def get_transmembrane_transporter_dataset(
         swissprot_only=swissprot_only,
         max_sequence_evidence_code=max_sequence_evidence_code,
         additional_proteins=additional_proteins,
-        remove_proteins_without_gene_names=remove_proteins_without_gene_names
+        remove_proteins_without_gene_names=remove_proteins_without_gene_names,
     )
-
 
     # Get GO annotations from subset of transmembrane transporter go terms
     df_uniprot_goa = get_go_annotations_subset(
@@ -45,7 +73,7 @@ def get_transmembrane_transporter_dataset(
     )
     # Filter sequences for those with transporter go annotations
     df_sequences = df_sequences[df_sequences.index.isin(df_uniprot_goa.Uniprot)]
-    
+
     # Filter for cellular components
     if anatomical_entities_whitelist:
         df_uniprot_goa_anatomical_entity = get_go_annotations_subset(
@@ -72,12 +100,10 @@ def get_transmembrane_transporter_dataset(
         dataset_path=datasets_path,
         go_ids_subset=set(df_uniprot_goa.go_id_ancestor),
         go_chebi_relations_subset={"has_primary_input", "has_participant"},
-        filter_by_3star=False,  
+        filter_by_3star=False,
         add_ancestors=True,
     )
     return df_sequences, df_uniprot_goa, df_go_chebi
-
-
 
 
 def get_stats(df_sequences, df_uniprot_goa):

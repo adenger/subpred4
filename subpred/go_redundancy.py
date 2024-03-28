@@ -279,6 +279,47 @@ def subset_pipeline(
     dataset_name="",
     cache_folder="../data/intermediate/notebooks_cache",
 ):
+    """Reduces a set of GO terms to a subset according to specified parameters, using a greedy algorithm.
+
+    Args:
+        df_uniprot_goa (pd.DataFrame): GO annotations from get_transmembrane_transporter_dataset or get_go_annotations_subset
+        df_sequences (pd.DataFrame): Proteins from from get_transmembrane_transporter_dataset or get_sequence_dataset
+        root_node (str, optional): Only GO terms that are ancestors of this root node, with is_a relations, are kept in the dataset. 
+            Defaults to "GO:0022857", which corresponds to "transmembrane transporter activity.
+        min_samples_per_term (int, optional): Parameter *n* in the paper. GO terms with less than *n* annotated proteins are removed from the dataset. 
+            Defaults to 20.
+        max_samples_percentile (int, optional): Parameter *p* in the paper. 
+            Removes the GO terms that are in the top *p*th percentile in terms of annotated proteins. 
+            Defaults to None.
+        min_unique_samples_per_term (int, optional): Parameter *m* from paper. ML models are only calculated for pairs GO terms 
+            where each GO term has at least *m* unique annotated proteins. A unique protein is a protein that is not part of the intersection set.
+            This removes cases where e.g. one GO term is the parent of another, which causes not enough samples to be available for each fold of the 5fCV.
+            Higher values can lead to more stable results, but require a lower min_coverage to produce non-redundant results.
+            Defaults to 5.
+        min_coverage (float, optional): Minimum fraction of the original protein set to be included in the final dataset. Defaults to 0.8.
+        epsilon_f1 (float, optional): Two ML evaluation F1 scores a,b are seen as equal if b-epsilon < a < b+epsilon.
+            Tries to reduce possible impact of rounding errors on results when sorting the GO terms by their evaluation scores.
+            Introduces some deterministic randomness in the algorithm, and can be used to escape local minima. Defaults to 0.0.
+        nan_value (float, optional): When calculating the average F1 scores, NaN values can be given a penalty in the calculation,
+            making sure that GO terms leading to NaNs are removed as soon as possible. Should be set to 0 or a negative value. Defaults to 0.0.
+        prefer_abstract_terms (bool, optional): Preference when choosing between a term closer to the root node and a way further away 
+            from the root node that have equal scores. 
+            Defaults to False.
+        verbose (bool, optional): Print which GO terms are removed during each step. Defaults to False.
+        excluded_terms (pd.DataFrame, optional): GO terms that will always be deleted at the start. Defaults to None.
+        random_seed (int, optional): The last tie breaker is a random draw with a numpy random generator, this is the random seed for that. Defaults to 1.
+        return_scores (bool, optional): If false, only the final subset is returned. If true, returns the subset and the matrix of pairwise F1 scores. Defaults to True.
+        return_baseline_scores (bool, optional): Skip all calculations and only return the pairwise F1 scores for the unoptimized dataset. Defaults to False.
+        exclude_iea_go_terms (bool, optional): If true do not use IEA GO terms for ML models. Defaults to False.
+        dataset_name (str, optional): Used for distinguishing between the ML results in the cache_folder. 
+            Important: Use a different dataset_name when using a different df_sequences/df_uniprot_goa.
+            Defaults to "".
+        cache_folder (str, optional): Folder for storing the cached pairwise ML results. Defaults to "../data/intermediate/notebooks_cache".
+
+    Returns:
+        Optimized GO subset
+        Pairwise F1 scores (optional)
+    """
     go_id_to_proteins = get_go_id_to_proteins(df_uniprot_goa)
 
     go_terms_list = get_go_subset(
