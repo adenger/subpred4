@@ -13,15 +13,6 @@
 # Setup                                                                         #
 #################################################################################
 
-## Install packages required on Ubuntu 22.04 LTS WSL
-setup_ubuntu:
-	sudo apt update && sudo apt upgrade -y
-	sudo apt install build-essential pigz
-	wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-	bash ~/miniconda.sh -p ~/miniconda3
-	rm ~/miniconda.sh
-	@echo Reload shell to put conda in path: source ~/.bashrc
-
 ## Import raw data from archive created with data_export
 data_import:
 	tar xvf subpred4_data.tar.gz
@@ -49,70 +40,10 @@ blast_databases:
 	cd data/raw/uniref/uniref50 && makeblastdb -in uniref50.fasta -parse_seqids -dbtype prot
 	cd data/raw/uniref/uniref90 && makeblastdb -in uniref90.fasta -parse_seqids -dbtype prot
 
-## sync temp files between server and local machine
-sync_tmp_files:
-	rsync -ruvhP ad@tera:~/manuscript2/subpred4/data/intermediate/ data/intermediate
-	# rsync -ruvhP data/intermediate/ ad@tera:~/manuscript2/subpred4/data/intermediate
-
-## Upload data archive to onedrive
-sync_backup_archive:
-	mv /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/subpred4_data.tar.gz /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/subpred4_data_prev.tar.gz
-	cp subpred4_data.tar.gz /mnt/c/Users/adeng/OneDrive\ -\ Universität\ des\ Saarlandes/PhD\ Thesis/Manuskript2/data/
-
 ## Clean up tmp files that are not needed
 clear_tmp_files:
 	find data/intermediate/blast -name "*.log" -delete
 	find data/intermediate/blast -name "*.fasta" -delete
-
-reports:
-	cd reports/03_matrices && bash render.sh
-
-#################################################################################
-# Raw data                                                                      #
-#################################################################################
-
-## Download raw data (not reccomended, use data_import instead, future datasets might be incompatible)
-raw_data:
-	curl "http://current.geneontology.org/ontology/go.owl" > "data/raw/ontologies/go.owl"
-	curl "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.owl.gz" | gunzip -c > data/raw/ontologies/chebi.owl
-	curl "https://tcdb.org/cgi-bin/substrates/getSubstrates.py" > data/raw/tcdb/tcdb_substrates.tsv
-	python3 subpred/uniprot_downloader.py "https://rest.uniprot.org/uniprotkb/search?compressed=false&fields=accession%2Cgene_names%2Cprotein_name%2Creviewed%2Cprotein_existence%2Csequence%2Corganism_id%2Cgo_id%2Ckeywordid%2Ckeyword%2Cxref_tcdb%2Cxref_interpro&format=tsv&query=%28%28fragment%3Afalse%29%20AND%20%28existence%3A1%29%20OR%20%28existence%3A2%29%29&size=500" "data/raw/uniprot/uniprot_2022_05_evidence1-2_nofragments.tsv"
-	wget https://ftp.ebi.ac.uk/pub/databases/GO/goa/UNIPROT/goa_uniprot_all.gaf.gz -O - | gunzip -c | awk 'BEGIN {OFS="\t";FS="\t"} ($1 == "UniProtKB") {print $2,$4,$5,$7,$9,$14}' | sort -u | xz -T0 > data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz
-	# curl "https://ftp.ebi.ac.uk/pub/databases/interpro/current_release/entry.list" > "data/raw/interpro/interpro_entries.tsv"
-	curl "https://ftp.ebi.ac.uk/pub/databases/interpro/releases/90.0/entry.list" > "data/raw/interpro/interpro_entries.tsv"
-	curl https://release.geneontology.org/2023-01-01/ontology/go.obo > data/raw/ontologies/go.obo
-	curl https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi.obo.gz | gzip -d  > data/raw/ontologies/chebi.obo
-# Link for old API
-#	curl "https://www.uniprot.org/uniprot/?query=reviewed:yes&format=tab&columns=id,genes,protein%20names,organism,organism-id,keyword-id,keywords,go-id,go,database(TCDB),existence,sequence,fragment&sort=score" > data/raw/swissprot/sp_data.tsv
-
-# ## Extract raw data from manuscript 1
-# raw_data_manuscript: data_full.tar
-# 	tar xvf data_full.tar
-# 	mkdir data/intermediate/blast
-# 	tar xf data/intermediate/blast.tar.xz --directory=data/intermediate/blast
-# 	rm data/intermediate/blast.tar.xz
-
-#################################################################################
-# Raw data: BLAST                           		                            #
-#################################################################################
-
-# ## Extract pssms from archive
-# extract_pssms: 
-# 	mkdir -p data/intermediate/blast
-# 	tar xf data/intermediate/blast.tar.xz --directory=data/intermediate/blast
-# 	rm data/intermediate/blast.tar.xz
-
-# ## Init blast dbs for creating additional PSSMs. >100GB needed
-# blast_databases: blastdb_uniref50 blastdb_uniref90
-
-# blastdb_uniref50: 
-# 	@echo Creating BLASTDB...
-# 	$(MAKE) -C data/raw/uniref/uniref50 uniref50.fasta.pdb
-
-# blastdb_uniref90: 
-# 	@echo Creating BLASTDB...
-# 	$(MAKE) -C data/raw/uniref/uniref90 uniref90.fasta.pdb
-
 
 #################################################################################
 # Self Documenting Commands                                                     #

@@ -10,6 +10,4 @@ data/intermediate/blast
 data/raw/uniref/preprocessing.md
 data/raw/uniref/uniref90/uniref90.fasta
 data/raw/uniref/uniref50/uniref50.fasta
-data/models/.gitkeep
-data/features/.gitkeep
 data/datasets/.gitkeep
