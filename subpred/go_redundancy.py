@@ -278,6 +278,7 @@ def subset_pipeline(
     exclude_iea_go_terms=False,
     dataset_name="",
     cache_folder="../data/intermediate/notebooks_cache",
+    external_subset=None
 ):
     """Reduces a set of GO terms to a subset according to specified parameters, using a greedy algorithm.
 
@@ -348,6 +349,20 @@ def subset_pipeline(
             df_test_scores_new=df_test_scores_new,
         )
         return go_terms_list, scores_before
+    
+    if external_subset:
+        go_terms_list_len = len(go_terms_list)
+        go_terms_list = list(set(external_subset) | set(go_terms_list))
+        external_subset_len = len(external_subset)
+        external_subset = list(filter(lambda x: x in go_terms_list, external_subset))
+        print(len(go_terms_list), go_terms_list_len, len(external_subset), external_subset_len)
+        scores_external = get_subset_eval(
+            go_terms_subset=external_subset,
+            all_proteins=go_terms_list,
+            go_id_to_proteins=go_id_to_proteins,
+            df_test_scores_new=df_test_scores_new,
+        )
+        return external_subset, scores_external
 
     optimized_subset = optimize_subset(
         go_terms_list=go_terms_list,
