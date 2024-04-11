@@ -316,7 +316,7 @@ def get_model_evaluation_matrix_parallel(
     )
 
     # if higher sample count or lower number of classes: paralellize svm or cv or gridsearch instead
-    results = Parallel(n_jobs=n_jobs)(
+    results = Parallel(n_jobs=n_jobs, backend="multiprocessing")(
         delayed(get_model_scores)(
             X,
             y,

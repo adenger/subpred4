@@ -275,7 +275,7 @@ def subset_pipeline(
     random_seed=1,
     return_scores=True,
     return_baseline_scores=False,
-    exclude_iea_go_terms=False,
+    # exclude_iea_go_terms=False,
     dataset_name="",
     cache_folder="../data/intermediate/notebooks_cache",
     external_subset=None
@@ -311,12 +311,11 @@ def subset_pipeline(
         random_seed (int, optional): The last tie breaker is a random draw with a numpy random generator, this is the random seed for that. Defaults to 1.
         return_scores (bool, optional): If false, only the final subset is returned. If true, returns the subset and the matrix of pairwise F1 scores. Defaults to True.
         return_baseline_scores (bool, optional): Skip all calculations and only return the pairwise F1 scores for the unoptimized dataset. Defaults to False.
-        exclude_iea_go_terms (bool, optional): If true do not use IEA GO terms for ML models. Defaults to False.
         dataset_name (str, optional): Used for distinguishing between the ML results in the cache_folder. 
             Important: Use a different dataset_name when using a different df_sequences/df_uniprot_goa.
             Defaults to "".
         cache_folder (str, optional): Folder for storing the cached pairwise ML results. Defaults to "../data/intermediate/notebooks_cache".
-
+        external_subset: Skip all calculations, use eval functions on this subset instead.
     Returns:
         Optimized GO subset
         Pairwise F1 scores (optional)
@@ -333,11 +332,13 @@ def subset_pipeline(
 
     go_id_to_level = get_go_id_to_level(go_terms_list, root_node=root_node)
 
+    goa_has_iea_annotations = "IEA" in df_uniprot_goa.evidence_code.unique()
+
     df_test_scores_new = get_pairwise_test_scores(
         df_sequences=df_sequences,
         df_uniprot_goa=df_uniprot_goa,
         min_samples_unique=min_unique_samples_per_term,
-        exclude_iea_go_terms=exclude_iea_go_terms,
+        exclude_iea_go_terms=not goa_has_iea_annotations,
         dataset_name=dataset_name,
         cache_folder=cache_folder,
     )
