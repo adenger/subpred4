@@ -11,3 +11,14 @@ data/raw/uniref/preprocessing.md
 data/raw/uniref/uniref90/uniref90.fasta
 data/raw/uniref/uniref50/uniref50.fasta
 data/datasets/.gitkeep
+data/intermediate/notebooks_cache/.gitkeep
+data/intermediate/notebooks_cache/df_plot_meta4.pickle
+data/intermediate/notebooks_cache/df_plot_yeast.pickle
+data/intermediate/notebooks_cache/ml_models_min5_meta4.pickle
+data/intermediate/notebooks_cache/ml_models_min5_yeast.pickle
+data/intermediate/notebooks_cache/ml_models_min10_meta4.pickle
+data/intermediate/notebooks_cache/ml_models_min10_yeast.pickle
+data/intermediate/notebooks_cache/ml_models_min15_meta4.pickle
+data/intermediate/notebooks_cache/ml_models_min15_yeast.pickle
+data/intermediate/notebooks_cache/ml_models_min20_meta4.pickle
+data/intermediate/notebooks_cache/ml_models_min20_yeast.pickle
