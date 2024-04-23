@@ -1,13 +1,4 @@
-.PHONY: setup_ubuntu reports env_export clear_tmp_files requirements package raw_data data_import sync_tmp_files extract_pssms blast_databases blastdb_uniref50 blastdb_uniref90 data_export
-
-#################################################################################
-# Conventions                                                                   #
-#################################################################################
-
-# "human": 		9606
-# "athaliana":	3702
-# "ecoli": 		83333
-# "yeast": 		559292
+.PHONY: env_export clear_tmp_files requirements package data_import blast_databases data_export
 
 #################################################################################
 # Setup                                                                         #
