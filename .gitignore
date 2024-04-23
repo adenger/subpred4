@@ -162,7 +162,7 @@ dmypy.json
 cython_debug/
 
 # .vscode/settings.json
-.vscode/settings.json
+.vscode/*.json
 
 
 data/raw/gene_ontology/goa_uniprot_all_ebi_filtered.tsv.xz
