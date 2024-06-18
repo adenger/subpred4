@@ -1,6 +1,6 @@
 # Subpred4
 
-## Setup (tested on Ubuntu 22.04 LTS)
+## How to reproduce results from study (tested on Ubuntu 22.04 LTS)
 
 1. Clone repository
 
