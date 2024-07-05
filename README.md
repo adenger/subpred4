@@ -8,7 +8,7 @@
 
     [OneDrive download link (~50GB)](https://unisaarlandde-my.sharepoint.com/:u:/g/personal/ande010_uni-saarland_de/EdtikTFsnuJGoUhtmvnM1PkBXGHGBB15ipbmWZco3ZrQag?e=6kcVpd)
    
-    [Mirror](https://1drv.ms/u/s!ApXb5Ub6ZmaIjo0_rp2FKfQ2UPL2-g?e=Y3jdHW)
+    [Mirror](https://1drv.ms/u/s!ApXb5Ub6ZmaIjo0_rp2FKfQ2UPL2-g)
 
 4. Extract raw data
 
